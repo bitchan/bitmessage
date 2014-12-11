@@ -1,0 +1,30 @@
+{
+  "name": "bitmessage",
+  "version": "0.0.0",
+  "description": "JavaScript Bitmessage library",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha && jshint ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nekogrid/bitmessage.git"
+  },
+  "keywords": [
+    "bitmessage",
+    "crypto",
+    "library",
+    "messaging"
+  ],
+  "author": "Kagami Hiiragi",
+  "license": "CC0",
+  "bugs": {
+    "url": "https://github.com/nekogrid/bitmessage/issues"
+  },
+  "homepage": "https://github.com/nekogrid/bitmessage",
+  "devDependencies": {
+    "chai": "*",
+    "jshint": "*",
+    "mocha": "*"
+  }
+}
