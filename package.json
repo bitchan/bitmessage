@@ -27,8 +27,10 @@
   "homepage": "https://github.com/nekogrid/bitmessage",
   "devDependencies": {
     "chai": "*",
-    "es6-promise": "^2.0.1",
     "jshint": "*",
     "mocha": "*"
+  },
+  "dependencies": {
+    "es6-promise": "^2.0.1"
   }
 }

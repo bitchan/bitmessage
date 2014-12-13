@@ -4,12 +4,6 @@ JavaScript Bitmessage library for both browserify and node.
 
 ## Usage
 
-You need ES6 Promise available in order to use this module. Use some sort of ES6 runtime or just apply polyfill:
-
-```js
-require("es6-promise").polyfill();
-```
-
 ```js
 var bitmessage = require("bitmessage");
 ```
