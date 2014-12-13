@@ -2,7 +2,10 @@
   "name": "bitmessage",
   "version": "0.0.0",
   "description": "JavaScript Bitmessage library",
-  "main": "index.js",
+  "main": "./lib/index",
+  "browser": {
+    "./lib/crypto": "./lib/crypto.browser"
+  },
   "scripts": {
     "test": "mocha && jshint ."
   },
@@ -24,6 +27,7 @@
   "homepage": "https://github.com/nekogrid/bitmessage",
   "devDependencies": {
     "chai": "*",
+    "es6-promise": "^2.0.1",
     "jshint": "*",
     "mocha": "*"
   }
