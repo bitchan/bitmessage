@@ -2,12 +2,13 @@
   "name": "bitmessage",
   "version": "0.0.0",
   "description": "JavaScript Bitmessage library",
-  "main": "./lib/index",
+  "main": "./lib/index.js",
   "browser": {
-    "./lib/crypto": "./lib/crypto.browser"
+    "./lib/crypto.js": "./lib/crypto.browser.js"
   },
   "scripts": {
-    "test": "mocha && jshint ."
+    "test": "mocha && xvfb-run -a karma start --single-run && jshint .",
+    "karma": "xvfb-run -a karma start"
   },
   "repository": {
     "type": "git",
@@ -28,6 +29,12 @@
   "devDependencies": {
     "chai": "*",
     "jshint": "*",
+    "karma": "^0.12.28",
+    "karma-browserify": "^1.0.1",
+    "karma-chrome-launcher": "^0.1.7",
+    "karma-cli": "~0.0.4",
+    "karma-mocha": "^0.1.10",
+    "karma-mocha-reporter": "^0.3.1",
     "mocha": "*"
   },
   "dependencies": {
