@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/nekogrid/bitmessage.git"
+    "url": "https://github.com/bitchan/bitmessage.git"
   },
   "keywords": [
     "bitmessage",
@@ -23,9 +23,9 @@
   "author": "Kagami Hiiragi",
   "license": "CC0",
   "bugs": {
-    "url": "https://github.com/nekogrid/bitmessage/issues"
+    "url": "https://github.com/bitchan/bitmessage/issues"
   },
-  "homepage": "https://github.com/nekogrid/bitmessage",
+  "homepage": "https://github.com/bitchan/bitmessage",
   "devDependencies": {
     "chai": "*",
     "jshint": "*",

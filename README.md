@@ -1,4 +1,4 @@
-# bitmessage [![Build Status](https://travis-ci.org/nekogrid/bitmessage.svg?branch=master)](https://travis-ci.org/nekogrid/bitmessage)
+# bitmessage [![Build Status](https://travis-ci.org/bitchan/bitmessage.svg?branch=master)](https://travis-ci.org/bitchan/bitmessage)
 
 JavaScript Bitmessage library for both browserify and node.
 
