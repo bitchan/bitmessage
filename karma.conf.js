@@ -1,5 +1,3 @@
-"use strict";
-
 process.env.CHROME_BIN = "chromium-browser";
 
 module.exports = function(config) {
