@@ -4,6 +4,7 @@
   "description": "JavaScript Bitmessage library",
   "main": "./lib/index.js",
   "browser": {
+    "int64-native": "node-int64",
     "./lib/crypto.js": "./lib/crypto.browser.js"
   },
   "scripts": {
@@ -38,6 +39,11 @@
     "mocha": "*"
   },
   "dependencies": {
-    "es6-promise": "^2.0.1"
+    "bs58": "^2.0.0",
+    "buffer-equal": "~0.0.1",
+    "es6-promise": "^2.0.1",
+    "int64-native": "^0.3.2",
+    "node-int64": "^0.3.2",
+    "ripemd160": "^0.2.0"
   }
 }
