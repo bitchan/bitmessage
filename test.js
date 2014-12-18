@@ -9,7 +9,8 @@ var bmcrypto = require("./lib/crypto");
 describe("var_int", function() {
   it("should decode", function() {
     var res;
-    expect(varint.decode.bind(Buffer([]))).to.throw(Error);
+    expect(varint.decode.bind(null, Buffer([]))).to.throw(Error);
+    expect(varint.decode.bind(null, Buffer("fd00", "hex"))).to.throw(Error);
 
     res = varint.decode(Buffer([123]));
     expect(res.value).to.equal(123);
@@ -30,6 +31,12 @@ describe("var_int", function() {
     expect(res.value == 0x1234567890).to.be.true;
     expect(res.length).to.equal(9);
     expect(res.rest.length).to.equal(0);
+  });
+
+  it("should check for lowest length on decode", function() {
+    expect(varint.decode.bind(null, Buffer("fd00fc", "hex"))).to.throw(Error);
+    expect(varint.decode.bind(null, Buffer("fe0000ffff", "hex"))).to.throw(Error);
+    expect(varint.decode.bind(null, Buffer("ff00000000ffffffff", "hex"))).to.throw(Error);
   });
 });
 
