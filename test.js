@@ -47,6 +47,12 @@ describe("Crypto", function() {
     });
   });
 
+  it("should implement SHA-256 hash", function() {
+    return bmcrypto.sha256(Buffer("test")).then(function(res) {
+      expect(res.toString("hex")).to.equal("9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08");
+    });
+  });
+
   it("should implement RIPEMD-160 hash", function() {
     return bmcrypto.ripemd160(Buffer("test")).then(function(res) {
       expect(res.toString("hex")).to.equal("5e52fee47e6b070565f74372468cdc699de89107");
