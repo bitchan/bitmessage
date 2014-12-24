@@ -1,6 +1,4 @@
 var expect = require("chai").expect;
-
-var bufferEqual = require("buffer-equal");
 var bitmessage = require("./lib");
 var Address = bitmessage.Address;
 var varint = require("./lib/varint");
@@ -15,17 +13,17 @@ describe("var_int", function() {
     res = varint.decode(Buffer([123]));
     expect(res.value).to.equal(123);
     expect(res.length).to.equal(1);
-    expect(bufferEqual(res.rest, Buffer([]))).to.be.true;
+    expect(res.rest.toString("hex")).to.equal("")
 
     res = varint.decode(Buffer("fd123456", "hex"));
     expect(res.value).to.equal(0x1234);
     expect(res.length).to.equal(3);
-    expect(bufferEqual(res.rest, Buffer("56", "hex"))).to.be.true;
+    expect(res.rest.toString("hex")).to.equal("56");
 
     res = varint.decode(Buffer("fe1234567890", "hex"));
     expect(res.value).to.equal(0x12345678);
     expect(res.length).to.equal(5);
-    expect(bufferEqual(res.rest, Buffer("90", "hex"))).to.be.true;
+    expect(res.rest.toString("hex")).to.equal("90");
 
     res = varint.decode(Buffer("ff0000001234567890", "hex"));
     expect(res.value == 0x1234567890).to.be.true;
@@ -66,7 +64,7 @@ describe("Address", function() {
       .then(function(addr) {
         expect(addr.version).to.equal(4);
         expect(addr.stream).to.equal(1);
-        expect(bufferEqual(addr.ripe, Buffer("003ab6655de4bd8c603eba9b00dd5970725fdd56", "hex"))).to.be.true;
+        expect(addr.ripe.toString("hex")).to.equal("003ab6655de4bd8c603eba9b00dd5970725fdd56");
       });
   });
 
@@ -75,7 +73,7 @@ describe("Address", function() {
       .then(function(addr) {
         expect(addr.version).to.equal(4);
         expect(addr.stream).to.equal(1);
-        expect(bufferEqual(addr.ripe, Buffer("003ab6655de4bd8c603eba9b00dd5970725fdd56", "hex"))).to.be.true;
+        expect(addr.ripe.toString("hex")).to.equal("003ab6655de4bd8c603eba9b00dd5970725fdd56");
       });
   });
 });
