@@ -5,7 +5,7 @@
   "main": "./lib/index.js",
   "browser": {
     "int64-native": "node-int64",
-    "./lib/crypto.js": "./lib/crypto.browser.js"
+    "./lib/crypto-platform.js": "./lib/crypto-platform.browser.js"
   },
   "scripts": {
     "test": "mocha && xvfb-run -a karma start && jshint .",
