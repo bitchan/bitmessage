@@ -73,7 +73,7 @@ describe("Crypto", function() {
         bytes[value] = 0;
       }
       bytes[value]++;
-      expect(bytes[value]).to.be.below(5);
+      expect(bytes[value]).to.be.below(7);
     }
     // Ideal sum = (255 / 2) * size = 12750
     expect(sum).to.be.above(10000);
