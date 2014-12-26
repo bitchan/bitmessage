@@ -56,6 +56,29 @@ describe("Crypto", function() {
       expect(res.toString("hex")).to.equal("5e52fee47e6b070565f74372468cdc699de89107");
     });
   });
+
+  it("should implement cryptographically secure PRNG", function() {
+    var size = 100;
+    var rnd = bmcrypto.randomBytes(size);
+    expect(Buffer.isBuffer(rnd)).to.be.true;
+    expect(rnd.length).to.equal(size);
+    // Very simple statistical test.
+    var bytes = {};
+    var sum = 0;
+    var value;
+    for (var i = 0; i < size; i++) {
+      value = rnd[i];
+      sum += value;
+      if (!bytes[value]) {
+        bytes[value] = 0;
+      }
+      bytes[value]++;
+      expect(bytes[value]).to.be.below(5);
+    }
+    // Ideal sum = (255 / 2) * size = 12750
+    expect(sum).to.be.above(10000);
+    expect(sum).to.be.below(15000);
+  });
 });
 
 describe("Address", function() {
