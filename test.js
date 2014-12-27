@@ -118,6 +118,7 @@ describe("Address", function() {
   });
 
   it("should allow to generate new Bitmessage address", function() {
+    this.timeout(10000);
     return Address.getRandom().then(function(addr) {
       expect(addr.version).to.equal(4);
       expect(addr.stream).to.equal(1);
