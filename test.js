@@ -1,5 +1,6 @@
 var expect = require("chai").expect;
 var bitmessage = require("./lib");
+var Int64 = bitmessage.Int64;
 var Address = bitmessage.Address;
 var varint = require("./lib/varint");
 var bmcrypto = require("./lib/crypto");
@@ -35,6 +36,18 @@ describe("var_int", function() {
     expect(varint.decode.bind(null, Buffer("fd00fc", "hex"))).to.throw(Error);
     expect(varint.decode.bind(null, Buffer("fe0000ffff", "hex"))).to.throw(Error);
     expect(varint.decode.bind(null, Buffer("ff00000000ffffffff", "hex"))).to.throw(Error);
+  });
+
+  it("should encode", function() {
+    expect(varint.encode(123).toString("hex")).to.equal("7b");
+    expect(varint.encode(0x1234).toString("hex")).to.equal("fd1234");
+    expect(varint.encode(0x12345678).toString("hex")).to.equal("fe12345678");
+    expect(varint.encode(0x1234567890).toString("hex")).to.equal("ff0000001234567890");
+    expect(varint.encode(new Int64("0xffffffffffffffff")).toString("hex")).to.equal("ffffffffffffffffff");
+    expect(varint.encode(Buffer("1234567890", "hex")).toString("hex")).to.equal("ff0000001234567890");
+    expect(varint.encode.bind(null, -123)).to.throw(Error);
+    expect(varint.encode.bind(null, Buffer("123456789012345678", "hex"))).to.throw(Error);
+    expect(varint.encode.bind(null, "test")).to.throw(Error);
   });
 });
 
