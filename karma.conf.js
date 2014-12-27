@@ -1,4 +1,10 @@
 process.env.CHROME_BIN = "chromium-browser";
+var allTests = !!process.env.ALL_TESTS;
+var files = ["test.js"];
+// Kludgy way to pass a variable to `test.js`.
+if (allTests) {
+  files.unshift("karma-all-tests.js");
+};
 
 module.exports = function(config) {
   config.set({
@@ -13,9 +19,7 @@ module.exports = function(config) {
 
 
     // list of files / patterns to load in the browser
-    files: [
-      "test.js"
-    ],
+    files: files,
 
 
     // preprocess matching files before serving them to the browser
@@ -67,5 +71,8 @@ module.exports = function(config) {
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
     singleRun: true,
+
+
+    browserNoActivityTimeout: allTests ? 60000 : 10000,
   });
 };

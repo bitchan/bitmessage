@@ -1,4 +1,8 @@
 var expect = require("chai").expect;
+var allTests = typeof window === "undefined" ?
+               !!process.env.ALL_TESTS :
+               window.ALL_TESTS;
+
 var bitmessage = require("./lib");
 var Int64 = bitmessage.Int64;
 var Address = bitmessage.Address;
@@ -112,4 +116,33 @@ describe("Address", function() {
         expect(addr.ripe.toString("hex")).to.equal("003ab6655de4bd8c603eba9b00dd5970725fdd56");
       });
   });
+
+  it("should allow to generate new Bitmessage address", function() {
+    return Address.getRandom().then(function(addr) {
+      expect(addr.version).to.equal(4);
+      expect(addr.stream).to.equal(1);
+      expect(addr.signPrivateKey.length).to.equal(32);
+      expect(addr.encPrivateKey.length).to.equal(32);
+      return Address.encode(addr).then(function(str) {
+        expect(str.slice(0, 3)).to.equal("BM-");
+        return Address.decode(str).then(function(addr2) {
+          expect(addr2.version).to.equal(4);
+          expect(addr2.stream).to.equal(1);
+          expect(addr2.ripe.length).to.equal(20);
+          expect(addr2.ripe[0]).to.equal(0);
+        });
+      });
+    });
+  });
+
+  if (allTests) {
+    it("should allow to generate shorter address", function() {
+      this.timeout(60000);
+      return Address.getRandom({ripelen: 18}).then(function(addr) {
+        return Address.getRipe(addr, {short: true}).then(function(ripe) {
+          expect(ripe.length).to.be.at.most(18);
+        });
+      });
+    });
+  }
 });
