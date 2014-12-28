@@ -1,6 +1,6 @@
 {
   "name": "bitmessage",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "JavaScript Bitmessage library",
   "main": "./lib/index.js",
   "browser": {
