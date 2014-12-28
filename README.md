@@ -1,6 +1,8 @@
 # bitmessage [![Build Status](https://travis-ci.org/bitchan/bitmessage.svg?branch=master)](https://travis-ci.org/bitchan/bitmessage)
 
-JavaScript Bitmessage library for both browserify and node. The goal of this project is to implement Bitmessage protocol v3 for both platforms at the maximum possible level (we still can't create TCP connections or listen for incoming connections in the Browser but Proof of work and crypto is fully doable).
+JavaScript Bitmessage library for both browserify and node. The goal of this project is to implement Bitmessage protocol v3 for both platforms at the maximum possible level (we still can't create TCP connections or listen for incoming connections in the Browser but the Proof of work and crypto is fully doable).
+
+Public library API is currently in alpha stage, breaking changes are very likely to happen.
 
 ## References
 
@@ -66,7 +68,7 @@ With the help of browserify `bitmessage` provides different implementations for 
   - [ ] decode knownnodes.dat
   - [ ] decode messages.dat
 
-# Feature matrix (Node.js only)
+## Feature matrix (Node.js only)
 
 - [ ] Network
   - [ ] Bootstrap
