@@ -55,8 +55,8 @@ With the help of browserify `bitmessage` provides different implementations for 
     - [x] encode
     - [x] decode
     - [x] getRipe
-    - [x] getRandom
-    - [ ] getDeterministic
+    - [x] fromRandom
+    - [ ] fromPassphrase
   - [ ] Message
     - [ ] encode
     - [ ] decode
@@ -78,11 +78,11 @@ With the help of browserify `bitmessage` provides different implementations for 
 ## Usage
 
 ```js
+// Generating a new Bitmessage identity.
 var Address = require("bitmessage").Address;
-Address.getRandom().then(function(addr) {
-  Address.encode(addr).then(function(str) {
+Address.fromRandom().then(function(addr) {
+  addr.encode().then(function(str) {
     console.log("New random Bitmessage address:", str);
-    console.log("Private keys and parameters:", addr);
   });
 });
 ```

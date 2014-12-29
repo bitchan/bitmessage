@@ -72,14 +72,9 @@ describe("WIF", function() {
         expect(Buffer.isBuffer(key2)).to.be.true;
         expect(key2.length).to.equal(32);
         expect(key2.toString("hex")).to.equal(encPrivateKey.toString("hex"));
-        return {
-          version: 4,
-          stream: 1,
-          signPrivateKey: key1,
-          encPrivateKey: key2,
-        };
+        return Address({signPrivateKey: key1, encPrivateKey: key2}).encode();
       });
-    }).then(Address.encode).then(function(str) {
+    }).then(function(str) {
       expect(str).to.equal("BM-2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z");
     });
   });
@@ -158,12 +153,12 @@ describe("Address", function() {
 
   it("should allow to generate new Bitmessage address", function() {
     this.timeout(10000);
-    return Address.getRandom().then(function(addr) {
+    return Address.fromRandom().then(function(addr) {
       expect(addr.version).to.equal(4);
       expect(addr.stream).to.equal(1);
       expect(addr.signPrivateKey.length).to.equal(32);
       expect(addr.encPrivateKey.length).to.equal(32);
-      return Address.encode(addr).then(function(str) {
+      return addr.encode().then(function(str) {
         expect(str.slice(0, 3)).to.equal("BM-");
         return Address.decode(str).then(function(addr2) {
           expect(addr2.version).to.equal(4);
@@ -178,8 +173,8 @@ describe("Address", function() {
   if (allTests) {
     it("should allow to generate shorter address", function() {
       this.timeout(60000);
-      return Address.getRandom({ripelen: 18}).then(function(addr) {
-        return Address.getRipe(addr, {short: true}).then(function(ripe) {
+      return Address.fromRandom({ripelen: 18}).then(function(addr) {
+        return addr.getRipe({short: true}).then(function(ripe) {
           expect(ripe.length).to.be.at.most(18);
         });
       });
