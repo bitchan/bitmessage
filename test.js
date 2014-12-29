@@ -6,6 +6,7 @@ var allTests = typeof window === "undefined" ?
 var bitmessage = require("./lib");
 var Int64 = bitmessage.Int64;
 var Address = bitmessage.Address;
+var wif = bitmessage.wif;
 var varint = require("./lib/varint");
 var bmcrypto = require("./lib/crypto");
 
@@ -52,6 +53,44 @@ describe("var_int", function() {
     expect(varint.encode.bind(null, -123)).to.throw(Error);
     expect(varint.encode.bind(null, Buffer("123456789012345678", "hex"))).to.throw(Error);
     expect(varint.encode.bind(null, "test")).to.throw(Error);
+  });
+});
+
+describe("WIF", function() {
+  var wifSign = "5JgQ79vTBusc61xYPtUEHYQ38AXKdDZgQ5rFp7Cbb4ZjXUKFZEV";
+  var wifEnc = "5K2aL8cnsEWHwHfHnUrPo8QdYyRfoYUBmhAnWY5GTpDLbeyusnE";
+  var signPrivateKey = Buffer("71c95d26c716a5e85e9af9efe26fb5f744dc98005a13d05d23ee92c77e038d9f", "hex");
+  var encPrivateKey = Buffer("9f9969c93c2d186787a7653f70e49be34c03c4a853e6ad0c867db0946bc433c6", "hex");
+
+  it("should decode", function() {
+    return wif.decode(wifSign)
+    .then(function(key1) {
+      expect(Buffer.isBuffer(key1)).to.be.true;
+      expect(key1.length).to.equal(32);
+      expect(key1.toString("hex")).to.equal(signPrivateKey.toString("hex"));
+      return wif.decode(wifEnc).then(function(key2) {
+        expect(Buffer.isBuffer(key2)).to.be.true;
+        expect(key2.length).to.equal(32);
+        expect(key2.toString("hex")).to.equal(encPrivateKey.toString("hex"));
+        return {
+          version: 4,
+          stream: 1,
+          signPrivateKey: key1,
+          encPrivateKey: key2,
+        };
+      });
+    }).then(Address.encode).then(function(str) {
+      expect(str).to.equal("BM-2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z");
+    });
+  });
+
+  it("should encode", function() {
+    return wif.encode(signPrivateKey).then(function(wif1) {
+      expect(wif1).to.equal(wifSign);
+      return wif.encode(encPrivateKey);
+    }).then(function(wif2) {
+      expect(wif2).to.equal(wifEnc);
+    });
   });
 });
 

@@ -60,9 +60,9 @@ With the help of browserify `bitmessage` provides different implementations for 
   - [ ] Message
     - [ ] encode
     - [ ] decode
-- [ ] WIF
-  - [ ] encode
-  - [ ] decode
+- [x] WIF
+  - [x] encode
+  - [x] decode
 - [ ] Parse PyBitmessage configs
   - [ ] decode keys.dat
   - [ ] decode knownnodes.dat
