@@ -4,6 +4,8 @@ JavaScript Bitmessage library for both browserify and node. The goal of this pro
 
 Public library API is currently in alpha stage, breaking changes are very likely to happen.
 
+API documentation available [here](https://bitchan.github.io/bitmessage/docs/).
+
 ## References
 
 * [Project wiki](https://bitmessage.org/wiki/Main_Page)

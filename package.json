@@ -13,7 +13,8 @@
     "k": "xvfb-run -a karma start",
     "kc": "xvfb-run -a karma start --browsers Chromium",
     "kf": "xvfb-run -a karma start --browsers Firefox",
-    "j": "jshint ."
+    "j": "jshint .",
+    "docs": "jsdoc -c jsdoc.json"
   },
   "repository": {
     "type": "git",
@@ -33,6 +34,7 @@
   "homepage": "https://github.com/bitchan/bitmessage",
   "devDependencies": {
     "chai": "*",
+    "jsdoc": "^3.3.0-alpha13",
     "jshint": "*",
     "karma": "^0.12.28",
     "karma-browserify": "^1.0.1",

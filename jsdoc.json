@@ -1,0 +1,13 @@
+{
+  "source": {
+    "include": ["lib", "README.md"]
+  },
+  "plugins": ["plugins/markdown"],
+  "markdown": {
+    "parser": "gfm"
+  },
+  "opts": {
+    "recurse": true,
+    "destination": "docs"
+  }
+}
