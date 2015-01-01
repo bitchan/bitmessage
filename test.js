@@ -7,52 +7,54 @@ var bitmessage = require("./lib");
 var Int64 = bitmessage.Int64;
 var Address = bitmessage.Address;
 var wif = bitmessage.wif;
-var varint = require("./lib/varint");
+var var_int = bitmessage.struct.var_int;
 var bmcrypto = require("./lib/crypto");
 
-describe("var_int", function() {
-  it("should decode", function() {
-    var res;
-    expect(varint.decode.bind(null, Buffer([]))).to.throw(Error);
-    expect(varint.decode.bind(null, Buffer("fd00", "hex"))).to.throw(Error);
+describe("Core structures", function() {
+  describe("var_int", function() {
+    it("should decode", function() {
+      var res;
+      expect(var_int.decode.bind(null, Buffer([]))).to.throw(Error);
+      expect(var_int.decode.bind(null, Buffer("fd00", "hex"))).to.throw(Error);
 
-    res = varint.decode(Buffer([123]));
-    expect(res.value).to.equal(123);
-    expect(res.length).to.equal(1);
-    expect(res.rest.toString("hex")).to.equal("")
+      res = var_int.decode(Buffer([123]));
+      expect(res.value).to.equal(123);
+      expect(res.length).to.equal(1);
+      expect(res.rest.toString("hex")).to.equal("")
 
-    res = varint.decode(Buffer("fd123456", "hex"));
-    expect(res.value).to.equal(0x1234);
-    expect(res.length).to.equal(3);
-    expect(res.rest.toString("hex")).to.equal("56");
+      res = var_int.decode(Buffer("fd123456", "hex"));
+      expect(res.value).to.equal(0x1234);
+      expect(res.length).to.equal(3);
+      expect(res.rest.toString("hex")).to.equal("56");
 
-    res = varint.decode(Buffer("fe1234567890", "hex"));
-    expect(res.value).to.equal(0x12345678);
-    expect(res.length).to.equal(5);
-    expect(res.rest.toString("hex")).to.equal("90");
+      res = var_int.decode(Buffer("fe1234567890", "hex"));
+      expect(res.value).to.equal(0x12345678);
+      expect(res.length).to.equal(5);
+      expect(res.rest.toString("hex")).to.equal("90");
 
-    res = varint.decode(Buffer("ff0000001234567890", "hex"));
-    expect(res.value == 0x1234567890).to.be.true;
-    expect(res.length).to.equal(9);
-    expect(res.rest.length).to.equal(0);
-  });
+      res = var_int.decode(Buffer("ff0000001234567890", "hex"));
+      expect(res.value == 0x1234567890).to.be.true;
+      expect(res.length).to.equal(9);
+      expect(res.rest.length).to.equal(0);
+    });
 
-  it("should check for lowest length on decode", function() {
-    expect(varint.decode.bind(null, Buffer("fd00fc", "hex"))).to.throw(Error);
-    expect(varint.decode.bind(null, Buffer("fe0000ffff", "hex"))).to.throw(Error);
-    expect(varint.decode.bind(null, Buffer("ff00000000ffffffff", "hex"))).to.throw(Error);
-  });
+    it("should check for lowest length on decode", function() {
+      expect(var_int.decode.bind(null, Buffer("fd00fc", "hex"))).to.throw(Error);
+      expect(var_int.decode.bind(null, Buffer("fe0000ffff", "hex"))).to.throw(Error);
+      expect(var_int.decode.bind(null, Buffer("ff00000000ffffffff", "hex"))).to.throw(Error);
+    });
 
-  it("should encode", function() {
-    expect(varint.encode(123).toString("hex")).to.equal("7b");
-    expect(varint.encode(0x1234).toString("hex")).to.equal("fd1234");
-    expect(varint.encode(0x12345678).toString("hex")).to.equal("fe12345678");
-    expect(varint.encode(0x1234567890).toString("hex")).to.equal("ff0000001234567890");
-    expect(varint.encode(new Int64("0xffffffffffffffff")).toString("hex")).to.equal("ffffffffffffffffff");
-    expect(varint.encode(Buffer("1234567890", "hex")).toString("hex")).to.equal("ff0000001234567890");
-    expect(varint.encode.bind(null, -123)).to.throw(Error);
-    expect(varint.encode.bind(null, Buffer("123456789012345678", "hex"))).to.throw(Error);
-    expect(varint.encode.bind(null, "test")).to.throw(Error);
+    it("should encode", function() {
+      expect(var_int.encode(123).toString("hex")).to.equal("7b");
+      expect(var_int.encode(0x1234).toString("hex")).to.equal("fd1234");
+      expect(var_int.encode(0x12345678).toString("hex")).to.equal("fe12345678");
+      expect(var_int.encode(0x1234567890).toString("hex")).to.equal("ff0000001234567890");
+      expect(var_int.encode(new Int64("0xffffffffffffffff")).toString("hex")).to.equal("ffffffffffffffffff");
+      expect(var_int.encode(Buffer("1234567890", "hex")).toString("hex")).to.equal("ff0000001234567890");
+      expect(var_int.encode.bind(null, -123)).to.throw(Error);
+      expect(var_int.encode.bind(null, Buffer("123456789012345678", "hex"))).to.throw(Error);
+      expect(var_int.encode.bind(null, "test")).to.throw(Error);
+    });
   });
 });
 
