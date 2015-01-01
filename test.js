@@ -8,6 +8,7 @@ var Int64 = bitmessage.Int64;
 var Address = bitmessage.Address;
 var wif = bitmessage.wif;
 var var_int = bitmessage.struct.var_int;
+var var_str = bitmessage.struct.var_str;
 var bmcrypto = require("./lib/crypto");
 
 describe("Core structures", function() {
@@ -54,6 +55,26 @@ describe("Core structures", function() {
       expect(var_int.encode.bind(null, -123)).to.throw(Error);
       expect(var_int.encode.bind(null, Buffer("123456789012345678", "hex"))).to.throw(Error);
       expect(var_int.encode.bind(null, "test")).to.throw(Error);
+    });
+  });
+
+  describe("var_str", function() {
+    it("should decode", function() {
+      var res;
+      res = var_str.decode(Buffer("0474657374", "hex"));
+      expect(res.str).to.equal("test");
+      expect(res.length).to.equal(5);
+      expect(res.rest.toString("hex")).to.equal("");
+
+      res = var_str.decode(Buffer("00", "hex"));
+      expect(res.str).to.equal("");
+      expect(res.length).to.equal(1);
+      expect(res.rest.toString("hex")).to.equal("");
+    });
+
+    it("should encode", function() {
+      expect(var_str.encode("test").toString("hex")).to.equal("0474657374");
+      expect(var_str.encode("").toString("hex")).to.equal("00");
     });
   });
 });
