@@ -4,7 +4,6 @@ var allTests = typeof window === "undefined" ?
                window.ALL_TESTS;
 
 var bitmessage = require("./lib");
-var Int64 = bitmessage.Int64;
 var Address = bitmessage.Address;
 var wif = bitmessage.wif;
 var var_int = bitmessage.struct.var_int;
@@ -18,6 +17,7 @@ describe("Core structures", function() {
       var res;
       expect(var_int.decode.bind(null, Buffer([]))).to.throw(Error);
       expect(var_int.decode.bind(null, Buffer("fd00", "hex"))).to.throw(Error);
+      expect(var_int.decode.bind(null, Buffer("ff004170706e9b0368", "hex"))).to.throw(Error);
 
       res = var_int.decode(Buffer([123]));
       expect(res.value).to.equal(123);
@@ -35,7 +35,7 @@ describe("Core structures", function() {
       expect(res.rest.toString("hex")).to.equal("90");
 
       res = var_int.decode(Buffer("ff0000001234567890", "hex"));
-      expect(res.value == 0x1234567890).to.be.true;
+      expect(res.value).to.equal(0x1234567890);
       expect(res.length).to.equal(9);
       expect(res.rest.length).to.equal(0);
     });
@@ -51,9 +51,9 @@ describe("Core structures", function() {
       expect(var_int.encode(0x1234).toString("hex")).to.equal("fd1234");
       expect(var_int.encode(0x12345678).toString("hex")).to.equal("fe12345678");
       expect(var_int.encode(0x1234567890).toString("hex")).to.equal("ff0000001234567890");
-      expect(var_int.encode(new Int64("0xffffffffffffffff")).toString("hex")).to.equal("ffffffffffffffffff");
       expect(var_int.encode(Buffer("1234567890", "hex")).toString("hex")).to.equal("ff0000001234567890");
       expect(var_int.encode.bind(null, -123)).to.throw(Error);
+      expect(var_int.encode.bind(null, 0x4170706e9b0368)).to.throw(Error);
       expect(var_int.encode.bind(null, Buffer("123456789012345678", "hex"))).to.throw(Error);
       expect(var_int.encode.bind(null, "test")).to.throw(Error);
     });
