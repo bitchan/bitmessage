@@ -70,9 +70,9 @@ With the help of browserify `bitmessage` provides different implementations for 
     - [ ] encrypt
     - [ ] decrypt
 - [ ] Parse PyBitmessage configs
-  - [ ] decode keys.dat
-  - [ ] decode knownnodes.dat
-  - [ ] decode messages.dat
+  - [ ] keys.dat
+  - [ ] knownnodes.dat
+  - [ ] messages.dat
 
 ## Feature matrix (Node.js only)
 
