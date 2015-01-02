@@ -9,6 +9,7 @@ var Address = bitmessage.Address;
 var wif = bitmessage.wif;
 var var_int = bitmessage.struct.var_int;
 var var_str = bitmessage.struct.var_str;
+var var_int_list = bitmessage.struct.var_int_list;
 var bmcrypto = require("./lib/crypto");
 
 describe("Core structures", function() {
@@ -61,20 +62,55 @@ describe("Core structures", function() {
   describe("var_str", function() {
     it("should decode", function() {
       var res;
+      res = var_str.decode(Buffer("00", "hex"));
+      expect(res.str).to.equal("");
+      expect(res.length).to.equal(1);
+      expect(res.rest.toString("hex")).to.equal("");
+
       res = var_str.decode(Buffer("0474657374", "hex"));
       expect(res.str).to.equal("test");
       expect(res.length).to.equal(5);
       expect(res.rest.toString("hex")).to.equal("");
 
-      res = var_str.decode(Buffer("00", "hex"));
-      expect(res.str).to.equal("");
-      expect(res.length).to.equal(1);
-      expect(res.rest.toString("hex")).to.equal("");
+      res = var_str.decode(Buffer("0474657374ffffff", "hex"));
+      expect(res.str).to.equal("test");
+      expect(res.length).to.equal(5);
+      expect(res.rest.toString("hex")).to.equal("ffffff");
     });
 
     it("should encode", function() {
       expect(var_str.encode("test").toString("hex")).to.equal("0474657374");
       expect(var_str.encode("").toString("hex")).to.equal("00");
+    });
+  });
+
+  describe("var_int_list", function() {
+    it("should decode", function() {
+      var res;
+      res = var_int_list.decode(Buffer("00", "hex"));
+      expect(res.list).to.deep.equal([]);
+      expect(res.length).to.equal(1);
+      expect(res.rest.toString("hex")).to.equal("");
+
+      res = var_int_list.decode(Buffer("0501fd0400ff0004000000000000fd9c40fe000186a0", "hex"));
+      expect(res.length).to.equal(22);
+      expect(res.list.length).to.equal(5);
+      expect(res.list[0]).to.equal(1);
+      expect(res.list[1]).to.equal(1024);
+      expect(res.list[2] == 1125899906842624).to.be.true;
+      expect(res.list[3]).to.equal(40000);
+      expect(res.list[4]).to.equal(100000);
+      expect(res.rest.toString("hex")).to.equal("");
+
+      res = var_int_list.decode(Buffer("0501fd0400ff0004000000000000fd9c40fe000186a0ffffff", "hex"));
+      expect(res.length).to.equal(22);
+      expect(res.list.length).to.equal(5);
+      expect(res.rest.toString("hex")).to.equal("ffffff");
+    });
+
+    it("should encode", function() {
+      expect(var_int_list.encode([]).toString("hex")).to.equal("00");
+      expect(var_int_list.encode([1, 1024, 1125899906842624, 40000, 100000]).toString("hex")).to.equal("0501fd0400ff0004000000000000fd9c40fe000186a0");
     });
   });
 });

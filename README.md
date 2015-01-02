@@ -35,23 +35,11 @@ With the help of browserify `bitmessage` provides different implementations for 
   - [ ] HMAC-SHA-256
 - [ ] Core structures
   - [x] var_int
-    - [x] encode
-    - [x] decode
-  - [ ] var_str
-    - [ ] encode
-    - [ ] decode
-  - [ ] var_int_list
-    - [ ] encode
-    - [ ] decode
+  - [x] var_str
+  - [x] var_int_list
   - [ ] inv_vect
-    - [ ] encode
-    - [ ] decode
   - [ ] net_addr
-    - [ ] encode
-    - [ ] decode
   - [ ] bitfield
-    - [ ] encode
-    - [ ] decode
 - [ ] High-level objects
   - [ ] Address
     - [x] encode
@@ -63,8 +51,7 @@ With the help of browserify `bitmessage` provides different implementations for 
     - [ ] encode
     - [ ] decode
 - [x] WIF
-  - [x] encode
-  - [x] decode
+- [ ] POW
 - [ ] Parse PyBitmessage configs
   - [ ] decode keys.dat
   - [ ] decode knownnodes.dat
