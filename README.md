@@ -50,6 +50,7 @@ With the help of browserify `bitmessage` provides different implementations for 
   - [ ] addr
   - [ ] inv
   - [ ] getdata
+  - [ ] error
   - [ ] object
 - [ ] Object types
   - [ ] getpubkey
