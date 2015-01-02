@@ -33,14 +33,32 @@ With the help of browserify `bitmessage` provides different implementations for 
   - [ ] ECIES
   - [ ] AES-256-CBC
   - [ ] HMAC-SHA-256
-- [ ] Core structures
+- [ ] Common structures
+  - [ ] message
   - [x] var_int
   - [x] var_str
   - [x] var_int_list
-  - [ ] inv_vect
   - [ ] net_addr
+  - [ ] inv_vect
+  - [ ] encrypted
+  - [ ] unencrypted
+  - [ ] encoding
   - [ ] bitfield
-- [ ] High-level objects
+- [ ] Message types
+  - [ ] version
+  - [ ] verack
+  - [ ] addr
+  - [ ] inv
+  - [ ] getdata
+  - [ ] object
+- [ ] Object types
+  - [ ] getpubkey
+  - [ ] pubkey
+  - [ ] msg
+  - [ ] broadcast
+- [x] WIF
+- [ ] POW
+- [ ] High-level classes
   - [ ] Address
     - [x] encode
     - [x] decode
@@ -48,10 +66,8 @@ With the help of browserify `bitmessage` provides different implementations for 
     - [x] fromRandom
     - [ ] fromPassphrase
   - [ ] Message
-    - [ ] encode
-    - [ ] decode
-- [x] WIF
-- [ ] POW
+    - [ ] encrypt
+    - [ ] decrypt
 - [ ] Parse PyBitmessage configs
   - [ ] decode keys.dat
   - [ ] decode knownnodes.dat
