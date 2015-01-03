@@ -4,7 +4,7 @@
   "description": "JavaScript Bitmessage library",
   "main": "./lib/index.js",
   "browser": {
-    "./lib/crypto-platform.js": "./lib/crypto-platform.browser.js"
+    "./lib/platform.js": "./lib/platform.browser.js"
   },
   "scripts": {
     "test": "ALL_TESTS=1 mocha && xvfb-run -a karma start && jshint .",
