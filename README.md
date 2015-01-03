@@ -12,14 +12,6 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
 * [Protocol specification](https://bitmessage.org/wiki/Protocol_specification)
 * [Whitepaper](https://bitmessage.org/bitmessage.pdf)
 
-## Implementation details
-
-With the help of browserify `bitmessage` provides different implementations for Browser and Node.js with the same API. Because WebCryptoAPI defines asynchronous promise-driven API, implementation for Node needs to use promises too.
-
-* Use Node.js crypto module/library bindings where possible
-* Use WebCryptoAPI where possible
-* Promise-driven API
-
 ## Feature matrix (both Browser and Node)
 
 - [ ] crypto
@@ -83,13 +75,10 @@ With the help of browserify `bitmessage` provides different implementations for 
 ## Usage
 
 ```js
-// Generating a new Bitmessage identity.
+// Generate a new random Bitmessage identity.
 var Address = require("bitmessage").Address;
-Address.fromRandom().then(function(addr) {
-  addr.encode().then(function(str) {
-    console.log("New random Bitmessage address:", str);
-  });
-});
+var addr = Address.fromRandom();
+console.log("New random Bitmessage address:", addr.encode());
 ```
 
 ## License
