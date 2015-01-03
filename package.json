@@ -13,7 +13,8 @@
     "kc": "xvfb-run -a karma start --browsers Chromium",
     "kf": "xvfb-run -a karma start --browsers Firefox",
     "j": "jshint .",
-    "docs": "jsdoc -c jsdoc.json"
+    "d": "jsdoc -c jsdoc.json",
+    "mv-docs": "rm -rf docs && jsdoc -c jsdoc.json && D=`mktemp -d` && mv docs \"$D\" && git checkout gh-pages && rm -rf docs && mv \"$D/docs\" . && rm -rf \"$D\""
   },
   "repository": {
     "type": "git",
