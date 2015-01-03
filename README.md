@@ -8,7 +8,7 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
 
 ## References
 
-* [Project wiki](https://bitmessage.org/wiki/Main_Page)
+* [Bitmessage wiki](https://bitmessage.org/wiki/Main_Page)
 * [Protocol specification](https://bitmessage.org/wiki/Protocol_specification)
 * [Whitepaper](https://bitmessage.org/bitmessage.pdf)
 
