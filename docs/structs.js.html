@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: structs.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: structs.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Implements common structures.
+ * @see {@link https://bitmessage.org/wiki/Protocol_specification#Common_structures}
+ * @module bitmessage/structs
+ */
+
+"use strict";
+
+var assert = require("assert");
+
+/**
+ * var_int.
+ * @see {@link https://bitmessage.org/wiki/Protocol_specification#Variable_length_integer}
+ * @namespace
+ * @static
+ */
+var var_int = exports.var_int = {
+  /**
+   * Decode var_int.
+   * @param {Buffer} buf - A buffer that starts with encoded var_int
+   * @return {{value: number, length: number, rest: Buffer}}
+   * Decoded var_int structure.
+   */
+  decode: function(buf) {
+    var value, length;
+    assert(buf.length > 0, "Empty buffer");
+    switch (buf[0]) {
+      case 253:
+        value = buf.readUInt16BE(1);
+        assert(value >= 253, "Impractical var_int");
+        length = 3;
+        break;
+      case 254:
+        value = buf.readUInt32BE(1);
+        assert(value >= 65536, "Impractical var_int");
+        length = 5;
+        break;
+      case 255:
+        var hi = buf.readUInt32BE(1);
+        assert(hi !== 0, "Impractical var_int");
+        // Max safe number = 2^53 - 1 =
+        // 0b0000000000011111111111111111111111111111111111111111111111111111
+        // = 2097151*(2^32) + (2^32 - 1).
+        // So it's safe until hi &lt;= 2097151. See
+        // &lt;http://mdn.io/issafeinteger>,
+        // &lt;https://stackoverflow.com/q/307179> for details.
+        // TODO(Kagami): We may want to return raw Buffer for
+        // 2^53 &lt;= value &lt;= 2^64 - 1 range. Possibly using the optional
+        // argument because most of the code expect to get a number when
+        // calling `var_int.decode`.
+        assert(hi &lt;= 2097151, "Unsafe integer");
+        var lo = buf.readUInt32BE(5);
+        value = hi * 4294967296 + lo;
+        length = 9;
+        break;
+      default:
+        value = buf[0];
+        length = 1;
+    }
+    var rest = buf.slice(length);
+    return {value: value, length: length, rest: rest};
+  },
+
+  /**
+   * Encode number into var_int.
+   * @param {(number|Buffer)} value - Input number
+   * @return {Buffer} Encoded var_int.
+   */
+  encode: function(value) {
+    var buf, targetStart;
+    if (typeof value === "number") {
+      assert(value >= 0, "Value cannot be less than zero");
+      if (value &lt; 253) {
+        buf = new Buffer([value]);
+      } else if (value &lt; 65536) {
+        buf = new Buffer(3);
+        buf[0] = 253;
+        buf.writeUInt16BE(value, 1, true);
+      } else if (value &lt; 4294967296) {
+        buf = new Buffer(5);
+        buf[0] = 254;
+        buf.writeUInt32BE(value, 1, true);
+      } else {
+        assert(value &lt;= 9007199254740991, "Unsafe integer");
+        buf = new Buffer(9);
+        buf[0] = 255;
+        buf.writeUInt32BE(Math.floor(value / 4294967296), 1, true);  // high32
+        buf.writeUInt32BE(value % 4294967296, 5, true);  // low32
+      }
+    } else if (Buffer.isBuffer(value)) {
+      assert(value.length &lt;= 8, "Buffer is too big");
+      buf = new Buffer(9);
+      buf.fill(0);
+      buf[0] = 255;
+      targetStart = 1 + (8 - value.length);
+      value.copy(buf, targetStart);
+    } else {
+      throw new Error("Value encode error");
+    }
+    return buf;
+  },
+};
+
+/**
+ * var_str.
+ * @see {@link https://bitmessage.org/wiki/Protocol_specification#Variable_length_string}
+ * @namespace
+ */
+exports.var_str = {
+  /**
+   * Decode var_str.
+   * @param {Buffer} buf - A buffer that starts with encoded var_str
+   * @return {{str: string, length: number, rest: Buffer}}
+   * Decoded var_str structure.
+   */
+  decode: function(buf) {
+    var decoded = var_int.decode(buf);
+    var strLength = decoded.value;
+    // XXX(Kagami): Spec doesn't mention encoding, using UTF-8.
+    var str = decoded.rest.slice(0, strLength).toString();
+    var rest = decoded.rest.slice(strLength);
+    return {str: str, length: decoded.length + strLength, rest: rest};
+  },
+
+  /**
+   * Encode string into var_str.
+   * @param {string} str - A string
+   * @return {Buffer} Encoded var_str.
+   */
+  encode: function(str) {
+    // XXX(Kagami): Spec doesn't mention encoding, using UTF-8.
+    var strBuf = new Buffer(str);
+    return Buffer.concat([var_int.encode(strBuf.length), strBuf]);
+  },
+};
+
+/**
+ * var_int_list.
+ * @see {@link https://bitmessage.org/wiki/Protocol_specification#Variable_length_list_of_integers}
+ * @namespace
+ */
+exports.var_int_list = {
+  /**
+   * Decode var_int_list.
+   * @param {Buffer} buf - A buffer that starts with encoded
+   * var_int_list
+   * @return {{list: number[], length: number, rest: Buffer}}
+   * Decoded var_int_list structure.
+   */
+  decode: function(buf) {
+    var decoded = var_int.decode(buf);
+    var listLength = decoded.value;
+    var list = new Array(listLength);
+    var rest = decoded.rest;
+    var sumLength = decoded.length;
+    for (var i = 0; i &lt; listLength; i++) {
+      decoded = var_int.decode(rest);
+      list[i] = decoded.value;
+      rest = decoded.rest;
+      sumLength += decoded.length;
+    }
+    return {list: list, length: sumLength, rest: rest};
+  },
+
+  /**
+   * Encode list of numbers into var_int_list.
+   * @param {number[]} list - A number list
+   * @return {Buffer} Encoded var_int_list.
+   */
+  encode: function(list) {
+    var listBuf = Buffer.concat(list.map(var_int.encode));
+    return Buffer.concat([var_int.encode(list.length), listBuf]);
+  },
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-bitmessage.html">bitmessage</a></li><li><a href="module-bitmessage_address.html">bitmessage/address</a></li><li><a href="module-bitmessage_crypto.html">bitmessage/crypto</a></li><li><a href="module-bitmessage_messages.html">bitmessage/messages</a></li><li><a href="module-bitmessage_objects.html">bitmessage/objects</a></li><li><a href="module-bitmessage_pow.html">bitmessage/pow</a></li><li><a href="module-bitmessage_structs.html">bitmessage/structs</a></li><li><a href="module-bitmessage_wif.html">bitmessage/wif</a></li></ul><h3>Classes</h3><ul><li><a href="module-bitmessage_address.Address.html">Address</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-bitmessage_structs.var_int.html">var_int</a></li><li><a href="module-bitmessage_structs.var_int_list.html">var_int_list</a></li><li><a href="module-bitmessage_structs.var_str.html">var_str</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha13</a> on Sat Jan 03 2015 19:33:03 GMT+0300 (MSK)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
