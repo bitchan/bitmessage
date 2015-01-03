@@ -5,9 +5,9 @@ var allTests = typeof window === "undefined" ?
 
 var bmcrypto = require("./lib/crypto");
 var bitmessage = require("./lib");
-var var_int = bitmessage.struct.var_int;
-var var_str = bitmessage.struct.var_str;
-var var_int_list = bitmessage.struct.var_int_list;
+var var_int = bitmessage.structs.var_int;
+var var_str = bitmessage.structs.var_str;
+var var_int_list = bitmessage.structs.var_int_list;
 var WIF = bitmessage.WIF;
 var Address = bitmessage.Address;
 

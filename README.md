@@ -41,7 +41,6 @@ With the help of browserify `bitmessage` provides different implementations for 
   - [ ] net_addr
   - [ ] inv_vect
   - [ ] encrypted
-  - [ ] unencrypted
   - [ ] encoding
   - [ ] bitfield
 - [ ] Message types
