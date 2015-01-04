@@ -5,10 +5,14 @@ var allTests = typeof window === "undefined" ?
 
 var bmcrypto = require("./lib/crypto");
 var bitmessage = require("./lib");
-var message = bitmessage.structs.message;
-var var_int = bitmessage.structs.var_int;
-var var_str = bitmessage.structs.var_str;
-var var_int_list = bitmessage.structs.var_int_list;
+var structs = bitmessage.structs;
+var message = structs.message;
+var var_int = structs.var_int;
+var var_str = structs.var_str;
+var var_int_list = structs.var_int_list;
+var messageEncodings = structs.messageEncodings;
+var serviceFeatures = structs.serviceFeatures;
+var pubkeyFeatures = structs.pubkeyFeatures;
 var WIF = bitmessage.WIF;
 var Address = bitmessage.Address;
 
@@ -164,6 +168,36 @@ describe("Common structures", function() {
     it("should encode", function() {
       expect(var_int_list.encode([]).toString("hex")).to.equal("00");
       expect(var_int_list.encode([1, 1024, 1125899906842624, 40000, 100000]).toString("hex")).to.equal("0501fd0400ff0004000000000000fd9c40fe000186a0");
+    });
+  });
+
+  describe("Message encodings", function() {
+    it("should decode", function() {
+      expect(messageEncodings.decode(Buffer([2])).value).to.equal(messageEncodings.SIMPLE);
+    });
+
+    it("should encode", function() {
+      expect(messageEncodings.encode(messageEncodings.SIMPLE).toString("hex")).to.equal("02");
+    });
+  });
+
+  describe("Service features", function() {
+    it("should decode", function() {
+      expect(serviceFeatures.decode(Buffer("0000000000000001", "hex"))).to.have.members([serviceFeatures.NODE_NETWORK]);
+    });
+
+    it("should encode", function() {
+      expect(serviceFeatures.encode([serviceFeatures.NODE_NETWORK]).toString("hex")).to.equal("0000000000000001");
+    });
+  });
+
+  describe("Pubkey features", function() {
+    it("should decode", function() {
+      expect(pubkeyFeatures.decode(Buffer("c0000000", "hex"))).to.have.members([pubkeyFeatures.DOES_ACK, pubkeyFeatures.INCLUDE_DESTINATION]);
+    });
+
+    it("should encode", function() {
+      expect(pubkeyFeatures.encode([pubkeyFeatures.INCLUDE_DESTINATION, pubkeyFeatures.DOES_ACK]).toString("hex")).to.equal("c0000000");
     });
   });
 });

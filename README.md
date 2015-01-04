@@ -33,8 +33,8 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
   - [ ] net_addr
   - [ ] encrypted
   - [x] message encodings
-  - [ ] service features
-  - [ ] pubkey features
+  - [x] service features
+  - [x] pubkey features
 - [ ] Message types
   - [ ] version
   - [ ] verack
