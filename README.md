@@ -26,15 +26,15 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
   - [ ] AES-256-CBC
   - [ ] HMAC-SHA-256
 - [ ] Common structures
-  - [ ] message
+  - [x] message
   - [x] var_int
   - [x] var_str
   - [x] var_int_list
   - [ ] net_addr
-  - [ ] inv_vect
   - [ ] encrypted
-  - [ ] encoding
-  - [ ] bitfield
+  - [x] message encodings
+  - [ ] service features
+  - [ ] pubkey features
 - [ ] Message types
   - [ ] version
   - [ ] verack
