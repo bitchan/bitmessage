@@ -5,6 +5,7 @@ var allTests = typeof window === "undefined" ?
 
 var bmcrypto = require("./lib/crypto");
 var bitmessage = require("./lib");
+var message = bitmessage.structs.message;
 var var_int = bitmessage.structs.var_int;
 var var_str = bitmessage.structs.var_str;
 var var_int_list = bitmessage.structs.var_int_list;
@@ -49,6 +50,21 @@ describe("Crypto", function() {
 });
 
 describe("Common structures", function() {
+  describe("message", function() {
+    it("should encode", function() {
+      expect(message.encode("test", Buffer("payload")).toString("hex")).to.equal("e9beb4d97465737400000000000000000000000770b33ce97061796c6f6164");
+    });
+
+    it("should decode", function() {
+      var res;
+      res = message.decode(Buffer("e9beb4d97465737400000000000000000000000770b33ce97061796c6f6164", "hex"));
+      expect(res.command).to.equal("test");
+      expect(res.payload.toString()).to.equal("payload");
+      expect(res.length).to.equal(31);
+      expect(res.rest.toString("hex")).to.equal("");
+    });
+  });
+
   describe("var_int", function() {
     it("should decode", function() {
       var res;
