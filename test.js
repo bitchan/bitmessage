@@ -201,7 +201,7 @@ describe("Common structures", function() {
       var time = new Date(1420490432000);
       expect(net_addr.encode({time: time, stream: 1, services: [serviceFeatures.NODE_NETWORK], host: "127.0.0.1", port: 8444}).toString("hex")).to.equal("0000000054aaf6c000000001000000000000000100000000000000000000ffff7f00000120fc");
       expect(net_addr.encode({short: true, services: [serviceFeatures.NODE_NETWORK], host: "127.0.0.1", port: 8444}).toString("hex")).to.equal("000000000000000100000000000000000000ffff7f00000120fc");
-      expect(net_addr.encode({short: true, services: [serviceFeatures.NODE_NETWORK], host: "::1", port: 65000}).toString("hex")).to.equal("000000000000000100000000000000000000000000000001fde8");
+      expect(net_addr.encode({short: true, host: "::1", port: 65000}).toString("hex")).to.equal("000000000000000100000000000000000000000000000001fde8");
     });
   });
 
