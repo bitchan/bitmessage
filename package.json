@@ -49,8 +49,7 @@
     "bs58": "^2.0.0",
     "buffer-equal": "~0.0.1",
     "eccrypto": "^0.1.2",
-    "hash.js": "^0.3.2",
-    "object.assign": "^1.1.1",
-    "sha.js": "^2.3.0"
+    "hash.js": "^1.0.2",
+    "object.assign": "^1.1.1"
   }
 }
