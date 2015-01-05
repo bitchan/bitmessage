@@ -10,6 +10,7 @@ var message = structs.message;
 var var_int = structs.var_int;
 var var_str = structs.var_str;
 var var_int_list = structs.var_int_list;
+var net_addr = structs.net_addr;
 var messageEncodings = structs.messageEncodings;
 var serviceFeatures = structs.serviceFeatures;
 var pubkeyFeatures = structs.pubkeyFeatures;
@@ -171,6 +172,39 @@ describe("Common structures", function() {
     });
   });
 
+  // FIXME(Kagami): Add more tests for inet_pton, inet_ntop; add more
+  // fail tests.
+  describe("net_addr", function() {
+    it("should decode", function() {
+      var res;
+      res = net_addr.decode(Buffer("0000000054aaf6c000000001000000000000000100000000000000000000ffff7f00000120fc", "hex"));
+      expect(res.time.getTime()).to.equal(1420490432000);
+      expect(res.stream).to.equal(1);
+      expect(res.services).to.have.members([serviceFeatures.NODE_NETWORK]);
+      expect(res.host).to.equal("127.0.0.1");
+      expect(res.port).to.equal(8444);
+
+      expect(net_addr.decode.bind(null, Buffer("000000000000000100000000000000000000ffff7f00000120fc", "hex"))).to.throw(Error);;
+
+      res = net_addr.decode(Buffer("000000000000000100000000000000000000ffff7f00000120fc", "hex"), {short: true});
+      expect(res.services).to.have.members([serviceFeatures.NODE_NETWORK]);
+      expect(res.host).to.equal("127.0.0.1");
+      expect(res.port).to.equal(8444);
+
+      res = net_addr.decode(Buffer("000000000000000100000000000000000000000000000001fde8", "hex"), {short: true});
+      expect(res.services).to.have.members([serviceFeatures.NODE_NETWORK]);
+      expect(res.host).to.equal("0:0:0:0:0:0:0:1");
+      expect(res.port).to.equal(65000);
+    });
+
+    it("should encode", function() {
+      var time = new Date(1420490432000);
+      expect(net_addr.encode({time: time, stream: 1, services: [serviceFeatures.NODE_NETWORK], host: "127.0.0.1", port: 8444}).toString("hex")).to.equal("0000000054aaf6c000000001000000000000000100000000000000000000ffff7f00000120fc");
+      expect(net_addr.encode({short: true, services: [serviceFeatures.NODE_NETWORK], host: "127.0.0.1", port: 8444}).toString("hex")).to.equal("000000000000000100000000000000000000ffff7f00000120fc");
+      expect(net_addr.encode({short: true, services: [serviceFeatures.NODE_NETWORK], host: "::1", port: 65000}).toString("hex")).to.equal("000000000000000100000000000000000000000000000001fde8");
+    });
+  });
+
   describe("Message encodings", function() {
     it("should decode", function() {
       expect(messageEncodings.decode(Buffer([2])).value).to.equal(messageEncodings.SIMPLE);
@@ -229,6 +263,7 @@ describe("WIF", function() {
   });
 });
 
+// FIXME(Kagami): Add more fail tests.
 describe("Address", function() {
   it("should decode Bitmessage address", function() {
     var addr = Address.decode("BM-2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z")

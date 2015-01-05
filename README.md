@@ -30,7 +30,7 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
   - [x] var_int
   - [x] var_str
   - [x] var_int_list
-  - [ ] net_addr
+  - [x] net_addr
   - [ ] encrypted
   - [x] message encodings
   - [x] service features
@@ -57,6 +57,7 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
     - [x] getRipe
     - [x] fromRandom
     - [ ] fromPassphrase
+  - [ ] UserAgent
   - [ ] Message
     - [ ] encrypt
     - [ ] decrypt
