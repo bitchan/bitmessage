@@ -49,8 +49,8 @@
     "bs58": "^2.0.0",
     "buffer-equal": "~0.0.1",
     "eccrypto": "^0.1.1",
+    "hash.js": "^0.3.2",
     "object.assign": "^1.1.1",
-    "ripemd160": "^0.2.0",
     "sha.js": "^2.3.0"
   }
 }
