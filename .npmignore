@@ -2,3 +2,4 @@
 .jshint*
 karma*
 docs
+jsdoc.json
