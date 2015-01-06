@@ -263,44 +263,46 @@ describe("WIF", function() {
   });
 });
 
-// FIXME(Kagami): Add more fail tests.
-describe("Address", function() {
-  it("should decode Bitmessage address", function() {
-    var addr = Address.decode("BM-2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z")
-    expect(addr.version).to.equal(4);
-    expect(addr.stream).to.equal(1);
-    expect(addr.ripe.toString("hex")).to.equal("003ab6655de4bd8c603eba9b00dd5970725fdd56");
-  });
-
-  it("should decode Bitmessage address badly formatted", function() {
-    var addr = Address.decode("  2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z ")
-    expect(addr.version).to.equal(4);
-    expect(addr.stream).to.equal(1);
-    expect(addr.ripe.toString("hex")).to.equal("003ab6655de4bd8c603eba9b00dd5970725fdd56");
-  });
-
-  it("should allow to generate new Bitmessage address", function() {
-    this.timeout(10000);
-    var addr = Address.fromRandom();
-    expect(addr.version).to.equal(4);
-    expect(addr.stream).to.equal(1);
-    expect(addr.signPrivateKey.length).to.equal(32);
-    expect(addr.encPrivateKey.length).to.equal(32);
-    var str = addr.encode();
-    expect(str.slice(0, 3)).to.equal("BM-");
-    var addr2 = Address.decode(str);
-    expect(addr2.version).to.equal(4);
-    expect(addr2.stream).to.equal(1);
-    expect(addr2.ripe.length).to.equal(20);
-    expect(addr2.ripe[0]).to.equal(0);
-  });
-
-  if (allTests) {
-    it("should allow to generate shorter address", function() {
-      this.timeout(60000);
-      var addr = Address.fromRandom({ripelen: 18});
-      var ripe = addr.getRipe({short: true});
-      expect(ripe.length).to.be.at.most(18);
+describe("High-level classes", function() {
+  // FIXME(Kagami): Add more fail tests.
+  describe("Address", function() {
+    it("should decode Bitmessage address", function() {
+      var addr = Address.decode("BM-2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z")
+      expect(addr.version).to.equal(4);
+      expect(addr.stream).to.equal(1);
+      expect(addr.ripe.toString("hex")).to.equal("003ab6655de4bd8c603eba9b00dd5970725fdd56");
     });
-  }
+
+    it("should decode Bitmessage address badly formatted", function() {
+      var addr = Address.decode("  2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z ")
+      expect(addr.version).to.equal(4);
+      expect(addr.stream).to.equal(1);
+      expect(addr.ripe.toString("hex")).to.equal("003ab6655de4bd8c603eba9b00dd5970725fdd56");
+    });
+
+    it("should allow to generate new Bitmessage address", function() {
+      this.timeout(10000);
+      var addr = Address.fromRandom();
+      expect(addr.version).to.equal(4);
+      expect(addr.stream).to.equal(1);
+      expect(addr.signPrivateKey.length).to.equal(32);
+      expect(addr.encPrivateKey.length).to.equal(32);
+      var str = addr.encode();
+      expect(str.slice(0, 3)).to.equal("BM-");
+      var addr2 = Address.decode(str);
+      expect(addr2.version).to.equal(4);
+      expect(addr2.stream).to.equal(1);
+      expect(addr2.ripe.length).to.equal(20);
+      expect(addr2.ripe[0]).to.equal(0);
+    });
+
+    if (allTests) {
+      it("should allow to generate shorter address", function() {
+        this.timeout(60000);
+        var addr = Address.fromRandom({ripelen: 18});
+        var ripe = addr.getRipe({short: true});
+        expect(ripe.length).to.be.at.most(18);
+      });
+    }
+  });
 });
