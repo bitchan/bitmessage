@@ -15,6 +15,7 @@ var messageEncodings = structs.messageEncodings;
 var serviceFeatures = structs.serviceFeatures;
 var pubkeyFeatures = structs.pubkeyFeatures;
 var WIF = bitmessage.WIF;
+var POW = bitmessage.POW;
 var Address = bitmessage.Address;
 
 describe("Crypto", function() {
@@ -263,6 +264,13 @@ describe("WIF", function() {
   });
 });
 
+describe("POW", function() {
+  it("should calculate target", function() {
+    expect(POW.getTarget({ttl: 2418984, payloadLength: 628, nonceTrialsPerByte: 1000, payloadLengthExtraBytes: 1000})).to.equal(297422593171);
+    expect(POW.getTarget({ttl: 86400, payloadLength: 628})).to.equal(4864647698763);
+  });
+});
+
 describe("High-level classes", function() {
   // FIXME(Kagami): Add more fail tests.
   describe("Address", function() {
@@ -296,7 +304,9 @@ describe("High-level classes", function() {
       expect(addr2.ripe[0]).to.equal(0);
     });
 
-    if (allTests) {
+    // FIXME(Kagami): Don't run it in browser currently because it's
+    // very slow. This need to be fixed.
+    if (allTests && typeof window === "undefined") {
       it("should allow to generate shorter address", function() {
         this.timeout(60000);
         var addr = Address.fromRandom({ripelen: 18});
