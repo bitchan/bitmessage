@@ -57,10 +57,6 @@ describe("Crypto", function() {
 
 describe("Common structures", function() {
   describe("message", function() {
-    it("should encode", function() {
-      expect(message.encode({command: "test", payload: Buffer("payload")}).toString("hex")).to.equal("e9beb4d97465737400000000000000000000000770b33ce97061796c6f6164");
-    });
-
     it("should decode", function() {
       var res;
       res = message.decode(Buffer("e9beb4d97465737400000000000000000000000770b33ce97061796c6f6164", "hex"));
@@ -68,6 +64,13 @@ describe("Common structures", function() {
       expect(res.payload.toString()).to.equal("payload");
       expect(res.length).to.equal(31);
       expect(res.rest.toString("hex")).to.equal("");
+
+      res = message.decode(Buffer("e9beb4d90000000000000000000000000000000770b33ce97061796c6f6164", "hex"));
+      expect(res.command).to.equal("");
+    });
+
+    it("should encode", function() {
+      expect(message.encode({command: "test", payload: Buffer("payload")}).toString("hex")).to.equal("e9beb4d97465737400000000000000000000000770b33ce97061796c6f6164");
     });
   });
 
