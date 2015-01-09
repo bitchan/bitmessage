@@ -1,9 +1,10 @@
 #ifndef BITMESSAGE_POW_H
 #define BITMESSAGE_POW_H
 
-int pow(uint32_t pool_size,
-        int64_t target,
+int pow(size_t pool_size,
+        uint64_t target,
         const uint8_t* initial_hash,
-        int64_t* nonce);
+        uint64_t max_nonce,
+        uint64_t* nonce);
 
 #endif

@@ -13,11 +13,13 @@ using v8::Object;
 using v8::String;
 using v8::Integer;
 
+#define MAX_SAFE_JS_INTEGER 9007199254740991
+
 class PowWorker : public NanAsyncWorker {
  public:
   PowWorker(NanCallback* callback,
-            uint32_t pool_size,
-            int64_t target,
+            size_t pool_size,
+            uint64_t target,
             uint8_t* initial_hash)
       : NanAsyncWorker(callback),
         pool_size(pool_size),
@@ -32,7 +34,7 @@ class PowWorker : public NanAsyncWorker {
   // here, so everything we need for input and output
   // should go on `this`.
   void Execute () {
-    error = pow(pool_size, target, initial_hash, &nonce);
+    error = pow(pool_size, target, initial_hash, MAX_SAFE_JS_INTEGER, &nonce);
   }
 
   // Executed when the async work is complete
@@ -50,10 +52,10 @@ class PowWorker : public NanAsyncWorker {
   }
 
  private:
-  uint32_t pool_size;
-  int64_t target;
+  size_t pool_size;
+  uint64_t target;
   uint8_t* initial_hash;
-  int64_t nonce;
+  uint64_t nonce;
   int error;
 };
 
@@ -61,8 +63,8 @@ NAN_METHOD(PowAsync) {
   NanScope();
 
   NanCallback *callback = new NanCallback(args[3].As<Function>());
-  uint32_t pool_size = args[0]->Uint32Value();
-  int64_t target = args[1]->IntegerValue();
+  size_t pool_size = args[0]->Uint32Value();
+  uint64_t target = args[1]->IntegerValue();
   size_t length = Buffer::Length(args[2]->ToObject());
   char* buf = Buffer::Data(args[2]->ToObject());
   uint8_t* initial_hash = (uint8_t *)malloc(length);
