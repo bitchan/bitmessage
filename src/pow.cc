@@ -3,6 +3,7 @@
 // TODO(Kagami): Port it to WIN32 (see bitmessage-powfaster for an
 // example).
 
+#define __STDC_LIMIT_MACROS
 #include <stdint.h>
 #include <string.h>
 #include <arpa/inet.h>
