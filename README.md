@@ -49,7 +49,7 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
   - [ ] msg
   - [ ] broadcast
 - [x] WIF
-- [ ] POW
+- [x] POW
 - [ ] High-level classes
   - [ ] Address
     - [x] encode

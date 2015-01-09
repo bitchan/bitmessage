@@ -4,3 +4,4 @@
 /docs/
 /jsdoc.json
 /worker.browserify.js
+/build/

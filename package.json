@@ -7,6 +7,7 @@
     "./lib/platform.js": "./lib/platform.browser.js"
   },
   "scripts": {
+    "install": "node-gyp rebuild || exit 0",
     "test": "ALL_TESTS=1 mocha && ALL_TESTS=1 npm run -s kc && ALL_TESTS=1 npm run -s kf && jshint .",
     "m": "mocha",
     "k": "npm run -s w && xvfb-run -a karma start",
@@ -53,7 +54,9 @@
     "bs58": "^2.0.0",
     "buffer-equal": "~0.0.1",
     "eccrypto": "^0.1.2",
+    "es6-promise": "^2.0.1",
     "hash.js": "^1.0.2",
+    "nan": "^1.4.1",
     "object-assign": "^2.0.0",
     "sha.js": "^2.3.0"
   }

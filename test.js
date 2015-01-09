@@ -279,7 +279,7 @@ describe("POW", function() {
     expect(POW.check({nonce: 3122436, target: 4864647698763, initialHash: Buffer("8ff2d685db89a0af2e3dbfd3f700ae96ef4d9a1eac72fd778bbb368c7510cddda349e03207e1c4965bd95c6f7265e8f1a481a08afab3874eaafb9ade09a10880", "hex")})).to.be.false;
   });
 
-  if (allTests && typeof window !== "undefined") {
+  if (allTests) {
     it("should do a POW", function() {
       this.timeout(120000);
       return POW.do({workerUrl: "/base/worker.browserify.js", target: 10693764680411, initialHash: Buffer("8ff2d685db89a0af2e3dbfd3f700ae96ef4d9a1eac72fd778bbb368c7510cddda349e03207e1c4965bd95c6f7265e8f1a481a08afab3874eaafb9ade09a10880", "hex")})
