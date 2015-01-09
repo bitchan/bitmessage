@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include "./pow.h"
 
+#define MAX_SAFE_JS_INTEGER 9007199254740991
+
 using node::Buffer;
 using v8::Handle;
 using v8::Local;
@@ -12,8 +14,6 @@ using v8::Value;
 using v8::Object;
 using v8::String;
 using v8::Integer;
-
-#define MAX_SAFE_JS_INTEGER 9007199254740991
 
 class PowWorker : public NanAsyncWorker {
  public:
@@ -81,8 +81,6 @@ NAN_METHOD(PowAsync) {
   NanReturnUndefined();
 }
 
-// Expose synchronous and asynchronous access to our
-// Estimate() function
 void InitAll(Handle<Object> exports) {
   exports->Set(
       NanNew<String>("powAsync"),
