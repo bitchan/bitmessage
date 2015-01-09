@@ -7,11 +7,12 @@
     "./lib/platform.js": "./lib/platform.browser.js"
   },
   "scripts": {
-    "test": "ALL_TESTS=1 mocha && ALL_TESTS=1 xvfb-run -a karma start && jshint .",
+    "test": "ALL_TESTS=1 mocha && ALL_TESTS=1 npm run -s kc && ALL_TESTS=1 npm run -s kf && jshint .",
     "m": "mocha",
-    "k": "xvfb-run -a karma start",
-    "kc": "xvfb-run -a karma start --browsers Chromium",
-    "kf": "xvfb-run -a karma start --browsers Firefox",
+    "k": "npm run -s w && xvfb-run -a karma start",
+    "kc": "npm run -s w && xvfb-run -a karma start --browsers Chromium",
+    "kf": "npm run -s w && xvfb-run -a karma start --browsers Firefox",
+    "w": "browserify lib/worker.browser.js > worker.browserify.js",
     "j": "jshint .",
     "d": "jsdoc -c jsdoc.json",
     "mv-docs": "rm -rf docs && jsdoc -c jsdoc.json && D=`mktemp -d` && mv docs \"$D\" && git checkout gh-pages && rm -rf docs && mv \"$D/docs\" . && rm -rf \"$D\""
@@ -33,14 +34,15 @@
   },
   "homepage": "https://github.com/bitchan/bitmessage",
   "devDependencies": {
+    "browserify": "^8.1.0",
     "chai": "*",
     "jsdoc": "^3.3.0-alpha13",
     "jshint": "*",
-    "karma": "^0.12.28",
-    "karma-browserify": "^1.0.1",
+    "karma": "^0.12.31",
+    "karma-browserify": "^2.0.0",
     "karma-chrome-launcher": "^0.1.7",
     "karma-cli": "~0.0.4",
-    "karma-firefox-launcher": "^0.1.3",
+    "karma-firefox-launcher": "^0.1.4",
     "karma-mocha": "^0.1.10",
     "karma-mocha-reporter": "^0.3.1",
     "mocha": "*"

@@ -1,9 +1,11 @@
 process.env.CHROME_BIN = "chromium-browser";
 var allTests = !!process.env.ALL_TESTS;
 var files = ["test.js"];
-// Kludgy way to pass a variable to `test.js`.
 if (allTests) {
+  // Kludgy way to pass a variable to `test.js`.
   files.unshift("karma-all-tests.js");
+  // Worker code.
+  files.push({pattern: "worker.browserify.js", included: false});
 };
 
 module.exports = function(config) {
@@ -15,7 +17,7 @@ module.exports = function(config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ["mocha", "browserify"],
+    frameworks: ["browserify", "mocha"],
 
 
     // list of files / patterns to load in the browser
@@ -73,6 +75,6 @@ module.exports = function(config) {
     singleRun: true,
 
 
-    browserNoActivityTimeout: allTests ? 60000 : 10000,
+    browserNoActivityTimeout: allTests ? 120000 : 10000,
   });
 };

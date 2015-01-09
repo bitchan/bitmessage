@@ -1,5 +1,6 @@
-.travis.yml
-.jshint*
-karma*
-docs
-jsdoc.json
+/.travis.yml
+/.jshint*
+/karma*
+/docs/
+/jsdoc.json
+/worker.browserify.js
