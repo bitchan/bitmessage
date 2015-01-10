@@ -43,7 +43,12 @@ class PowWorker : public NanAsyncWorker {
   void HandleOKCallback () {
     NanScope();
     if (error) {
-      Local<Value> argv[] = {NanError("Max safe integer overflow")};
+      Local<Value> argv[1];
+      if (error == -1) {
+        argv[0] = NanError("Max safe integer overflow");
+      } else {
+        argv[0] = NanError("Internal error");
+      }
       callback->Call(1, argv);
     } else {
       Local<Value> argv[] = {NanNull(), NanNew<Integer>(nonce)};
@@ -70,7 +75,7 @@ NAN_METHOD(PowAsync) {
   uint8_t* initial_hash = (uint8_t *)malloc(length);
 
   if (initial_hash == NULL) {
-    Local<Value> argv[] = {NanError("Cannot allocate memory")};
+    Local<Value> argv[] = {NanError("Internal error")};
     callback->Call(1, argv);
   } else {
     memcpy(initial_hash, buf, length);
