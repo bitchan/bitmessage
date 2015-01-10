@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include "./pow.h"
 
-#define MAX_SAFE_JS_INTEGER 9007199254740991
+#define MAX_SAFE_INTEGER 9007199254740991
 
 using node::Buffer;
 using v8::Handle;
@@ -34,7 +34,7 @@ class PowWorker : public NanAsyncWorker {
   // here, so everything we need for input and output
   // should go on `this`.
   void Execute () {
-    error = pow(pool_size, target, initial_hash, MAX_SAFE_JS_INTEGER, &nonce);
+    error = pow(pool_size, target, initial_hash, MAX_SAFE_INTEGER, &nonce);
   }
 
   // Executed when the async work is complete
