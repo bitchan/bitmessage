@@ -8,7 +8,7 @@
   },
   "scripts": {
     "install": "node-gyp rebuild || exit 0",
-    "test": "ALL_TESTS=1 mocha && ALL_TESTS=1 xvfb-run -a karma start && jshint .",
+    "test": "ALL_TESTS=1 mocha && ALL_TESTS=1 xvfb-run -a karma start --browsers Chromium && ALL_TESTS=1 xvfb-run -a karma start --browsers Firefox && jshint .",
     "m": "mocha",
     "k": "xvfb-run -a karma start",
     "kc": "xvfb-run -a karma start --browsers Chromium",
