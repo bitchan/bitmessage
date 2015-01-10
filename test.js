@@ -281,8 +281,8 @@ describe("POW", function() {
 
   if (allTests) {
     it("should do a POW", function() {
-      this.timeout(120000);
-      return POW.do({workerUrl: "/base/worker.browserify.js", target: 10693764680411, initialHash: Buffer("8ff2d685db89a0af2e3dbfd3f700ae96ef4d9a1eac72fd778bbb368c7510cddda349e03207e1c4965bd95c6f7265e8f1a481a08afab3874eaafb9ade09a10880", "hex")})
+      this.timeout(300000);
+      return POW.do({target: 10693764680411, initialHash: Buffer("8ff2d685db89a0af2e3dbfd3f700ae96ef4d9a1eac72fd778bbb368c7510cddda349e03207e1c4965bd95c6f7265e8f1a481a08afab3874eaafb9ade09a10880", "hex")})
         .then(function(nonce) {
           // Multiple valid nonces.
           expect([2373146, 2543600]).to.include(nonce);
@@ -309,7 +309,7 @@ describe("High-level classes", function() {
     });
 
     it("should allow to generate new Bitmessage address", function() {
-      this.timeout(10000);
+      this.timeout(60000);
       var addr = Address.fromRandom();
       expect(addr.version).to.equal(4);
       expect(addr.stream).to.equal(1);
@@ -328,7 +328,7 @@ describe("High-level classes", function() {
     // very slow. This need to be fixed.
     if (allTests && typeof window === "undefined") {
       it("should allow to generate shorter address", function() {
-        this.timeout(120000);
+        this.timeout(300000);
         var addr = Address.fromRandom({ripelen: 18});
         var ripe = addr.getRipe({short: true});
         expect(ripe.length).to.be.at.most(18);

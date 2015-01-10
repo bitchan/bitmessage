@@ -4,8 +4,6 @@ var files = ["test.js"];
 if (allTests) {
   // Kludgy way to pass a variable to `test.js`.
   files.unshift("karma-all-tests.js");
-  // Worker code.
-  files.push({pattern: "worker.browserify.js", included: false});
 };
 
 module.exports = function(config) {
@@ -75,6 +73,6 @@ module.exports = function(config) {
     singleRun: true,
 
 
-    browserNoActivityTimeout: allTests ? 120000 : 10000,
+    browserNoActivityTimeout: allTests ? 300000 : 60000,
   });
 };

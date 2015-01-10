@@ -8,12 +8,11 @@
   },
   "scripts": {
     "install": "node-gyp rebuild || exit 0",
-    "test": "ALL_TESTS=1 mocha && ALL_TESTS=1 npm run -s kc && ALL_TESTS=1 npm run -s kf && jshint .",
+    "test": "ALL_TESTS=1 mocha && ALL_TESTS=1 xvfb-run -a karma start && jshint .",
     "m": "mocha",
-    "k": "npm run -s w && xvfb-run -a karma start",
-    "kc": "npm run -s w && xvfb-run -a karma start --browsers Chromium",
-    "kf": "npm run -s w && xvfb-run -a karma start --browsers Firefox",
-    "w": "browserify lib/worker.browser.js > worker.browserify.js",
+    "k": "xvfb-run -a karma start",
+    "kc": "xvfb-run -a karma start --browsers Chromium",
+    "kf": "xvfb-run -a karma start --browsers Firefox",
     "j": "jshint .",
     "d": "jsdoc -c jsdoc.json",
     "mv-docs": "rm -rf docs && jsdoc -c jsdoc.json && D=`mktemp -d` && mv docs \"$D\" && git checkout gh-pages && rm -rf docs && mv \"$D/docs\" . && rm -rf \"$D\""
@@ -35,7 +34,6 @@
   },
   "homepage": "https://github.com/bitchan/bitmessage",
   "devDependencies": {
-    "browserify": "^8.1.0",
     "chai": "*",
     "jsdoc": "^3.3.0-alpha13",
     "jshint": "*",
@@ -58,6 +56,7 @@
     "hash.js": "^1.0.2",
     "nan": "^1.4.1",
     "object-assign": "^2.0.0",
-    "sha.js": "^2.3.0"
+    "sha.js": "^2.3.0",
+    "webworkify": "^1.0.1"
   }
 }

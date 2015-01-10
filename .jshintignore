@@ -2,4 +2,3 @@
 /test*
 /karma*
 /docs/
-/worker.browserify.js
