@@ -11,20 +11,6 @@
 #include <openssl/sha.h>
 
 #define HASH_SIZE 64
-#define NTOHLL(x)                                                  \
-  (                                                                \
-    ((uint64_t)(ntohl( (unsigned int)((x << 32) >> 32) )) << 32) | \
-    ntohl( ((unsigned int)(x >> 32)) )                             \
-  )
-#define SET_RESULT(res, nonce)          \
-  {                                     \
-    pthread_mutex_lock(&g_mutex);       \
-    if (g_result == RESULT_NOT_READY) { \
-      g_result = res;                   \
-      g_nonce = nonce;                  \
-    }                                   \
-    pthread_mutex_unlock(&g_mutex);     \
-  }
 
 typedef enum {
   RESULT_NOT_READY,
@@ -44,6 +30,23 @@ pthread_mutex_t g_mutex;
 Result g_result = RESULT_NOT_READY;
 uint64_t g_nonce;
 
+inline uint64_t ntohll(uint64_t x) {
+  return (
+      ((uint64_t)(ntohl( (unsigned int)((x << 32) >> 32) )) << 32) |
+      ntohl( ((unsigned int)(x >> 32)) )
+  );
+}
+
+// Set POW computation result in a thread-safe way.
+void set_result(Result res, uint64_t nonce) {
+  pthread_mutex_lock(&g_mutex);
+  if (g_result == RESULT_NOT_READY) {
+    g_result = res;
+    g_nonce = nonce;
+  }
+  pthread_mutex_unlock(&g_mutex);
+}
+
 void* pow_thread(void* num) {
   uint64_t i = *((size_t *)num);
   uint8_t message[HASH_SIZE+sizeof(uint64_t)];
@@ -60,18 +63,18 @@ void* pow_thread(void* num) {
     // This is very unlikely to be ever happen but it's better to be
     // sure anyway.
     if (i > g_max_nonce) {
-      SET_RESULT(RESULT_OVERFLOW, 0);
+      set_result(RESULT_OVERFLOW, 0);
       return NULL;
     }
-    *be_nonce = NTOHLL(i);
+    *be_nonce = ntohll(i);
     SHA512_Init(&sha);
     SHA512_Update(&sha, message, HASH_SIZE+sizeof(uint64_t));
     SHA512_Final(digest, &sha);
     SHA512_Init(&sha);
     SHA512_Update(&sha, digest, HASH_SIZE);
     SHA512_Final(digest, &sha);
-    if (NTOHLL(*be_trial) <= g_target) {
-      SET_RESULT(RESULT_OK, i);
+    if (ntohll(*be_trial) <= g_target) {
+      set_result(RESULT_OK, i);
       return NULL;
     }
     i += g_pool_size;
@@ -99,7 +102,7 @@ int pow(size_t pool_size,
     args[i] = i;
     error = pthread_create(&threads[i], NULL, pow_thread, &args[i]);
     if (error) {
-      SET_RESULT(RESULT_ERROR, 0);
+      set_result(RESULT_ERROR, 0);
       break;
     }
   }

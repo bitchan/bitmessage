@@ -25,6 +25,7 @@ class PowWorker : public NanAsyncWorker {
         pool_size(pool_size),
         target(target),
         initial_hash(initial_hash) {}
+
   ~PowWorker() {
     free(initial_hash);
   }
