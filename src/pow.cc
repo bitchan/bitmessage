@@ -9,15 +9,15 @@
 #include <pthread.h>
 #include <arpa/inet.h>
 #include <openssl/sha.h>
+#include "./pow.h"
 
-#define HASH_SIZE 64
-
-typedef enum {
-  RESULT_NOT_READY,
-  RESULT_OK,
-  RESULT_OVERFLOW,
-  RESULT_ERROR
-} Result;
+enum PowResult {
+  RESULT_OK = 0,
+  RESULT_OVERFLOW = -1,
+  RESULT_ERROR = -2,
+  RESULT_BAD_INPUT = -3,
+  RESULT_NOT_READY = -4
+};
 
 // Global arguments.
 size_t g_pool_size;
@@ -27,7 +27,7 @@ uint64_t g_max_nonce;
 
 // Shared variables for threads.
 pthread_mutex_t g_mutex;
-Result g_result = RESULT_NOT_READY;
+PowResult g_result = RESULT_NOT_READY;
 uint64_t g_nonce;
 
 inline uint64_t ntohll(uint64_t x) {
@@ -38,7 +38,7 @@ inline uint64_t ntohll(uint64_t x) {
 }
 
 // Set POW computation result in a thread-safe way.
-void set_result(Result res, uint64_t nonce) {
+void set_result(PowResult res, uint64_t nonce) {
   pthread_mutex_lock(&g_mutex);
   if (g_result == RESULT_NOT_READY) {
     g_result = res;
@@ -87,6 +87,9 @@ int pow(size_t pool_size,
         const uint8_t* initial_hash,
         uint64_t max_nonce,
         uint64_t* nonce) {
+  if (pool_size < 1 || pool_size > MAX_POOL_SIZE) {
+    return RESULT_BAD_INPUT;
+  }
   g_pool_size = pool_size;
   g_target = target;
   g_initial_hash = (uint8_t *)initial_hash;
@@ -112,18 +115,10 @@ int pow(size_t pool_size,
     pthread_join(threads[i], NULL);
   }
 
-  switch (g_result) {
-    case RESULT_OK:
-      *nonce = g_nonce;
-      error = 0;
-      break;
-    case RESULT_OVERFLOW:
-      error = -1;
-      break;
-    default:
-      error = -2;
+  if (g_result == RESULT_OK) {
+    *nonce = g_nonce;
   }
 
   pthread_mutex_destroy(&g_mutex);
-  return error;
+  return g_result;
 }

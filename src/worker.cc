@@ -68,22 +68,32 @@ class PowWorker : public NanAsyncWorker {
 NAN_METHOD(PowAsync) {
   NanScope();
 
-  NanCallback *callback = new NanCallback(args[3].As<Function>());
+  if (args.Length() != 4 ||
+      !args[0]->IsNumber() ||  // pool_size
+      !args[1]->IsNumber() ||  // target
+      !args[2]->IsObject() ||  // initial_hash
+      !args[3]->IsFunction()) {  // cb
+    NanThrowError("Bad input");
+    NanReturnUndefined();
+  }
+
   size_t pool_size = args[0]->Uint32Value();
   uint64_t target = args[1]->IntegerValue();
   size_t length = Buffer::Length(args[2]->ToObject());
-  char* buf = Buffer::Data(args[2]->ToObject());
+  if (pool_size < 1 || pool_size > MAX_POOL_SIZE || length != HASH_SIZE) {
+    NanThrowError("Bad input");
+    NanReturnUndefined();
+  }
   uint8_t* initial_hash = (uint8_t *)malloc(length);
-
   if (initial_hash == NULL) {
-    Local<Value> argv[] = {NanError("Internal error")};
-    callback->Call(1, argv);
-  } else {
-    memcpy(initial_hash, buf, length);
-    NanAsyncQueueWorker(
-        new PowWorker(callback, pool_size, target, initial_hash));
+    NanThrowError("Internal error");
+    NanReturnUndefined();
   }
 
+  char* buf = Buffer::Data(args[2]->ToObject());
+  memcpy(initial_hash, buf, length);
+  NanCallback* callback = new NanCallback(args[3].As<Function>());
+  NanAsyncQueueWorker(new PowWorker(callback, pool_size, target, initial_hash));
   NanReturnUndefined();
 }
 
