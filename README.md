@@ -25,13 +25,13 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
   - [ ] ECIES
   - [ ] AES-256-CBC
   - [ ] HMAC-SHA-256
-- [ ] Common structures
+- [x] Common structures
   - [x] message
   - [x] var_int
   - [x] var_str
   - [x] var_int_list
   - [x] net_addr
-  - [ ] encrypted
+  - [x] encrypted
   - [x] message encodings
   - [x] service features
   - [x] pubkey features

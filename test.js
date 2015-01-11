@@ -3,6 +3,7 @@ var allTests = typeof window === "undefined" ?
                !!process.env.ALL_TESTS :
                window.ALL_TESTS;
 
+var bufferEqual = require("buffer-equal");
 var bmcrypto = require("./lib/crypto");
 var bitmessage = require("./lib");
 var structs = bitmessage.structs;
@@ -11,6 +12,7 @@ var var_int = structs.var_int;
 var var_str = structs.var_str;
 var var_int_list = structs.var_int_list;
 var net_addr = structs.net_addr;
+var encrypted = structs.encrypted;
 var messageEncodings = structs.messageEncodings;
 var serviceFeatures = structs.serviceFeatures;
 var pubkeyFeatures = structs.pubkeyFeatures;
@@ -206,6 +208,30 @@ describe("Common structures", function() {
       expect(net_addr.encode({time: time, stream: 1, services: [serviceFeatures.NODE_NETWORK], host: "127.0.0.1", port: 8444}).toString("hex")).to.equal("0000000054aaf6c000000001000000000000000100000000000000000000ffff7f00000120fc");
       expect(net_addr.encode({short: true, services: [serviceFeatures.NODE_NETWORK], host: "127.0.0.1", port: 8444}).toString("hex")).to.equal("000000000000000100000000000000000000ffff7f00000120fc");
       expect(net_addr.encode({short: true, host: "::1", port: 65000}).toString("hex")).to.equal("000000000000000100000000000000000000000000000001fde8");
+    });
+  });
+
+  describe("Encrypted", function() {
+    it("should encode and decode", function() {
+      var iv = Buffer(16);
+      var ephemPublicKey = Buffer(65);
+      ephemPublicKey[0] = 0x04;
+      var cipherText = Buffer("test");
+      var mac = Buffer(32);
+      var inopts = {
+        iv: iv,
+        ephemPublicKey: ephemPublicKey,
+        cipherText: cipherText,
+        mac: mac,
+      };
+
+      var encoded = encrypted.encode(inopts);
+      expect(encoded.length).to.equal(122);
+      var outopts = encrypted.decode(encoded);
+      expect(bufferEqual(iv, outopts.iv)).to.be.true;
+      expect(bufferEqual(ephemPublicKey, outopts.ephemPublicKey)).to.be.true;
+      expect(cipherText.toString()).to.equal("test");
+      expect(bufferEqual(mac, outopts.mac)).to.be.true;
     });
   });
 
