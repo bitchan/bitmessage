@@ -57,7 +57,7 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
     - [x] getRipe
     - [x] fromRandom
     - [ ] fromPassphrase
-  - [ ] UserAgent
+  - [x] UserAgent
   - [ ] Message
     - [ ] encrypt
     - [ ] decrypt

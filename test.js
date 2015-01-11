@@ -19,6 +19,7 @@ var pubkeyFeatures = structs.pubkeyFeatures;
 var WIF = bitmessage.WIF;
 var POW = bitmessage.POW;
 var Address = bitmessage.Address;
+var UserAgent = bitmessage.UserAgent;
 
 describe("Crypto", function() {
   it("should implement SHA-512 hash", function() {
@@ -376,5 +377,45 @@ describe("High-level classes", function() {
         expect(ripe.length).to.be.at.most(18);
       });
     }
+  });
+
+  describe("User Agent", function() {
+    var pybm = {name: "PyBitmessage", version: "0.4.4"};
+    var bnode = {name: "bitchan-node", version: "0.0.1"};
+    var bweb = {name: "bitchan-web"};
+
+    it("should decode", function() {
+      var ua = var_str.encode("/cBitmessage:0.2(iPad; U; CPU OS 3_2_1)/AndroidBuild:0.8/");
+      var res = UserAgent.decode(ua);
+      expect(res.software).to.deep.equal([
+        {name: "cBitmessage", version: "0.2", comments: "iPad; U; CPU OS 3_2_1"},
+        {name: "AndroidBuild", version: "0.8"},
+      ]);
+      expect(res.length).to.equal(58);
+      expect(res.rest.toString("hex")).to.equal("");
+    });
+
+    it("should encode", function() {
+      var ua = UserAgent.encode([pybm]);
+      expect(var_str.decode(ua).str).to.equal("/PyBitmessage:0.4.4/");
+      var res = UserAgent.decode(ua);
+      expect(res.software).to.deep.equal([pybm]);
+      expect(res.length).to.equal(21);
+      expect(res.rest.toString("hex")).to.equal("");
+    });
+
+    it("should encode bitmessage's user agent", function() {
+      var res = UserAgent.decode(UserAgent.encodeSelf())
+      var software = res.software;
+      expect(software[0].name).to.equal("bitmessage");
+      expect(software[0]).to.have.property("version");
+
+      res = UserAgent.decode(UserAgent.encodeSelfWith([bnode, bweb]));
+      software = res.software;
+      expect(software[0].name).to.equal("bitmessage");
+      expect(software[1]).to.deep.equal(bnode);
+      expect(software[2].name).to.equal(bweb.name);
+      expect(software[2].version).to.equal("0.0.0");
+    });
   });
 });
