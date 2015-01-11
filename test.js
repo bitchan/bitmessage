@@ -283,11 +283,13 @@ describe("POW", function() {
     it("should do a POW", function() {
       this.timeout(300000);
       var target = typeof window === "undefined" ? 297422593171 : 10693764680411;
-      var nonces = typeof window === "undefined" ? [21997550] : [2373146, 2543600];
+      var validNonces = typeof window === "undefined" ?
+                        [21997550] :
+                        [2373146, 2543600, 3593915];
       return POW.doAsync({target: target, initialHash: Buffer("8ff2d685db89a0af2e3dbfd3f700ae96ef4d9a1eac72fd778bbb368c7510cddda349e03207e1c4965bd95c6f7265e8f1a481a08afab3874eaafb9ade09a10880", "hex")})
         .then(function(computedNonce) {
           // Multiple valid nonces.
-          expect(nonces).to.include(computedNonce);
+          expect(validNonces).to.include(computedNonce);
         });
     });
   }
