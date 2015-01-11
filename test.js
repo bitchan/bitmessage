@@ -402,6 +402,9 @@ describe("High-level classes", function() {
       expect(res.software).to.deep.equal([pybm]);
       expect(res.length).to.equal(21);
       expect(res.rest.toString("hex")).to.equal("");
+
+      ua = UserAgent.encode([{name: "test", "comments": "linux"}]);
+      expect(var_str.decode(ua).str).to.equal("/test:0.0.0(linux)/");
     });
 
     it("should encode bitmessage's user agent", function() {
