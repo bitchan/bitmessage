@@ -4,8 +4,8 @@ var allTests = typeof window === "undefined" ?
                window.ALL_TESTS;
 
 var bufferEqual = require("buffer-equal");
-var bmcrypto = require("./lib/crypto");
 var bitmessage = require("./lib");
+var bmcrypto = require("./lib/crypto");
 var structs = bitmessage.structs;
 var message = structs.message;
 var var_int = structs.var_int;
@@ -140,6 +140,9 @@ describe("Common structures", function() {
       expect(res.str).to.equal("test");
       expect(res.length).to.equal(5);
       expect(res.rest.toString("hex")).to.equal("ffffff");
+
+      // Truncated input.
+      expect(var_str.decode.bind(null, Buffer("04746573", "hex"))).to.throw(Error);
     });
 
     it("should encode", function() {
@@ -170,6 +173,9 @@ describe("Common structures", function() {
       expect(res.length).to.equal(22);
       expect(res.list.length).to.equal(5);
       expect(res.rest.toString("hex")).to.equal("ffffff");
+
+      // Truncated input.
+      expect(var_int_list.decode.bind(null, Buffer("0501fd0400ff0004000000000000fd9c40fe000186", "hex"))).to.throw(Error);
     });
 
     it("should encode", function() {
@@ -303,6 +309,12 @@ describe("POW", function() {
     expect(POW.check({nonce: 21997550, target: 297422593171, initialHash: Buffer("8ff2d685db89a0af2e3dbfd3f700ae96ef4d9a1eac72fd778bbb368c7510cddda349e03207e1c4965bd95c6f7265e8f1a481a08afab3874eaafb9ade09a10880", "hex")})).to.be.true;
     expect(POW.check({nonce: 3122437, target: 4864647698763, initialHash: Buffer("8ff2d685db89a0af2e3dbfd3f700ae96ef4d9a1eac72fd778bbb368c7510cddda349e03207e1c4965bd95c6f7265e8f1a481a08afab3874eaafb9ade09a10880", "hex")})).to.be.true;
     expect(POW.check({nonce: 3122436, target: 4864647698763, initialHash: Buffer("8ff2d685db89a0af2e3dbfd3f700ae96ef4d9a1eac72fd778bbb368c7510cddda349e03207e1c4965bd95c6f7265e8f1a481a08afab3874eaafb9ade09a10880", "hex")})).to.be.false;
+  });
+
+  it("should fail on bad POW arguments", function() {
+    expect(POW.doAsync.bind(null, {target: 123, initialHash: 0})).to.throw(Error);
+    expect(POW.doAsync.bind(null, {target: 123, initialHash: Buffer("test")})).to.throw(Error);
+    expect(POW.doAsync.bind(null, {poolSize: -1, target: 123, initialHash: Buffer(64)})).to.throw(Error);
   });
 
   if (allTests) {
