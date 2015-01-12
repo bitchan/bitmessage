@@ -1,6 +1,5 @@
 #include <node.h>
 #include <nan.h>
-#include <stdlib.h>
 #include "./pow.h"
 
 #define MAX_SAFE_INTEGER 9007199254740991
@@ -27,7 +26,7 @@ class PowWorker : public NanAsyncWorker {
         initial_hash(initial_hash) {}
 
   ~PowWorker() {
-    free(initial_hash);
+    delete[] initial_hash;
   }
 
   // Executed inside the worker-thread.
@@ -73,24 +72,19 @@ NAN_METHOD(PowAsync) {
       !args[1]->IsNumber() ||  // target
       !args[2]->IsObject() ||  // initial_hash
       !args[3]->IsFunction()) {  // cb
-    NanThrowError("Bad input");
-    NanReturnUndefined();
+    return NanThrowError("Bad input");
   }
 
   size_t pool_size = args[0]->Uint32Value();
   uint64_t target = args[1]->IntegerValue();
   size_t length = Buffer::Length(args[2]->ToObject());
   if (pool_size < 1 || pool_size > MAX_POOL_SIZE || length != HASH_SIZE) {
-    NanThrowError("Bad input");
-    NanReturnUndefined();
-  }
-  uint8_t* initial_hash = (uint8_t *)malloc(length);
-  if (initial_hash == NULL) {
-    NanThrowError("Internal error");
-    NanReturnUndefined();
+    return NanThrowError("Bad input");
   }
 
   char* buf = Buffer::Data(args[2]->ToObject());
+  // TODO(Kagami): Do we need to process `std::bad_alloc`?
+  uint8_t* initial_hash = new uint8_t[length];
   memcpy(initial_hash, buf, length);
   NanCallback* callback = new NanCallback(args[3].As<Function>());
   NanAsyncQueueWorker(new PowWorker(callback, pool_size, target, initial_hash));
