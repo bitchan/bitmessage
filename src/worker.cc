@@ -78,11 +78,15 @@ NAN_METHOD(PowAsync) {
   size_t pool_size = args[0]->Uint32Value();
   uint64_t target = args[1]->IntegerValue();
   size_t length = Buffer::Length(args[2]->ToObject());
-  if (pool_size < 1 || pool_size > MAX_POOL_SIZE || length != HASH_SIZE) {
+  char* buf = Buffer::Data(args[2]->ToObject());
+  if (
+      pool_size < 1 ||
+      pool_size > MAX_POOL_SIZE ||
+      length != HASH_SIZE ||
+      buf == NULL) {
     return NanThrowError("Bad input");
   }
 
-  char* buf = Buffer::Data(args[2]->ToObject());
   // TODO(Kagami): Do we need to process `std::bad_alloc`?
   uint8_t* initial_hash = new uint8_t[length];
   memcpy(initial_hash, buf, length);

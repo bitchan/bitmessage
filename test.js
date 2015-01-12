@@ -312,10 +312,15 @@ describe("POW", function() {
     expect(POW.check({nonce: 3122436, target: 4864647698763, initialHash: Buffer("8ff2d685db89a0af2e3dbfd3f700ae96ef4d9a1eac72fd778bbb368c7510cddda349e03207e1c4965bd95c6f7265e8f1a481a08afab3874eaafb9ade09a10880", "hex")})).to.be.false;
   });
 
-  it("should fail on bad POW arguments", function() {
-    expect(POW.doAsync.bind(null, {target: 123, initialHash: 0})).to.throw(Error);
-    expect(POW.doAsync.bind(null, {target: 123, initialHash: Buffer("test")})).to.throw(Error);
-    expect(POW.doAsync.bind(null, {poolSize: -1, target: 123, initialHash: Buffer(64)})).to.throw(Error);
+  it("should reject promise on bad POW arguments", function(done) {
+    POW.doAsync({target: 123, initialHash: {}}).catch(function() {
+      POW.doAsync({target: 123, initialHash: Buffer("test")}).catch(function() {
+        POW.doAsync({poolSize: -1, target: 123, initialHash: Buffer(64)})
+        .catch(function() {
+          done();
+        });
+      });
+    });
   });
 
   if (allTests) {
