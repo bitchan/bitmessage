@@ -327,14 +327,22 @@ describe("POW", function() {
     it("should do a POW", function() {
       this.timeout(300000);
       var target = typeof window === "undefined" ? 297422593171 : 10693764680411;
-      var validNonces = typeof window === "undefined" ?
-                        [21997550] :
-                        [2373146, 2543600, 3593915];
-      return POW.doAsync({target: target, initialHash: Buffer("8ff2d685db89a0af2e3dbfd3f700ae96ef4d9a1eac72fd778bbb368c7510cddda349e03207e1c4965bd95c6f7265e8f1a481a08afab3874eaafb9ade09a10880", "hex")})
-        .then(function(computedNonce) {
-          // Multiple valid nonces.
-          expect(validNonces).to.include(computedNonce);
-        });
+      var initialHash = Buffer("8ff2d685db89a0af2e3dbfd3f700ae96ef4d9a1eac72fd778bbb368c7510cddda349e03207e1c4965bd95c6f7265e8f1a481a08afab3874eaafb9ade09a10880", "hex");
+      return POW.doAsync({target: target, initialHash: initialHash})
+      .then(function(nonce) {
+        // FIXME(Kagami): Chromium behaves very strangely on Travis CI:
+        // computed nonces may vary in a big range (since target is
+        // simple, there are a lot of valid nonces). Probably because
+        // some spawned web workers get blocked for some reason.
+        if (typeof window === "undefined") {
+          expect(nonce).to.equal(21997550);
+        }
+        expect(POW.check({
+          nonce: nonce,
+          target: target,
+          initialHash: initialHash,
+        })).to.be.true;
+      });
     });
   }
 });
