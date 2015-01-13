@@ -14,17 +14,17 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
 
 ## Feature matrix (both Browser and Node)
 
-- [ ] crypto
+- [x] crypto
   - [x] SHA-512
   - [x] SHA-256
   - [x] RIPEMD-160
   - [x] PRNG
   - [x] ECC keys manipulation
   - [x] ECDSA
-  - [ ] ECDH
-  - [ ] ECIES
-  - [ ] AES-256-CBC
-  - [ ] HMAC-SHA-256
+  - [x] ECDH
+  - [x] ECIES
+  - [x] AES-256-CBC
+  - [x] HMAC-SHA-256
 - [x] Common structures
   - [x] message
   - [x] var_int

@@ -223,12 +223,12 @@ describe("Common structures", function() {
       var iv = Buffer(16);
       var ephemPublicKey = Buffer(65);
       ephemPublicKey[0] = 0x04;
-      var cipherText = Buffer("test");
+      var ciphertext = Buffer("test");
       var mac = Buffer(32);
       var inopts = {
         iv: iv,
         ephemPublicKey: ephemPublicKey,
-        cipherText: cipherText,
+        ciphertext: ciphertext,
         mac: mac,
       };
 
@@ -237,7 +237,7 @@ describe("Common structures", function() {
       var outopts = encrypted.decode(encoded);
       expect(bufferEqual(iv, outopts.iv)).to.be.true;
       expect(bufferEqual(ephemPublicKey, outopts.ephemPublicKey)).to.be.true;
-      expect(cipherText.toString()).to.equal("test");
+      expect(ciphertext.toString()).to.equal("test");
       expect(bufferEqual(mac, outopts.mac)).to.be.true;
     });
   });
