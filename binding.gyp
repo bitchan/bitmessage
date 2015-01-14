@@ -3,7 +3,7 @@
     {
       "target_name": "worker",
       "include_dirs": ["<!(node -e \"require('nan')\")"],
-      "cflags": ["-Wall", "-O2"],
+      "cflags": ["-Wall", "-Wextra", "-O2"],
       "sources": ["src/worker.cc", "src/pow.cc"],
       "conditions": [
         ["OS=='win'", {

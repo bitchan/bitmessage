@@ -10,7 +10,7 @@ using v8::Function;
 using v8::Value;
 using v8::Object;
 using v8::String;
-using v8::Integer;
+using v8::Number;
 
 static const uint64_t MAX_SAFE_INTEGER = 9007199254740991ULL;
 
@@ -51,7 +51,7 @@ class PowWorker : public NanAsyncWorker {
       }
       callback->Call(1, argv);
     } else {
-      Local<Value> argv[] = {NanNull(), NanNew<Integer>(nonce)};
+      Local<Value> argv[] = {NanNull(), NanNew<Number>(nonce)};
       callback->Call(2, argv);
     }
   }
