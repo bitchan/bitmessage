@@ -2,8 +2,6 @@
 #include <nan.h>
 #include "./pow.h"
 
-#define MAX_SAFE_INTEGER 9007199254740991
-
 using node::Buffer;
 using v8::Handle;
 using v8::Local;
@@ -13,6 +11,8 @@ using v8::Value;
 using v8::Object;
 using v8::String;
 using v8::Integer;
+
+static const uint64_t MAX_SAFE_INTEGER = 9007199254740991ULL;
 
 class PowWorker : public NanAsyncWorker {
  public:
@@ -77,13 +77,12 @@ NAN_METHOD(PowAsync) {
 
   size_t pool_size = args[0]->Uint32Value();
   uint64_t target = args[1]->IntegerValue();
-  size_t length = Buffer::Length(args[2]->ToObject());
   char* buf = Buffer::Data(args[2]->ToObject());
-  if (
-      pool_size < 1 ||
+  size_t length = Buffer::Length(args[2]->ToObject());
+  if (pool_size < 1 ||
       pool_size > MAX_POOL_SIZE ||
-      length != HASH_SIZE ||
-      buf == NULL) {
+      buf == NULL ||
+      length != HASH_SIZE) {
     return NanThrowError("Bad input");
   }
 

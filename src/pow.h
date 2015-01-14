@@ -1,8 +1,8 @@
 #ifndef BITMESSAGE_POW_H
 #define BITMESSAGE_POW_H
 
-#define MAX_POOL_SIZE 1024
-#define HASH_SIZE 64
+static const int MAX_POOL_SIZE = 1024;
+static const int HASH_SIZE = 64;
 
 int pow(size_t pool_size,
         uint64_t target,
