@@ -41,7 +41,7 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
   - [x] verack
   - [x] addr
   - [x] inv
-  - [ ] getdata
+  - [x] getdata
   - [ ] error
   - [ ] object
 - [ ] Object types
@@ -58,10 +58,10 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
     - [x] getRipe
     - [x] fromRandom
     - [ ] fromPassphrase
-  - [x] UserAgent
   - [ ] Message
     - [ ] encrypt
     - [ ] decrypt
+  - [x] UserAgent
 - [ ] Parse PyBitmessage configs
   - [ ] keys.dat
   - [ ] knownnodes.dat
