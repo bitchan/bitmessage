@@ -16,6 +16,8 @@ var encrypted = structs.encrypted;
 var messageEncodings = structs.messageEncodings;
 var serviceFeatures = structs.serviceFeatures;
 var pubkeyFeatures = structs.pubkeyFeatures;
+var messages = bitmessage.messages;
+var version = messages.version;
 var WIF = bitmessage.WIF;
 var POW = bitmessage.POW;
 var Address = bitmessage.Address;
@@ -70,6 +72,10 @@ describe("Common structures", function() {
 
       res = message.decode(Buffer("e9beb4d90000000000000000000000000000000770b33ce97061796c6f6164", "hex"));
       expect(res.command).to.equal("");
+    });
+
+    it("should throw when decoding message with truncated payload", function() {
+      expect(message.decode.bind(null, Buffer("e9beb4d97465737400000000000000000000000770b33ce97061796c6f61", "hex"))).to.throw(Error);
     });
 
     it("should encode", function() {
@@ -271,6 +277,28 @@ describe("Common structures", function() {
     it("should encode", function() {
       expect(pubkeyFeatures.encode([pubkeyFeatures.INCLUDE_DESTINATION, pubkeyFeatures.DOES_ACK]).toString("hex")).to.equal("c0000000");
       expect(pubkeyFeatures.encode(pubkeyFeatures.INCLUDE_DESTINATION).toString("hex")).to.equal("40000000");
+    });
+  });
+});
+
+describe("Message types", function() {
+  describe("version", function() {
+    it("should encode and decode", function() {
+      var res = version.decode(version.encode({
+        remoteHost: "1.2.3.4",
+        remotePort: 48444,
+        port: 8444,
+      }));
+      expect(res.version).to.equal(3);
+      expect(res.services).to.deep.equal([serviceFeatures.NODE_NETWORK]);
+      expect(res.time).to.be.instanceof(Date);
+      expect(res.remoteHost).to.equal("1.2.3.4");
+      expect(res.remotePort).to.equal(48444);
+      expect(res.port).to.equal(8444);
+      expect(bufferEqual(res.nonce, version.NONCE)).to.be.true;
+      expect(res.software).to.deep.equal(UserAgent.SELF);
+      expect(res.streamNumbers).to.deep.equal([1]);
+      expect(res.length).to.equal(101);
     });
   });
 });
