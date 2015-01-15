@@ -433,5 +433,17 @@ describe("High-level classes", function() {
       expect(software[2].name).to.equal(bweb.name);
       expect(software[2].version).to.equal("0.0.0");
     });
+
+    it("should accept just object or string(s) on encode", function() {
+      var enc1 = UserAgent.encode({name: "test", version: "0.0.1"});
+      var enc2 = UserAgent.encode("test:0.0.1");
+      var res = [{name: "test", version: "0.0.1"}];
+      expect(UserAgent.decode(enc1).software).to.deep.equal(res);
+      expect(UserAgent.decode(enc2).software).to.deep.equal(res);
+      var enc3 = UserAgent.encodeSelfWith("test:0.0.1");
+      var software = UserAgent.decode(enc3).software;
+      expect(software[0].name).to.equal("bitmessage");
+      expect(software[1]).to.deep.equal(res[0]);
+    });
   });
 });
