@@ -12,6 +12,7 @@ var var_int = structs.var_int;
 var var_str = structs.var_str;
 var var_int_list = structs.var_int_list;
 var net_addr = structs.net_addr;
+var inv_vect = structs.inv_vect;
 var encrypted = structs.encrypted;
 var messageEncodings = structs.messageEncodings;
 var serviceFeatures = structs.serviceFeatures;
@@ -19,6 +20,7 @@ var pubkeyFeatures = structs.pubkeyFeatures;
 var messages = bitmessage.messages;
 var version = messages.version;
 var addr = messages.addr;
+var inv = messages.inv;
 var WIF = bitmessage.WIF;
 var POW = bitmessage.POW;
 var Address = bitmessage.Address;
@@ -225,7 +227,13 @@ describe("Common structures", function() {
     });
   });
 
-  describe("Encrypted", function() {
+  describe("inv_vect", function() {
+    it("should encode", function() {
+      expect(inv_vect.encode("test").toString("hex")).to.equal("faadcaf60afd35dfcdb5e9ea0d0a0531f6338c62187cff37a1efe11f1d41a348");
+    });
+  });
+
+  describe("encrypted", function() {
     it("should encode and decode", function() {
       var iv = Buffer(16);
       var ephemPublicKey = Buffer(65);
@@ -249,7 +257,7 @@ describe("Common structures", function() {
     });
   });
 
-  describe("Message encodings", function() {
+  describe("message encodings", function() {
     it("should decode", function() {
       expect(messageEncodings.decode(Buffer([2])).value).to.equal(messageEncodings.SIMPLE);
     });
@@ -259,7 +267,7 @@ describe("Common structures", function() {
     });
   });
 
-  describe("Service features", function() {
+  describe("service features", function() {
     it("should decode", function() {
       expect(serviceFeatures.decode(Buffer("0000000000000001", "hex"))).to.have.members([serviceFeatures.NODE_NETWORK]);
     });
@@ -270,7 +278,7 @@ describe("Common structures", function() {
     });
   });
 
-  describe("Pubkey features", function() {
+  describe("pubkey features", function() {
     it("should decode", function() {
       expect(pubkeyFeatures.decode(Buffer("c0000000", "hex"))).to.have.members([pubkeyFeatures.DOES_ACK, pubkeyFeatures.INCLUDE_DESTINATION]);
     });
@@ -324,6 +332,24 @@ describe("Message types", function() {
     it("shouldn't encode/decode more than 1000 entires", function() {
       expect(addr.encode.bind(null, Array(2000))).to.throw(/too many/i);
       expect(addr.decode.bind(null, var_int.encode(2000))).to.throw(/too many/i);
+    });
+  });
+
+  describe("inv", function() {
+    it("should encode and decode", function() {
+      var vect1 = inv_vect.encode(Buffer("test"));
+      var vect2 = inv_vect.encode(Buffer("test2"));
+      var inventory = [vect1, vect2];
+      var res = inv.decode(inv.encode(inventory));
+      expect(res.inventory.length).to.equal(2);
+      expect(bufferEqual(res.inventory[0], vect1)).to.be.true;
+      expect(bufferEqual(res.inventory[1], vect2)).to.be.true;
+      expect(res.length).to.equal(65);
+    });
+
+    it("shouldn't encode/decode more than 1000 entires", function() {
+      expect(inv.encode.bind(null, Array(60000))).to.throw(/too many/i);
+      expect(inv.decode.bind(null, var_int.encode(60000))).to.throw(/too many/i);
     });
   });
 });
@@ -447,7 +473,7 @@ describe("High-level classes", function() {
     }
   });
 
-  describe("User Agent", function() {
+  describe("UserAgent", function() {
     var pybm = {name: "PyBitmessage", version: "0.4.4"};
     var bnode = {name: "bitchan-node", version: "0.0.1"};
     var bweb = {name: "bitchan-web"};

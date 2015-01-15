@@ -14,7 +14,7 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
 
 ## Feature matrix (both Browser and Node)
 
-- [x] crypto
+- [x] Crypto
   - [x] SHA-512
   - [x] SHA-256
   - [x] RIPEMD-160
@@ -31,6 +31,7 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
   - [x] var_str
   - [x] var_int_list
   - [x] net_addr
+  - [x] inv_vect
   - [x] encrypted
   - [x] message encodings
   - [x] service features
@@ -39,7 +40,7 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
   - [x] version
   - [x] verack
   - [x] addr
-  - [ ] inv
+  - [x] inv
   - [ ] getdata
   - [ ] error
   - [ ] object
