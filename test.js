@@ -259,6 +259,7 @@ describe("Common structures", function() {
 
     it("should encode", function() {
       expect(serviceFeatures.encode([serviceFeatures.NODE_NETWORK]).toString("hex")).to.equal("0000000000000001");
+      expect(serviceFeatures.encode(serviceFeatures.NODE_NETWORK).toString("hex")).to.equal("0000000000000001");
     });
   });
 
@@ -269,6 +270,7 @@ describe("Common structures", function() {
 
     it("should encode", function() {
       expect(pubkeyFeatures.encode([pubkeyFeatures.INCLUDE_DESTINATION, pubkeyFeatures.DOES_ACK]).toString("hex")).to.equal("c0000000");
+      expect(pubkeyFeatures.encode(pubkeyFeatures.INCLUDE_DESTINATION).toString("hex")).to.equal("40000000");
     });
   });
 });
