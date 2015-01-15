@@ -320,6 +320,11 @@ describe("Message types", function() {
       expect(res.addrs[1].host).to.equal("ff:0:0:0:0:0:0:1");
       expect(res.addrs[1].port).to.equal(18444);
     });
+
+    it("shouldn't encode/decode more than 1000 entires", function() {
+      expect(addr.encode.bind(null, Array(2000))).to.throw(/too many/i);
+      expect(addr.decode.bind(null, var_int.encode(2000))).to.throw(/too many/i);
+    });
   });
 });
 
