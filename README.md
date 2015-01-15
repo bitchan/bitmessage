@@ -37,8 +37,8 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
   - [x] pubkey features
 - [ ] Message types
   - [x] version
-  - [ ] verack
-  - [ ] addr
+  - [x] verack
+  - [x] addr
   - [ ] inv
   - [ ] getdata
   - [ ] error

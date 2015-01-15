@@ -18,6 +18,7 @@ var serviceFeatures = structs.serviceFeatures;
 var pubkeyFeatures = structs.pubkeyFeatures;
 var messages = bitmessage.messages;
 var version = messages.version;
+var addr = messages.addr;
 var WIF = bitmessage.WIF;
 var POW = bitmessage.POW;
 var Address = bitmessage.Address;
@@ -299,6 +300,25 @@ describe("Message types", function() {
       expect(res.software).to.deep.equal(UserAgent.SELF);
       expect(res.streamNumbers).to.deep.equal([1]);
       expect(res.length).to.equal(101);
+    });
+  });
+
+  describe("addr", function() {
+    it("should encode and decode", function() {
+      var res = addr.decode(addr.encode([]));
+      expect(res.length).to.equal(1);
+      expect(res.addrs).to.deep.equal([]);
+
+      res = addr.decode(addr.encode([
+        {host: "1.2.3.4", port: 8444},
+        {host: "ff::1", port: 18444},
+      ]));
+      expect(res.length).to.equal(77);
+      expect(res.addrs.length).to.equal(2);
+      expect(res.addrs[0].host).to.equal("1.2.3.4");
+      expect(res.addrs[0].port).to.equal(8444);
+      expect(res.addrs[1].host).to.equal("ff:0:0:0:0:0:0:1");
+      expect(res.addrs[1].port).to.equal(18444);
     });
   });
 });
