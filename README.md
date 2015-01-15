@@ -43,7 +43,7 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
   - [x] inv
   - [x] getdata
   - [ ] error
-  - [ ] object
+  - [x] object
 - [ ] Object types
   - [ ] getpubkey
   - [ ] pubkey

@@ -21,6 +21,7 @@ var messages = bitmessage.messages;
 var version = messages.version;
 var addr = messages.addr;
 var inv = messages.inv;
+var object = messages.object;
 var WIF = bitmessage.WIF;
 var POW = bitmessage.POW;
 var Address = bitmessage.Address;
@@ -347,9 +348,39 @@ describe("Message types", function() {
       expect(res.length).to.equal(65);
     });
 
-    it("shouldn't encode/decode more than 1000 entires", function() {
+    it("shouldn't encode/decode more than 50000 entires", function() {
       expect(inv.encode.bind(null, Array(60000))).to.throw(/too many/i);
       expect(inv.decode.bind(null, var_int.encode(60000))).to.throw(/too many/i);
+    });
+  });
+
+  describe("object", function() {
+    it("should encode and decode", function() {
+      var nonce = Buffer(8);
+      var res = object.decode(object.encode({
+        nonce: nonce,
+        ttl: 100,
+        type: 2,
+        version: 1,
+        payload: Buffer("test"),
+      }));
+
+      expect(bufferEqual(nonce, res.nonce)).to.be.true;
+      expect(res.ttl).to.be.at.least(100);
+      expect(res.type).to.equal(2);
+      expect(res.version).to.equal(1);
+      expect(res.stream).to.equal(1);
+      expect(res.payload.toString()).to.equal("test");
+    });
+
+    it("shouldn't encode too big TTL", function() {
+      expect(object.encode.bind(null, {
+        nonce: Buffer(8),
+        ttl: 10000000,
+        type: 2,
+        version: 1,
+        payload: Buffer("test"),
+      })).to.throw(Error);
     });
   });
 });
