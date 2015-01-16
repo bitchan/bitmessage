@@ -21,6 +21,7 @@ var messages = bitmessage.messages;
 var version = messages.version;
 var addr = messages.addr;
 var inv = messages.inv;
+var error = messages.error;
 var object = messages.object;
 var WIF = bitmessage.WIF;
 var POW = bitmessage.POW;
@@ -351,6 +352,29 @@ describe("Message types", function() {
     it("shouldn't encode/decode more than 50000 entires", function() {
       expect(inv.encode.bind(null, Array(60000))).to.throw(/too many/i);
       expect(inv.decode.bind(null, var_int.encode(60000))).to.throw(/too many/i);
+    });
+  });
+
+  describe("error", function() {
+    it("should encode and decode", function() {
+      var res = error.decode(error.encode({errorText: "test"}));
+      expect(res.fatal).to.equal(0);
+      expect(res.banTime).to.equal(0);
+      expect(res.vector).to.equal("");
+      expect(res.errorText).to.equal("test");
+      expect(res.length).to.equal(8);
+
+      var res = error.decode(error.encode({
+        fatal: error.FATAL,
+        banTime: 120,
+        vector: "123",
+        errorText: "fatal error",
+      }));
+      expect(res.fatal).to.equal(2);
+      expect(res.banTime).to.equal(120);
+      expect(res.vector).to.equal("123");
+      expect(res.errorText).to.equal("fatal error");
+      expect(res.length).to.equal(18);
     });
   });
 

@@ -36,13 +36,13 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
   - [x] message encodings
   - [x] service features
   - [x] pubkey features
-- [ ] Message types
+- [x] Message types
   - [x] version
   - [x] verack
   - [x] addr
   - [x] inv
   - [x] getdata
-  - [ ] error
+  - [x] error
   - [x] object
 - [ ] Object types
   - [ ] getpubkey
@@ -58,9 +58,6 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
     - [x] getRipe
     - [x] fromRandom
     - [ ] fromPassphrase
-  - [ ] Message
-    - [ ] encrypt
-    - [ ] decrypt
   - [x] UserAgent
 - [ ] Parse PyBitmessage configs
   - [ ] keys.dat
