@@ -410,6 +410,18 @@ describe("Message types", function() {
         payload: Buffer("test"),
       })).to.throw(Error);
     });
+
+    it("should return type of the object", function() {
+      var encoded = object.encode({
+        nonce: Buffer(8),
+        ttl: 100,
+        type: object.BROADCAST,
+        version: 1,
+        payload: Buffer("test"),
+      });
+      expect(object.getType(encoded)).to.equal(3);
+      expect(object.decode(encoded).type).to.equal(3);
+    });
   });
 });
 
