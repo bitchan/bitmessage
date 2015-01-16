@@ -15,8 +15,9 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
 ## Feature matrix (both Browser and Node)
 
 - [x] Crypto
-  - [x] SHA-512
+  - [x] SHA-1
   - [x] SHA-256
+  - [x] SHA-512
   - [x] RIPEMD-160
   - [x] PRNG
   - [x] ECC keys manipulation
