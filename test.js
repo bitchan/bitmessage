@@ -525,7 +525,7 @@ describe("High-level classes", function() {
       expect(addr.ripe.toString("hex")).to.equal("003ab6655de4bd8c603eba9b00dd5970725fdd56");
     });
 
-    it("should allow to generate new Bitmessage address", function() {
+    it("should allow to create random Bitmessage address", function() {
       this.timeout(60000);
       var addr = Address.fromRandom();
       expect(addr.version).to.equal(4);
@@ -539,6 +539,17 @@ describe("High-level classes", function() {
       expect(addr2.stream).to.equal(1);
       expect(addr2.ripe.length).to.equal(20);
       expect(addr2.ripe[0]).to.equal(0);
+    });
+
+    it("should allow to create Bitmessage address from passphrase", function() {
+      this.timeout(60000);
+      var addr = Address.fromPassphrase({passphrase: "test"});
+      expect(addr.version).to.equal(4);
+      expect(addr.stream).to.equal(1);
+      expect(bufferEqual(addr.signPrivateKey, WIF.decode("5JY1CFeeyN4eyfL35guWAuUqu5VLmd7LojtkNP6wmt5msZxxZ57"))).to.be.true;
+      expect(bufferEqual(addr.encPrivateKey, WIF.decode("5J1oDgZDicNhUgbfzBDQqi2m5jUPnDrfZinnTqEEEaLv63jVFTM"))).to.be.true;
+      expect(addr.getRipe().toString("hex")).to.equal("00ac14944b00decea5628eb40d0ff4b0f9ee9eca");
+      expect(addr.encode()).to.equal("BM-2cWFkyuXXFw6d393RGnin2RpSXj8wxtt6F");
     });
 
     it("should calculate tag", function() {

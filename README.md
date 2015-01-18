@@ -51,12 +51,8 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
   - [ ] broadcast
 - [x] WIF
 - [x] POW
-- [ ] High-level classes
-  - [ ] Address
-    - [x] encode
-    - [x] decode
-    - [x] fromRandom
-    - [ ] fromPassphrase
+- [x] High-level classes
+  - [x] Address
   - [x] UserAgent
 - [ ] Parse PyBitmessage configs
   - [ ] keys.dat
