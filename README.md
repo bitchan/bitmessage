@@ -34,7 +34,6 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
   - [x] net_addr
   - [x] inv_vect
   - [x] encrypted
-  - [x] message encodings
   - [x] service features
   - [x] pubkey features
 - [x] Message types

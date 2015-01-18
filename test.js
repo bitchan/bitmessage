@@ -14,7 +14,6 @@ var var_int_list = structs.var_int_list;
 var net_addr = structs.net_addr;
 var inv_vect = structs.inv_vect;
 var encrypted = structs.encrypted;
-var messageEncodings = structs.messageEncodings;
 var serviceFeatures = structs.serviceFeatures;
 var pubkeyFeatures = structs.pubkeyFeatures;
 var messages = bitmessage.messages;
@@ -260,16 +259,6 @@ describe("Common structures", function() {
       expect(bufferEqual(ephemPublicKey, outopts.ephemPublicKey)).to.be.true;
       expect(ciphertext.toString()).to.equal("test");
       expect(bufferEqual(mac, outopts.mac)).to.be.true;
-    });
-  });
-
-  describe("message encodings", function() {
-    it("should decode", function() {
-      expect(messageEncodings.decode(Buffer([2])).value).to.equal(messageEncodings.SIMPLE);
-    });
-
-    it("should encode", function() {
-      expect(messageEncodings.encode(messageEncodings.SIMPLE).toString("hex")).to.equal("02");
     });
   });
 
