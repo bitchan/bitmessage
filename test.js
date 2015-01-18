@@ -581,6 +581,20 @@ describe("High-level classes", function() {
       expect(Address.decode(addr)).to.equal(addr);
     });
 
+    it("should provide setters for keys and ripe", function() {
+      var addr = Address();
+      expect(function(){addr.ripe}).to.throw(Error);
+      addr.signPrivateKey = Buffer("71c95d26c716a5e85e9af9efe26fb5f744dc98005a13d05d23ee92c77e038d9f", "hex");
+      expect(addr.signPublicKey.toString("hex")).to.equal("042d391543f574608cbcdfd12a37cc4c74dd36e54510b13a6a1d8b7b1498fb96c92873d33ca17586dace7f5ad0f4532a954061ac06bc5230aed9c8374072546571");
+      expect(function(){addr.ripe}).to.throw(Error);
+      addr.encPrivateKey = Buffer("9f9969c93c2d186787a7653f70e49be34c03c4a853e6ad0c867db0946bc433c6", "hex");
+      expect(addr.encPublicKey.toString("hex")).to.equal("04c6ed1b56f2da97fec1b762d43364566faf082c1e4918ae1dbb41757cad41b03b2cc5087f341414e63f6eee72a1fbf0b5f346a1bb3ba944cad204ca597db2bfc8");
+      expect(addr.ripe.toString("hex")).to.equal("003ab6655de4bd8c603eba9b00dd5970725fdd56");
+      expect(addr.getRipe({short: true}).toString("hex")).to.equal("3ab6655de4bd8c603eba9b00dd5970725fdd56");
+      addr.encPrivateKey = Buffer("009969c93c2d186787a7653f70e49be34c03c4a853e6ad0c867db0946bc433c6", "hex");
+      expect(addr.getRipe({short: true}).toString("hex")).to.equal("69617ddb1946dc327cadffcf33889fed587fc1e7");
+    });
+
     // FIXME(Kagami): Don't run it in browser currently because it's
     // very slow. This need to be fixed.
     if (allTests && typeof window === "undefined") {
