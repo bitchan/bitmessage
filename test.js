@@ -277,12 +277,12 @@ describe("Common structures", function() {
 
   describe("pubkey features", function() {
     it("should decode", function() {
-      expect(pubkeyFeatures.decode(Buffer("c0000000", "hex"))).to.have.members([pubkeyFeatures.DOES_ACK, pubkeyFeatures.INCLUDE_DESTINATION]);
+      expect(pubkeyFeatures.decode(Buffer("00000003", "hex"))).to.have.members([pubkeyFeatures.DOES_ACK, pubkeyFeatures.INCLUDE_DESTINATION]);
     });
 
     it("should encode", function() {
-      expect(pubkeyFeatures.encode([pubkeyFeatures.INCLUDE_DESTINATION, pubkeyFeatures.DOES_ACK]).toString("hex")).to.equal("c0000000");
-      expect(pubkeyFeatures.encode(pubkeyFeatures.INCLUDE_DESTINATION).toString("hex")).to.equal("40000000");
+      expect(pubkeyFeatures.encode([pubkeyFeatures.INCLUDE_DESTINATION, pubkeyFeatures.DOES_ACK]).toString("hex")).to.equal("00000003");
+      expect(pubkeyFeatures.encode(pubkeyFeatures.DOES_ACK).toString("hex")).to.equal("00000001");
     });
   });
 });
