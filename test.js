@@ -418,7 +418,23 @@ describe("Message types", function() {
 
 describe("Object types", function() {
   describe("getpubkey", function() {
-    it("should encode and decode", function() {
+    it("should encode and decode getpubkey v3", function() {
+      return getpubkey.encodeAsync({
+        nonce: Buffer(8),
+        ttl: 100,
+        to: "BM-2D8Jxw5yiepaQqxrx43iPPNfRqbvWoJLoU",
+      }).then(getpubkey.decodeAsync)
+      .then(function(res) {
+        expect(res.ttl).to.equal(100);
+        expect(res.type).to.equal(object.GETPUBKEY);
+        expect(res.version).to.equal(3);
+        expect(res.stream).to.equal(1);
+        expect(res.ripe.toString("hex")).to.equal("003ab6655de4bd8c603eba9b00dd5970725fdd56");
+        expect(res).to.not.have.property("tag");
+      });
+    });
+
+    it("should encode and decode getpubkey v4", function() {
       return getpubkey.encodeAsync({
         nonce: Buffer(8),
         ttl: 100,
@@ -426,8 +442,10 @@ describe("Object types", function() {
       }).then(getpubkey.decodeAsync)
       .then(function(res) {
         expect(res.ttl).to.equal(100);
+        expect(res.type).to.equal(object.GETPUBKEY);
         expect(res.version).to.equal(4);
         expect(res.stream).to.equal(1);
+        expect(res).to.not.have.property("ripe");
         expect(res.tag.toString("hex")).to.equal("facf1e3e6c74916203b7f714ca100d4d60604f0917696d0f09330f82f52bed1a");
       });
     });
