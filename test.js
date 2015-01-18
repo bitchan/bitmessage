@@ -22,6 +22,8 @@ var addr = messages.addr;
 var inv = messages.inv;
 var error = messages.error;
 var object = messages.object;
+var objects = bitmessage.objects;
+var getpubkey = objects.getpubkey;
 var WIF = bitmessage.WIF;
 var POW = bitmessage.POW;
 var Address = bitmessage.Address;
@@ -414,6 +416,24 @@ describe("Message types", function() {
   });
 });
 
+describe("Object types", function() {
+  describe("getpubkey", function() {
+    it("should encode and decode", function() {
+      return getpubkey.encodeAsync({
+        nonce: Buffer(8),
+        ttl: 100,
+        to: "2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z",
+      }).then(getpubkey.decodeAsync)
+      .then(function(res) {
+        expect(res.ttl).to.equal(100);
+        expect(res.version).to.equal(4);
+        expect(res.stream).to.equal(1);
+        expect(res.tag.toString("hex")).to.equal("facf1e3e6c74916203b7f714ca100d4d60604f0917696d0f09330f82f52bed1a");
+      });
+    });
+  });
+});
+
 describe("WIF", function() {
   var wifSign = "5JgQ79vTBusc61xYPtUEHYQ38AXKdDZgQ5rFp7Cbb4ZjXUKFZEV";
   var wifEnc = "5K2aL8cnsEWHwHfHnUrPo8QdYyRfoYUBmhAnWY5GTpDLbeyusnE";
@@ -519,6 +539,17 @@ describe("High-level classes", function() {
       expect(addr2.stream).to.equal(1);
       expect(addr2.ripe.length).to.equal(20);
       expect(addr2.ripe[0]).to.equal(0);
+    });
+
+    it("should calculate tag", function() {
+      var addr = Address.decode("2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z");
+      expect(addr.getTag().toString("hex")).to.equal("facf1e3e6c74916203b7f714ca100d4d60604f0917696d0f09330f82f52bed1a");
+    });
+
+    it("should allow to decode Address instance", function() {
+      var addr = Address.decode("2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z");
+      expect(addr.ripe.toString("hex")).to.equal("003ab6655de4bd8c603eba9b00dd5970725fdd56");
+      expect(Address.decode(addr)).to.equal(addr);
     });
 
     // FIXME(Kagami): Don't run it in browser currently because it's

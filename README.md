@@ -45,7 +45,7 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
   - [x] error
   - [x] object
 - [ ] Object types
-  - [ ] getpubkey
+  - [x] getpubkey
   - [ ] pubkey
   - [ ] msg
   - [ ] broadcast
@@ -55,7 +55,6 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
   - [ ] Address
     - [x] encode
     - [x] decode
-    - [x] getRipe
     - [x] fromRandom
     - [ ] fromPassphrase
   - [x] UserAgent
