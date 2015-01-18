@@ -14,8 +14,8 @@ var var_int_list = structs.var_int_list;
 var net_addr = structs.net_addr;
 var inv_vect = structs.inv_vect;
 var encrypted = structs.encrypted;
-var servicesBitfield = structs.servicesBitfield;
-var pubkeyBitfield = structs.pubkeyBitfield;
+var ServicesBitfield = structs.ServicesBitfield;
+var PubkeyBitfield = structs.PubkeyBitfield;
 var messages = bitmessage.messages;
 var version = messages.version;
 var addr = messages.addr;
@@ -209,27 +209,27 @@ describe("Common structures", function() {
       res = net_addr.decode(Buffer("0000000054aaf6c000000001000000000000000100000000000000000000ffff7f00000120fc", "hex"));
       expect(res.time.getTime()).to.equal(1420490432000);
       expect(res.stream).to.equal(1);
-      expect(res.services).to.have.members([servicesBitfield.NODE_NETWORK]);
+      expect(res.services.get(ServicesBitfield.NODE_NETWORK)).to.be.true;
       expect(res.host).to.equal("127.0.0.1");
       expect(res.port).to.equal(8444);
 
       expect(net_addr.decode.bind(null, Buffer("000000000000000100000000000000000000ffff7f00000120fc", "hex"))).to.throw(Error);;
 
       res = net_addr.decode(Buffer("000000000000000100000000000000000000ffff7f00000120fc", "hex"), {short: true});
-      expect(res.services).to.have.members([servicesBitfield.NODE_NETWORK]);
+      expect(res.services.get(ServicesBitfield.NODE_NETWORK)).to.be.true;
       expect(res.host).to.equal("127.0.0.1");
       expect(res.port).to.equal(8444);
 
       res = net_addr.decode(Buffer("000000000000000100000000000000000000000000000001fde8", "hex"), {short: true});
-      expect(res.services).to.have.members([servicesBitfield.NODE_NETWORK]);
+      expect(res.services.get(ServicesBitfield.NODE_NETWORK)).to.be.true;
       expect(res.host).to.equal("0:0:0:0:0:0:0:1");
       expect(res.port).to.equal(65000);
     });
 
     it("should encode", function() {
       var time = new Date(1420490432000);
-      expect(net_addr.encode({time: time, stream: 1, services: [servicesBitfield.NODE_NETWORK], host: "127.0.0.1", port: 8444}).toString("hex")).to.equal("0000000054aaf6c000000001000000000000000100000000000000000000ffff7f00000120fc");
-      expect(net_addr.encode({short: true, services: [servicesBitfield.NODE_NETWORK], host: "127.0.0.1", port: 8444}).toString("hex")).to.equal("000000000000000100000000000000000000ffff7f00000120fc");
+      expect(net_addr.encode({time: time, stream: 1, services: ServicesBitfield().set(ServicesBitfield.NODE_NETWORK), host: "127.0.0.1", port: 8444}).toString("hex")).to.equal("0000000054aaf6c000000001000000000000000100000000000000000000ffff7f00000120fc");
+      expect(net_addr.encode({short: true, services: ServicesBitfield().set(ServicesBitfield.NODE_NETWORK), host: "127.0.0.1", port: 8444}).toString("hex")).to.equal("000000000000000100000000000000000000ffff7f00000120fc");
       expect(net_addr.encode({short: true, host: "::1", port: 65000}).toString("hex")).to.equal("000000000000000100000000000000000000000000000001fde8");
     });
   });
@@ -265,24 +265,24 @@ describe("Common structures", function() {
   });
 
   describe("service features", function() {
-    it("should decode", function() {
-      expect(servicesBitfield.decode(Buffer("0000000000000001", "hex"))).to.have.members([servicesBitfield.NODE_NETWORK]);
+    it("should allow to check bits", function() {
+      expect(ServicesBitfield(Buffer("0000000000000001", "hex")).get(ServicesBitfield.NODE_NETWORK)).to.be.true;
     });
 
-    it("should encode", function() {
-      expect(servicesBitfield.encode([servicesBitfield.NODE_NETWORK]).toString("hex")).to.equal("0000000000000001");
-      expect(servicesBitfield.encode(servicesBitfield.NODE_NETWORK).toString("hex")).to.equal("0000000000000001");
+    it("should allow to set bits", function() {
+      expect(ServicesBitfield().set([ServicesBitfield.NODE_NETWORK]).buffer.toString("hex")).to.equal("0000000000000001");
+      expect(ServicesBitfield().set(ServicesBitfield.NODE_NETWORK).buffer.toString("hex")).to.equal("0000000000000001");
     });
   });
 
   describe("pubkey features", function() {
-    it("should decode", function() {
-      expect(pubkeyBitfield.decode(Buffer("00000003", "hex"))).to.have.members([pubkeyBitfield.DOES_ACK, pubkeyBitfield.INCLUDE_DESTINATION]);
+    it("should allow to check bits", function() {
+      expect(PubkeyBitfield(Buffer("00000003", "hex")).get([PubkeyBitfield.DOES_ACK, PubkeyBitfield.INCLUDE_DESTINATION])).to.be.true;
     });
 
-    it("should encode", function() {
-      expect(pubkeyBitfield.encode([pubkeyBitfield.INCLUDE_DESTINATION, pubkeyBitfield.DOES_ACK]).toString("hex")).to.equal("00000003");
-      expect(pubkeyBitfield.encode(pubkeyBitfield.DOES_ACK).toString("hex")).to.equal("00000001");
+    it("should allow to set bits", function() {
+      expect(PubkeyBitfield().set([PubkeyBitfield.INCLUDE_DESTINATION, PubkeyBitfield.DOES_ACK]).buffer.toString("hex")).to.equal("00000003");
+      expect(PubkeyBitfield().set(PubkeyBitfield.DOES_ACK).buffer.toString("hex")).to.equal("00000001");
     });
   });
 });
@@ -296,7 +296,7 @@ describe("Message types", function() {
         port: 8444,
       }));
       expect(res.version).to.equal(3);
-      expect(res.services).to.deep.equal([servicesBitfield.NODE_NETWORK]);
+      expect(res.services.get(ServicesBitfield.NODE_NETWORK)).to.be.true;
       expect(res.time).to.be.instanceof(Date);
       expect(res.remoteHost).to.equal("1.2.3.4");
       expect(res.remotePort).to.equal(48444);
