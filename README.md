@@ -68,11 +68,18 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
 
 ## Usage
 
+### Address
+
 ```js
-// Generate a new random Bitmessage identity.
 var Address = require("bitmessage").Address;
-var addr = Address.fromRandom();
-console.log("New random Bitmessage address:", addr.encode());
+
+// Generate a new random Bitmessage identity.
+var addr1 = Address.fromRandom();
+console.log("New random Bitmessage address:", addr1.encode());
+
+// Or create it from passphrase.
+var addr2 = Address.fromPassphrase("test");
+console.log("Deterministic Bitmessage address:", addr2.encode());
 ```
 
 ## License

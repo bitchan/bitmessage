@@ -570,6 +570,17 @@ describe("High-level classes", function() {
       expect(addr.encode()).to.equal("BM-2cWFkyuXXFw6d393RGnin2RpSXj8wxtt6F");
     });
 
+    it("should accept string in Address.fromPassphrase", function() {
+      this.timeout(60000);
+      var addr = Address.fromPassphrase("test");
+      expect(addr.version).to.equal(4);
+      expect(addr.stream).to.equal(1);
+      expect(bufferEqual(addr.signPrivateKey, WIF.decode("5JY1CFeeyN4eyfL35guWAuUqu5VLmd7LojtkNP6wmt5msZxxZ57"))).to.be.true;
+      expect(bufferEqual(addr.encPrivateKey, WIF.decode("5J1oDgZDicNhUgbfzBDQqi2m5jUPnDrfZinnTqEEEaLv63jVFTM"))).to.be.true;
+      expect(addr.getRipe().toString("hex")).to.equal("00ac14944b00decea5628eb40d0ff4b0f9ee9eca");
+      expect(addr.encode()).to.equal("BM-2cWFkyuXXFw6d393RGnin2RpSXj8wxtt6F");
+    });
+
     it("should calculate tag", function() {
       var addr = Address.decode("2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z");
       expect(addr.getTag().toString("hex")).to.equal("facf1e3e6c74916203b7f714ca100d4d60604f0917696d0f09330f82f52bed1a");
