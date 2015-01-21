@@ -606,6 +606,13 @@ describe("High-level classes", function() {
       expect(addr.getRipe({short: true}).toString("hex")).to.equal("69617ddb1946dc327cadffcf33889fed587fc1e7");
     });
 
+    it("should implement isAddress method", function() {
+      var addr = Address();
+      expect(Address.isAddress(addr)).to.be.true;
+      expect(Address.isAddress(null)).to.be.false;
+      expect(Address.isAddress({})).to.be.false;
+    });
+
     // FIXME(Kagami): Don't run it in browser currently because it's
     // very slow. This need to be fixed.
     if (allTests && typeof window === "undefined") {
