@@ -30,6 +30,7 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
   - [x] HMAC-SHA-256
 - [x] Common structures
   - [x] message
+  - [x] object
   - [x] var_int
   - [x] var_str
   - [x] var_int_list
@@ -45,10 +46,9 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
   - [x] inv
   - [x] getdata
   - [x] error
-  - [x] object
 - [ ] Object types
   - [x] getpubkey
-  - [ ] pubkey
+  - [x] pubkey
   - [ ] msg
   - [ ] broadcast
 - [x] WIF

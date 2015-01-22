@@ -8,6 +8,7 @@ var bitmessage = require("./lib");
 var bmcrypto = require("./lib/crypto");
 var structs = bitmessage.structs;
 var message = structs.message;
+var object = structs.object;
 var var_int = structs.var_int;
 var var_str = structs.var_str;
 var var_int_list = structs.var_int_list;
@@ -21,9 +22,9 @@ var version = messages.version;
 var addr = messages.addr;
 var inv = messages.inv;
 var error = messages.error;
-var object = messages.object;
 var objects = bitmessage.objects;
 var getpubkey = objects.getpubkey;
+var pubkey = objects.pubkey;
 var WIF = bitmessage.WIF;
 var POW = bitmessage.POW;
 var Address = bitmessage.Address;
@@ -65,8 +66,48 @@ describe("Crypto", function() {
       expect(bytes[value]).to.be.below(7);
     }
     // Ideal sum = (255 / 2) * size = 12750
-    expect(sum).to.be.above(10000);
-    expect(sum).to.be.below(15000);
+    expect(sum).to.be.above(5000);
+    expect(sum).to.be.below(20000);
+  });
+
+  it("should generate private keys", function() {
+    var privateKey = bmcrypto.getPrivate();
+    expect(Buffer.isBuffer(privateKey)).to.be.true;
+    expect(privateKey.length).to.equal(32);
+    var sum = 0;
+    for (var i = 0; i < 32; i++) { sum += privateKey[i]; }
+    expect(sum).to.be.above(0);
+    expect(sum).to.be.below(8160);
+  });
+
+  it("should allow to convert private key to public", function() {
+    var privateKey = Buffer(32);
+    privateKey.fill(1);
+    expect(bmcrypto.getPublic(privateKey).toString("hex")).to.equal("041b84c5567b126440995d3ed5aaba0565d71e1834604819ff9c17f5e9d5dd078f70beaf8f588b541507fed6a642c5ab42dfdf8120a7f639de5122d47a69a8e8d1");
+  });
+
+  it("should allow to sign and verify message", function() {
+    var privateKey = Buffer(32);
+    privateKey.fill(1);
+    var publicKey = bmcrypto.getPublic(privateKey);
+    var msg = Buffer("test");
+    return bmcrypto.sign(privateKey, msg).then(function(sig) {
+      expect(Buffer.isBuffer(sig)).to.be.true;
+      expect(sig.toString("hex")).to.equal("304402204737396b697e5a3400e3aedd203d8be89879f97708647252bd0c17752ff4c8f302201d52ef234de82ce0719679fa220334c83b80e21b8505a781d32d94a27d9310aa");
+      return bmcrypto.verify(publicKey, msg, sig);
+    });
+  });
+
+  it("should allow to encrypt and decrypt message", function() {
+    var privateKeyA = bmcrypto.getPrivate();
+    var publicKeyA = bmcrypto.getPublic(privateKeyA);
+    return bmcrypto.encrypt(publicKeyA, Buffer("msg to a")).then(function(buf) {
+      expect(Buffer.isBuffer(buf)).to.be.true;
+      return bmcrypto.decrypt(privateKeyA, buf).then(function(plaintext) {
+        expect(Buffer.isBuffer(plaintext)).to.be.true;
+        expect(plaintext.toString()).to.equal("msg to a");
+      });
+    });
   });
 });
 
@@ -90,6 +131,37 @@ describe("Common structures", function() {
 
     it("should encode", function() {
       expect(message.encode({command: "test", payload: Buffer("payload")}).toString("hex")).to.equal("e9beb4d97465737400000000000000000000000770b33ce97061796c6f6164");
+    });
+  });
+
+  describe("object", function() {
+    it("should encode and decode", function() {
+      var nonce = Buffer(8);
+      var res = object.decode(object.encode({
+        nonce: nonce,
+        ttl: 100,
+        type: 2,
+        version: 1,
+        payload: Buffer("test"),
+      }));
+
+      expect(bufferEqual(nonce, res.nonce)).to.be.true;
+      expect(res.ttl).to.be.at.least(100);
+      expect(res.type).to.equal(2);
+      expect(res.version).to.equal(1);
+      expect(res.stream).to.equal(1);
+      expect(res.headerLength).to.equal(22);
+      expect(res.payload.toString()).to.equal("test");
+    });
+
+    it("shouldn't encode too big TTL", function() {
+      expect(object.encode.bind(null, {
+        nonce: Buffer(8),
+        ttl: 10000000,
+        type: 2,
+        version: 1,
+        payload: Buffer("test"),
+      })).to.throw(Error);
     });
   });
 
@@ -372,55 +444,12 @@ describe("Message types", function() {
       expect(res.length).to.equal(18);
     });
   });
-
-  describe("object", function() {
-    it("should encode and decode", function() {
-      var nonce = Buffer(8);
-      var res = object.decode(object.encode({
-        nonce: nonce,
-        ttl: 100,
-        type: 2,
-        version: 1,
-        payload: Buffer("test"),
-      }));
-
-      expect(bufferEqual(nonce, res.nonce)).to.be.true;
-      expect(res.ttl).to.be.at.least(100);
-      expect(res.type).to.equal(2);
-      expect(res.version).to.equal(1);
-      expect(res.stream).to.equal(1);
-      expect(res.payload.toString()).to.equal("test");
-    });
-
-    it("shouldn't encode too big TTL", function() {
-      expect(object.encode.bind(null, {
-        nonce: Buffer(8),
-        ttl: 10000000,
-        type: 2,
-        version: 1,
-        payload: Buffer("test"),
-      })).to.throw(Error);
-    });
-
-    it("should return type of the object", function() {
-      var encoded = object.encode({
-        nonce: Buffer(8),
-        ttl: 100,
-        type: object.BROADCAST,
-        version: 1,
-        payload: Buffer("test"),
-      });
-      expect(object.getType(encoded)).to.equal(3);
-      expect(object.decode(encoded).type).to.equal(3);
-    });
-  });
 });
 
 describe("Object types", function() {
   describe("getpubkey", function() {
     it("should encode and decode getpubkey v3", function() {
       return getpubkey.encodeAsync({
-        nonce: Buffer(8),
         ttl: 100,
         to: "BM-2D8Jxw5yiepaQqxrx43iPPNfRqbvWoJLoU",
       }).then(getpubkey.decodeAsync)
@@ -436,7 +465,6 @@ describe("Object types", function() {
 
     it("should encode and decode getpubkey v4", function() {
       return getpubkey.encodeAsync({
-        nonce: Buffer(8),
         ttl: 100,
         to: "2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z",
       }).then(getpubkey.decodeAsync)
@@ -447,6 +475,72 @@ describe("Object types", function() {
         expect(res.stream).to.equal(1);
         expect(res).to.not.have.property("ripe");
         expect(res.tag.toString("hex")).to.equal("facf1e3e6c74916203b7f714ca100d4d60604f0917696d0f09330f82f52bed1a");
+      });
+    });
+  });
+
+  describe("pubkey", function() {
+    var signPrivateKey = Buffer("71c95d26c716a5e85e9af9efe26fb5f744dc98005a13d05d23ee92c77e038d9f", "hex");
+    var signPublicKey = bmcrypto.getPublic(signPrivateKey);
+    var encPrivateKey = Buffer("9f9969c93c2d186787a7653f70e49be34c03c4a853e6ad0c867db0946bc433c6", "hex");
+    var encPublicKey = bmcrypto.getPublic(encPrivateKey);
+    var from = Address({
+      signPrivateKey: signPrivateKey,
+      encPrivateKey: encPrivateKey,
+    });
+
+    it("should encode and decode pubkey v2", function() {
+      return pubkey.encodeAsync({
+        ttl: 123,
+        from: from,
+        to: "BM-onhypnh1UMhbQpmvdiPuG6soLLytYJAfH",
+      }).then(pubkey.decodeAsync)
+      .then(function(res) {
+        expect(res.ttl).to.equal(123);
+        expect(res.type).to.equal(object.PUBKEY);
+        expect(res.version).to.equal(2);
+        expect(res.stream).to.equal(1);
+        expect(res.behavior.get(PubkeyBitfield.DOES_ACK)).to.be.true;
+        expect(bufferEqual(res.signPublicKey, signPublicKey)).to.be.true;
+        expect(bufferEqual(res.encPublicKey, encPublicKey)).to.be.true;
+        expect(res.length).to.equal(132);
+      });
+    });
+
+    it("should encode and decode pubkey v3", function() {
+      return pubkey.encodeAsync({
+        ttl: 456,
+        from: from,
+        to: "BM-2D8Jxw5yiepaQqxrx43iPPNfRqbvWoJLoU",
+      }).then(pubkey.decodeAsync)
+      .then(function(res) {
+        expect(res.ttl).to.equal(456);
+        expect(res.type).to.equal(object.PUBKEY);
+        expect(res.version).to.equal(3);
+        expect(res.stream).to.equal(1);
+        expect(res.behavior.get(PubkeyBitfield.DOES_ACK)).to.be.true;
+        expect(bufferEqual(res.signPublicKey, signPublicKey)).to.be.true;
+        expect(bufferEqual(res.encPublicKey, encPublicKey)).to.be.true;
+        expect(res.nonceTrialsPerByte).to.equal(1000);
+        expect(res.payloadLengthExtraBytes).to.equal(1000);
+      });
+    });
+
+    it("should encode and decode pubkey v4", function() {
+      return pubkey.encodeAsync({ttl: 789, from: from, to: from})
+      .then(function(buf) {
+        return pubkey.decodeAsync(buf, {neededPubkeys: from});
+      }).then(function(res) {
+        expect(res.ttl).to.equal(789);
+        expect(res.type).to.equal(object.PUBKEY);
+        expect(res.version).to.equal(4);
+        expect(res.stream).to.equal(1);
+        expect(res.behavior.get(PubkeyBitfield.DOES_ACK)).to.be.true;
+        expect(bufferEqual(res.signPublicKey, signPublicKey)).to.be.true;
+        expect(bufferEqual(res.encPublicKey, encPublicKey)).to.be.true;
+        expect(res.nonceTrialsPerByte).to.equal(1000);
+        expect(res.payloadLengthExtraBytes).to.equal(1000);
+        expect(bufferEqual(res.tag, from.getTag())).to.be.true;
       });
     });
   });
@@ -584,6 +678,11 @@ describe("High-level classes", function() {
     it("should calculate tag", function() {
       var addr = Address.decode("2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z");
       expect(addr.getTag().toString("hex")).to.equal("facf1e3e6c74916203b7f714ca100d4d60604f0917696d0f09330f82f52bed1a");
+    });
+
+    it("should calculate a private key to encrypt pubkey object", function() {
+      var addr = Address.decode("BM-2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z");
+      expect(addr.getPubkeyPrivateKey().toString("hex")).to.equal("15e516173769dc87d4a8e8ed90200362fa58c0228bb2b70b06f26c089a9823a4");
     });
 
     it("should allow to decode Address instance", function() {
