@@ -523,6 +523,7 @@ describe("Object types", function() {
         expect(bufferEqual(res.encPublicKey, encPublicKey)).to.be.true;
         expect(res.nonceTrialsPerByte).to.equal(1000);
         expect(res.payloadLengthExtraBytes).to.equal(1000);
+        expect(Buffer.isBuffer(res.signature)).to.be.true;
       });
     });
 
@@ -540,6 +541,7 @@ describe("Object types", function() {
         expect(bufferEqual(res.encPublicKey, encPublicKey)).to.be.true;
         expect(res.nonceTrialsPerByte).to.equal(1000);
         expect(res.payloadLengthExtraBytes).to.equal(1000);
+        expect(Buffer.isBuffer(res.signature)).to.be.true;
         expect(bufferEqual(res.tag, from.getTag())).to.be.true;
       });
     });
@@ -685,6 +687,11 @@ describe("High-level classes", function() {
       expect(addr.getPubkeyPrivateKey().toString("hex")).to.equal("15e516173769dc87d4a8e8ed90200362fa58c0228bb2b70b06f26c089a9823a4");
     });
 
+    it("should calculate a private key to encrypt broadcast object", function() {
+      var addr = Address.decode("BM-2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z");
+      expect(addr.getBroadcastPrivateKey().toString("hex")).to.equal("15e516173769dc87d4a8e8ed90200362fa58c0228bb2b70b06f26c089a9823a4");
+    });
+
     it("should allow to decode Address instance", function() {
       var addr = Address.decode("2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z");
       expect(addr.ripe.toString("hex")).to.equal("003ab6655de4bd8c603eba9b00dd5970725fdd56");
@@ -717,7 +724,7 @@ describe("High-level classes", function() {
     if (allTests && typeof window === "undefined") {
       it("should allow to generate shorter address", function() {
         this.timeout(300000);
-        var addr = Address.fromRandom({ripelen: 18});
+        var addr = Address.fromRandom({ripeLength: 18});
         var ripe = addr.getRipe({short: true});
         expect(ripe.length).to.be.at.most(18);
       });
