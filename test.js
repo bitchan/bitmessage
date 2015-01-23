@@ -146,7 +146,7 @@ describe("Common structures", function() {
       }));
 
       expect(bufferEqual(nonce, res.nonce)).to.be.true;
-      expect(res.ttl).to.be.at.least(100);
+      expect(res.ttl).to.be.at.most(100);
       expect(res.type).to.equal(2);
       expect(res.version).to.equal(1);
       expect(res.stream).to.equal(1);
@@ -454,7 +454,7 @@ describe("Object types", function() {
         to: "BM-2D8Jxw5yiepaQqxrx43iPPNfRqbvWoJLoU",
       }).then(getpubkey.decodeAsync)
       .then(function(res) {
-        expect(res.ttl).to.equal(100);
+        expect(res.ttl).to.be.at.most(100);
         expect(res.type).to.equal(object.GETPUBKEY);
         expect(res.version).to.equal(3);
         expect(res.stream).to.equal(1);
@@ -469,7 +469,7 @@ describe("Object types", function() {
         to: "2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z",
       }).then(getpubkey.decodeAsync)
       .then(function(res) {
-        expect(res.ttl).to.equal(100);
+        expect(res.ttl).to.be.at.most(100);
         expect(res.type).to.equal(object.GETPUBKEY);
         expect(res.version).to.equal(4);
         expect(res.stream).to.equal(1);
@@ -496,7 +496,7 @@ describe("Object types", function() {
         to: "BM-onhypnh1UMhbQpmvdiPuG6soLLytYJAfH",
       }).then(pubkey.decodeAsync)
       .then(function(res) {
-        expect(res.ttl).to.equal(123);
+        expect(res.ttl).to.be.at.most(123);
         expect(res.type).to.equal(object.PUBKEY);
         expect(res.version).to.equal(2);
         expect(res.stream).to.equal(1);
@@ -514,7 +514,7 @@ describe("Object types", function() {
         to: "BM-2D8Jxw5yiepaQqxrx43iPPNfRqbvWoJLoU",
       }).then(pubkey.decodeAsync)
       .then(function(res) {
-        expect(res.ttl).to.equal(456);
+        expect(res.ttl).to.be.at.most(456);
         expect(res.type).to.equal(object.PUBKEY);
         expect(res.version).to.equal(3);
         expect(res.stream).to.equal(1);
@@ -532,7 +532,7 @@ describe("Object types", function() {
       .then(function(buf) {
         return pubkey.decodeAsync(buf, {neededPubkeys: from});
       }).then(function(res) {
-        expect(res.ttl).to.equal(789);
+        expect(res.ttl).to.be.at.most(789);
         expect(res.type).to.equal(object.PUBKEY);
         expect(res.version).to.equal(4);
         expect(res.stream).to.equal(1);
