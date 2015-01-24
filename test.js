@@ -374,9 +374,19 @@ describe("Message types", function() {
       expect(res.remotePort).to.equal(48444);
       expect(res.port).to.equal(8444);
       expect(bufferEqual(res.nonce, version.NONCE)).to.be.true;
-      expect(res.software).to.deep.equal(UserAgent.SELF);
+      expect(UserAgent.parse(res.userAgent)).to.deep.equal(UserAgent.SELF);
       expect(res.streamNumbers).to.deep.equal([1]);
       expect(res.length).to.equal(101);
+    });
+
+    it("should accept raw user agent string", function() {
+      var res = version.decode(version.encode({
+        remoteHost: "1.2.3.4",
+        remotePort: 48444,
+        port: 8444,
+        userAgent: "/test:0.0.1/",
+      }));
+      expect(res.userAgent).to.equal("/test:0.0.1/");
     });
   });
 
@@ -736,10 +746,10 @@ describe("High-level classes", function() {
     var bnode = {name: "bitchan-node", version: "0.0.1"};
     var bweb = {name: "bitchan-web"};
 
-    it("should decode", function() {
+    it("should decode and parse", function() {
       var ua = var_str.encode("/cBitmessage:0.2(iPad; U; CPU OS 3_2_1)/AndroidBuild:0.8/");
       var res = UserAgent.decode(ua);
-      expect(res.software).to.deep.equal([
+      expect(UserAgent.parse(res.str)).to.deep.equal([
         {name: "cBitmessage", version: "0.2", comments: "iPad; U; CPU OS 3_2_1"},
         {name: "AndroidBuild", version: "0.8"},
       ]);
@@ -749,40 +759,41 @@ describe("High-level classes", function() {
 
     it("should encode", function() {
       var ua = UserAgent.encode([pybm]);
-      expect(var_str.decode(ua).str).to.equal("/PyBitmessage:0.4.4/");
       var res = UserAgent.decode(ua);
-      expect(res.software).to.deep.equal([pybm]);
+      expect(res.str).to.equal("/PyBitmessage:0.4.4/");
+      expect(UserAgent.parse(res.str)).to.deep.equal([pybm]);
       expect(res.length).to.equal(21);
       expect(res.rest.toString("hex")).to.equal("");
 
       ua = UserAgent.encode([{name: "test", "comments": "linux"}]);
-      expect(var_str.decode(ua).str).to.equal("/test:0.0.0(linux)/");
+      expect(UserAgent.decode(ua).str).to.equal("/test:0.0.0(linux)/");
     });
 
     it("should encode bitmessage's user agent", function() {
       var res = UserAgent.decode(UserAgent.encodeSelf())
-      var software = res.software;
+      var software = UserAgent.parse(res.str);
       expect(software[0].name).to.equal("bitmessage");
       expect(software[0]).to.have.property("version");
 
       res = UserAgent.decode(UserAgent.encodeSelfWith([bnode, bweb]));
-      software = res.software;
+      software = UserAgent.parse(res.str);
       expect(software[0].name).to.equal("bitmessage");
       expect(software[1]).to.deep.equal(bnode);
       expect(software[2].name).to.equal(bweb.name);
       expect(software[2].version).to.equal("0.0.0");
     });
 
-    it("should accept just object or string(s) on encode", function() {
-      var enc1 = UserAgent.encode({name: "test", version: "0.0.1"});
-      var enc2 = UserAgent.encode("test:0.0.1");
-      var res = [{name: "test", version: "0.0.1"}];
-      expect(UserAgent.decode(enc1).software).to.deep.equal(res);
-      expect(UserAgent.decode(enc2).software).to.deep.equal(res);
-      var enc3 = UserAgent.encodeSelfWith("test:0.0.1");
-      var software = UserAgent.decode(enc3).software;
-      expect(software[0].name).to.equal("bitmessage");
-      expect(software[1]).to.deep.equal(res[0]);
+    it("should accept raw user agent string on encode", function() {
+      var enc = UserAgent.encode("/test:0.0.1/");
+      var software = UserAgent.parse(UserAgent.decode(enc).str);
+      expect(software).to.deep.equal([{name: "test", version: "0.0.1"}]);
+    });
+
+    it("should parse empty/incorrect user agent into empty list", function() {
+      expect(UserAgent.parse("").length).to.equal(0);
+      expect(UserAgent.parse("test").length).to.equal(0);
+      expect(UserAgent.parse("/test").length).to.equal(0);
+      expect(UserAgent.parse("test/").length).to.equal(0);
     });
   });
 });
