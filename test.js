@@ -21,6 +21,7 @@ var messages = bitmessage.messages;
 var version = messages.version;
 var addr = messages.addr;
 var inv = messages.inv;
+var getdata = messages.getdata;
 var error = messages.error;
 var objects = bitmessage.objects;
 var getpubkey = objects.getpubkey;
@@ -362,11 +363,13 @@ describe("Common structures", function() {
 describe("Message types", function() {
   describe("version", function() {
     it("should encode and decode", function() {
-      var res = version.decode(version.encode({
+      var encoded = version.encode({
         remoteHost: "1.2.3.4",
         remotePort: 48444,
         port: 8444,
-      }));
+      });
+      expect(message.decode(encoded).command).to.equal("version");
+      var res = version.decode(encoded);
       expect(res.version).to.equal(3);
       expect(res.services.get(ServicesBitfield.NODE_NETWORK)).to.be.true;
       expect(res.time).to.be.instanceof(Date);
@@ -396,10 +399,12 @@ describe("Message types", function() {
       expect(res.length).to.equal(1);
       expect(res.addrs).to.deep.equal([]);
 
-      res = addr.decode(addr.encode([
+      var encoded = addr.encode([
         {host: "1.2.3.4", port: 8444},
         {host: "ff::1", port: 18444},
-      ]));
+      ]);
+      expect(message.decode(encoded).command).to.equal("addr");
+      res = addr.decode(encoded);
       expect(res.length).to.equal(77);
       expect(res.addrs.length).to.equal(2);
       expect(res.addrs[0].host).to.equal("1.2.3.4");
@@ -410,7 +415,7 @@ describe("Message types", function() {
 
     it("shouldn't encode/decode more than 1000 entires", function() {
       expect(addr.encode.bind(null, Array(2000))).to.throw(/too many/i);
-      expect(addr.decode.bind(null, var_int.encode(2000))).to.throw(/too many/i);
+      expect(addr.decodePayload.bind(null, var_int.encode(2000))).to.throw(/too many/i);
     });
   });
 
@@ -419,7 +424,9 @@ describe("Message types", function() {
       var vect1 = inv_vect.encode(Buffer("test"));
       var vect2 = inv_vect.encode(Buffer("test2"));
       var inventory = [vect1, vect2];
-      var res = inv.decode(inv.encode(inventory));
+      var encoded = inv.encode(inventory);
+      expect(message.decode(encoded).command).to.equal("inv");
+      var res = inv.decode(encoded);
       expect(res.inventory.length).to.equal(2);
       expect(bufferEqual(res.inventory[0], vect1)).to.be.true;
       expect(bufferEqual(res.inventory[1], vect2)).to.be.true;
@@ -428,13 +435,35 @@ describe("Message types", function() {
 
     it("shouldn't encode/decode more than 50000 entires", function() {
       expect(inv.encode.bind(null, Array(60000))).to.throw(/too many/i);
-      expect(inv.decode.bind(null, var_int.encode(60000))).to.throw(/too many/i);
+      expect(inv.decodePayload.bind(null, var_int.encode(60000))).to.throw(/too many/i);
+    });
+  });
+
+  describe("getdata", function() {
+    it("should encode and decode", function() {
+      var vect1 = inv_vect.encode(Buffer("test"));
+      var vect2 = inv_vect.encode(Buffer("test2"));
+      var inventory = [vect1, vect2];
+      var encoded = getdata.encode(inventory);
+      expect(message.decode(encoded).command).to.equal("getdata");
+      var res = getdata.decode(encoded);
+      expect(res.inventory.length).to.equal(2);
+      expect(bufferEqual(res.inventory[0], vect1)).to.be.true;
+      expect(bufferEqual(res.inventory[1], vect2)).to.be.true;
+      expect(res.length).to.equal(65);
+    });
+
+    it("shouldn't encode/decode more than 50000 entires", function() {
+      expect(getdata.encode.bind(null, Array(60000))).to.throw(/too many/i);
+      expect(getdata.decodePayload.bind(null, var_int.encode(60000))).to.throw(/too many/i);
     });
   });
 
   describe("error", function() {
     it("should encode and decode", function() {
-      var res = error.decode(error.encode({errorText: "test"}));
+      var encoded = error.encode({errorText: "test"});
+      expect(message.decode(encoded).command).to.equal("error");
+      var res = error.decode(encoded);
       expect(res.fatal).to.equal(0);
       expect(res.banTime).to.equal(0);
       expect(res.vector).to.equal("");
