@@ -363,6 +363,12 @@ describe("Common structures", function() {
 
 // TODO(Kagami): Add tests for encodePayload/decodePayload as well.
 describe("Message types", function() {
+  it("should get command for encoded message", function() {
+    var encoded = message.encode("test", Buffer(0));
+    expect(messages.getCommand(encoded)).to.equal("test");
+    expect(messages.getCommand(Buffer("test"))).to.be.undefined;
+  });
+
   describe("version", function() {
     it("should encode and decode", function() {
       var encoded = version.encode({
