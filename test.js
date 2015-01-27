@@ -112,6 +112,7 @@ describe("Crypto", function() {
   });
 });
 
+// TODO(Kagami): Add tests for encodePayload/decodePayload as well.
 describe("Common structures", function() {
   describe("message", function() {
     it("should decode", function() {
@@ -143,7 +144,7 @@ describe("Common structures", function() {
         ttl: 100,
         type: 2,
         version: 1,
-        payload: Buffer("test"),
+        objectPayload: Buffer("test"),
       }));
 
       expect(bufferEqual(nonce, res.nonce)).to.be.true;
@@ -152,7 +153,7 @@ describe("Common structures", function() {
       expect(res.version).to.equal(1);
       expect(res.stream).to.equal(1);
       expect(res.headerLength).to.equal(22);
-      expect(res.payload.toString()).to.equal("test");
+      expect(res.objectPayload.toString()).to.equal("test");
     });
 
     it("shouldn't encode too big TTL", function() {
@@ -161,7 +162,7 @@ describe("Common structures", function() {
         ttl: 10000000,
         type: 2,
         version: 1,
-        payload: Buffer("test"),
+        objectPayload: Buffer("test"),
       })).to.throw(Error);
     });
   });
@@ -360,6 +361,7 @@ describe("Common structures", function() {
   });
 });
 
+// TODO(Kagami): Add tests for encodePayload/decodePayload as well.
 describe("Message types", function() {
   describe("version", function() {
     it("should encode and decode", function() {
@@ -485,14 +487,17 @@ describe("Message types", function() {
   });
 });
 
+// TODO(Kagami): Add tests for encodePayloadAsync/decodePayloadAsync as well.
 describe("Object types", function() {
   describe("getpubkey", function() {
     it("should encode and decode getpubkey v3", function() {
       return getpubkey.encodeAsync({
         ttl: 100,
         to: "BM-2D8Jxw5yiepaQqxrx43iPPNfRqbvWoJLoU",
-      }).then(getpubkey.decodeAsync)
-      .then(function(res) {
+      }).then(function(buf) {
+        expect(message.decode(buf).command).to.equal("object");
+        return getpubkey.decodeAsync(buf);
+      }).then(function(res) {
         expect(res.ttl).to.be.at.most(100);
         expect(res.type).to.equal(object.GETPUBKEY);
         expect(res.version).to.equal(3);
@@ -506,8 +511,10 @@ describe("Object types", function() {
       return getpubkey.encodeAsync({
         ttl: 100,
         to: "2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z",
-      }).then(getpubkey.decodeAsync)
-      .then(function(res) {
+      }).then(function(buf) {
+        expect(message.decode(buf).command).to.equal("object");
+        return getpubkey.decodeAsync(buf);
+      }).then(function(res) {
         expect(res.ttl).to.be.at.most(100);
         expect(res.type).to.equal(object.GETPUBKEY);
         expect(res.version).to.equal(4);
@@ -533,8 +540,10 @@ describe("Object types", function() {
         ttl: 123,
         from: from,
         to: "BM-onhypnh1UMhbQpmvdiPuG6soLLytYJAfH",
-      }).then(pubkey.decodeAsync)
-      .then(function(res) {
+      }).then(function(buf) {
+        expect(message.decode(buf).command).to.equal("object");
+        return pubkey.decodeAsync(buf);
+      }).then(function(res) {
         expect(res.ttl).to.be.at.most(123);
         expect(res.type).to.equal(object.PUBKEY);
         expect(res.version).to.equal(2);
@@ -551,8 +560,10 @@ describe("Object types", function() {
         ttl: 456,
         from: from,
         to: "BM-2D8Jxw5yiepaQqxrx43iPPNfRqbvWoJLoU",
-      }).then(pubkey.decodeAsync)
-      .then(function(res) {
+      }).then(function(buf) {
+        expect(message.decode(buf).command).to.equal("object");
+        return pubkey.decodeAsync(buf);
+      }).then(function(res) {
         expect(res.ttl).to.be.at.most(456);
         expect(res.type).to.equal(object.PUBKEY);
         expect(res.version).to.equal(3);
@@ -569,6 +580,7 @@ describe("Object types", function() {
     it("should encode and decode pubkey v4", function() {
       return pubkey.encodeAsync({ttl: 789, from: from, to: from})
       .then(function(buf) {
+        expect(message.decode(buf).command).to.equal("object");
         return pubkey.decodeAsync(buf, {neededPubkeys: from});
       }).then(function(res) {
         expect(res.ttl).to.be.at.most(789);
