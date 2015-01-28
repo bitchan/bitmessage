@@ -612,7 +612,7 @@ describe("Object types", function() {
       return pubkey.encodeAsync({ttl: 789, from: from, to: from})
       .then(function(buf) {
         expect(message.decode(buf).command).to.equal("object");
-        return pubkey.decodeAsync(buf, {neededPubkeys: from});
+        return pubkey.decodeAsync(buf, {needed: from});
       }).then(function(res) {
         expect(res.ttl).to.be.at.most(789);
         expect(res.type).to.equal(object.PUBKEY);
