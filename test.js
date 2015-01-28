@@ -743,7 +743,7 @@ describe("High-level classes", function() {
       expect(addr.stream).to.equal(1);
       expect(bufferEqual(addr.signPrivateKey, WIF.decode("5JY1CFeeyN4eyfL35guWAuUqu5VLmd7LojtkNP6wmt5msZxxZ57"))).to.be.true;
       expect(bufferEqual(addr.encPrivateKey, WIF.decode("5J1oDgZDicNhUgbfzBDQqi2m5jUPnDrfZinnTqEEEaLv63jVFTM"))).to.be.true;
-      expect(addr.getRipe().toString("hex")).to.equal("00ac14944b00decea5628eb40d0ff4b0f9ee9eca");
+      expect(addr.ripe.toString("hex")).to.equal("00ac14944b00decea5628eb40d0ff4b0f9ee9eca");
       expect(addr.encode()).to.equal("BM-2cWFkyuXXFw6d393RGnin2RpSXj8wxtt6F");
     });
 
@@ -754,7 +754,7 @@ describe("High-level classes", function() {
       expect(addr.stream).to.equal(1);
       expect(bufferEqual(addr.signPrivateKey, WIF.decode("5JY1CFeeyN4eyfL35guWAuUqu5VLmd7LojtkNP6wmt5msZxxZ57"))).to.be.true;
       expect(bufferEqual(addr.encPrivateKey, WIF.decode("5J1oDgZDicNhUgbfzBDQqi2m5jUPnDrfZinnTqEEEaLv63jVFTM"))).to.be.true;
-      expect(addr.getRipe().toString("hex")).to.equal("00ac14944b00decea5628eb40d0ff4b0f9ee9eca");
+      expect(addr.ripe.toString("hex")).to.equal("00ac14944b00decea5628eb40d0ff4b0f9ee9eca");
       expect(addr.encode()).to.equal("BM-2cWFkyuXXFw6d393RGnin2RpSXj8wxtt6F");
     });
 
@@ -788,9 +788,9 @@ describe("High-level classes", function() {
       addr.encPrivateKey = Buffer("9f9969c93c2d186787a7653f70e49be34c03c4a853e6ad0c867db0946bc433c6", "hex");
       expect(addr.encPublicKey.toString("hex")).to.equal("04c6ed1b56f2da97fec1b762d43364566faf082c1e4918ae1dbb41757cad41b03b2cc5087f341414e63f6eee72a1fbf0b5f346a1bb3ba944cad204ca597db2bfc8");
       expect(addr.ripe.toString("hex")).to.equal("003ab6655de4bd8c603eba9b00dd5970725fdd56");
-      expect(addr.getRipe({short: true}).toString("hex")).to.equal("3ab6655de4bd8c603eba9b00dd5970725fdd56");
+      expect(addr.getShortRipe().toString("hex")).to.equal("3ab6655de4bd8c603eba9b00dd5970725fdd56");
       addr.encPrivateKey = Buffer("009969c93c2d186787a7653f70e49be34c03c4a853e6ad0c867db0946bc433c6", "hex");
-      expect(addr.getRipe({short: true}).toString("hex")).to.equal("69617ddb1946dc327cadffcf33889fed587fc1e7");
+      expect(addr.getShortRipe().toString("hex")).to.equal("69617ddb1946dc327cadffcf33889fed587fc1e7");
     });
 
     it("should implement isAddress method", function() {
@@ -806,7 +806,7 @@ describe("High-level classes", function() {
       it("should allow to generate shorter address", function() {
         this.timeout(300000);
         var addr = Address.fromRandom({ripeLength: 18});
-        var ripe = addr.getRipe({short: true});
+        var ripe = addr.getShortRipe();
         expect(ripe.length).to.be.at.most(18);
       });
     }
