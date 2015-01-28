@@ -49,7 +49,7 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
 - [ ] Object types
   - [x] getpubkey
   - [x] pubkey
-  - [ ] msg
+  - [x] msg
   - [ ] broadcast
 - [x] WIF
 - [x] POW

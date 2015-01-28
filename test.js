@@ -26,6 +26,7 @@ var error = messages.error;
 var objects = bitmessage.objects;
 var getpubkey = objects.getpubkey;
 var pubkey = objects.pubkey;
+var msg = objects.msg;
 var WIF = bitmessage.WIF;
 var POW = bitmessage.POW;
 var Address = bitmessage.Address;
@@ -91,11 +92,11 @@ describe("Crypto", function() {
     var privateKey = Buffer(32);
     privateKey.fill(1);
     var publicKey = bmcrypto.getPublic(privateKey);
-    var msg = Buffer("test");
-    return bmcrypto.sign(privateKey, msg).then(function(sig) {
+    var message = Buffer("test");
+    return bmcrypto.sign(privateKey, message).then(function(sig) {
       expect(Buffer.isBuffer(sig)).to.be.true;
       expect(sig.toString("hex")).to.equal("304402204737396b697e5a3400e3aedd203d8be89879f97708647252bd0c17752ff4c8f302201d52ef234de82ce0719679fa220334c83b80e21b8505a781d32d94a27d9310aa");
-      return bmcrypto.verify(publicKey, msg, sig);
+      return bmcrypto.verify(publicKey, message, sig);
     });
   });
 
@@ -495,6 +496,15 @@ describe("Message types", function() {
 
 // TODO(Kagami): Add tests for encodePayloadAsync/decodePayloadAsync as well.
 describe("Object types", function() {
+  var signPrivateKey = Buffer("71c95d26c716a5e85e9af9efe26fb5f744dc98005a13d05d23ee92c77e038d9f", "hex");
+  var signPublicKey = bmcrypto.getPublic(signPrivateKey);
+  var encPrivateKey = Buffer("9f9969c93c2d186787a7653f70e49be34c03c4a853e6ad0c867db0946bc433c6", "hex");
+  var encPublicKey = bmcrypto.getPublic(encPrivateKey);
+  var from = Address({
+    signPrivateKey: signPrivateKey,
+    encPrivateKey: encPrivateKey,
+  });
+
   it("should get type of the encoded object message", function() {
     var encoded = object.encode({
       nonce: Buffer(8),
@@ -556,15 +566,6 @@ describe("Object types", function() {
   });
 
   describe("pubkey", function() {
-    var signPrivateKey = Buffer("71c95d26c716a5e85e9af9efe26fb5f744dc98005a13d05d23ee92c77e038d9f", "hex");
-    var signPublicKey = bmcrypto.getPublic(signPrivateKey);
-    var encPrivateKey = Buffer("9f9969c93c2d186787a7653f70e49be34c03c4a853e6ad0c867db0946bc433c6", "hex");
-    var encPublicKey = bmcrypto.getPublic(encPrivateKey);
-    var from = Address({
-      signPrivateKey: signPrivateKey,
-      encPrivateKey: encPrivateKey,
-    });
-
     it("should encode and decode pubkey v2", function() {
       return pubkey.encodeAsync({
         ttl: 123,
@@ -624,6 +625,67 @@ describe("Object types", function() {
         expect(res.payloadLengthExtraBytes).to.equal(1000);
         expect(Buffer.isBuffer(res.signature)).to.be.true;
         expect(bufferEqual(res.tag, from.getTag())).to.be.true;
+      });
+    });
+  });
+
+  describe("msg", function() {
+    it("should encode and decode msg", function() {
+      return msg.encodeAsync({
+        ttl: 111,
+        from: from,
+        to: from,
+        message: "test",
+      }).then(function(buf) {
+        expect(message.decode(buf).command).to.equal("object");
+        return msg.decodeAsync(buf, {identities: [from]});
+      }).then(function(res) {
+        expect(res.ttl).to.be.at.most(111);
+        expect(res.type).to.equal(object.MSG);
+        expect(res.version).to.equal(1);
+        expect(res.stream).to.equal(1);
+        expect(res.senderVersion).to.equal(4);
+        expect(res.senderStream).to.equal(1);
+        expect(res.behavior.get(PubkeyBitfield.DOES_ACK)).to.be.true;
+        expect(bufferEqual(res.signPublicKey, signPublicKey)).to.be.true;
+        expect(bufferEqual(res.encPublicKey, encPublicKey)).to.be.true;
+        expect(res.nonceTrialsPerByte).to.equal(1000);
+        expect(res.payloadLengthExtraBytes).to.equal(1000);
+        expect(bufferEqual(res.ripe, from.ripe)).to.be.true;
+        expect(res.encoding).to.equal(msg.TRIVIAL);
+        expect(res.message).to.equal("test");
+        expect(res).to.not.have.property("subject");
+        expect(Buffer.isBuffer(res.signature)).to.be.true;
+      });
+    });
+
+    it("shouldn't decode msg without identities", function(done) {
+      return msg.encodeAsync({
+        ttl: 111,
+        from: from,
+        to: from,
+        message: "test",
+      }).then(function(buf) {
+        return msg.decodeAsync(buf, {identities: []});
+      }).catch(function() {
+        done();
+      });
+    });
+
+    it("should encode and decode SIMPLE msg", function() {
+      return msg.encodeAsync({
+        ttl: 111,
+        from: from,
+        to: from,
+        encoding: msg.SIMPLE,
+        subject: "Тема",
+        message: "Сообщение",
+      }).then(function(buf) {
+        return msg.decodeAsync(buf, {identities: [from]});
+      }).then(function(res) {
+        expect(res.encoding).to.equal(msg.SIMPLE);
+        expect(res.subject).to.equal("Тема");
+        expect(res.message).to.equal("Сообщение");
       });
     });
   });
