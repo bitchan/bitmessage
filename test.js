@@ -495,6 +495,30 @@ describe("Message types", function() {
 
 // TODO(Kagami): Add tests for encodePayloadAsync/decodePayloadAsync as well.
 describe("Object types", function() {
+  it("should get type of the encoded object message", function() {
+    var encoded = object.encode({
+      nonce: Buffer(8),
+      ttl: 100,
+      type: object.BROADCAST,
+      version: 1,
+      objectPayload: Buffer("test"),
+    });
+    expect(objects.getType(encoded)).to.equal(object.BROADCAST);
+    expect(objects.getType(Buffer(4))).to.be.undefined;
+  });
+
+  it("should get type of the object message payload", function() {
+    var encoded = object.encodePayload({
+      nonce: Buffer(8),
+      ttl: 333,
+      type: object.MSG,
+      version: 1,
+      objectPayload: Buffer("test"),
+    });
+    expect(objects.getPayloadType(encoded)).to.equal(object.MSG);
+    expect(objects.getPayloadType(Buffer(7))).to.be.undefined;
+  });
+
   describe("getpubkey", function() {
     it("should encode and decode getpubkey v3", function() {
       return getpubkey.encodeAsync({
