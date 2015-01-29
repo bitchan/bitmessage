@@ -830,8 +830,15 @@ describe("High-level classes", function() {
       expect(addr.getPubkeyPrivateKey().toString("hex")).to.equal("15e516173769dc87d4a8e8ed90200362fa58c0228bb2b70b06f26c089a9823a4");
     });
 
-    it("should calculate a private key to encrypt broadcast object", function() {
+    it("should calculate a private key to encrypt broadcast v4", function() {
+      var addr = Address.decode("   2D8Jxw5yiepaQqxrx43iPPNfRqbvWoJLoU   ");
+      expect(addr.version).to.equal(3);
+      expect(addr.getBroadcastPrivateKey().toString("hex")).to.equal("664420eaed1b6b3208fc04905c2f6ca758594c537eb5a08f2f0c2bbe6f07fb44");
+    });
+
+    it("should calculate a private key to encrypt broadcast v5", function() {
       var addr = Address.decode("BM-2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z");
+      expect(addr.version).to.equal(4);
       expect(addr.getBroadcastPrivateKey().toString("hex")).to.equal("15e516173769dc87d4a8e8ed90200362fa58c0228bb2b70b06f26c089a9823a4");
     });
 
