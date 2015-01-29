@@ -843,14 +843,14 @@ describe("High-level classes", function() {
   // FIXME(Kagami): Add more fail tests.
   describe("Address", function() {
     it("should decode Bitmessage address", function() {
-      var addr = Address.decode("BM-2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z")
+      var addr = Address.decode("BM-2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z");
       expect(addr.version).to.equal(4);
       expect(addr.stream).to.equal(1);
       expect(addr.ripe.toString("hex")).to.equal("003ab6655de4bd8c603eba9b00dd5970725fdd56");
     });
 
     it("should decode Bitmessage address badly formatted", function() {
-      var addr = Address.decode("  2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z ")
+      var addr = Address.decode("  2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z ");
       expect(addr.version).to.equal(4);
       expect(addr.stream).to.equal(1);
       expect(addr.ripe.toString("hex")).to.equal("003ab6655de4bd8c603eba9b00dd5970725fdd56");
@@ -958,6 +958,27 @@ describe("High-level classes", function() {
       expect(Address.isAddress(addr)).to.be.true;
       expect(Address.isAddress(null)).to.be.false;
       expect(Address.isAddress({})).to.be.false;
+    });
+
+    it("should implement clone method", function() {
+      var addr = Address.decode("BM-2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z");
+      expect(addr.version).to.equal(4);
+      expect(addr.stream).to.equal(1);
+      var addr2 = addr.clone();
+      expect(addr2.version).to.equal(4);
+      expect(addr2.stream).to.equal(1);
+      addr2.version = 3;
+      addr2.stream = 2;
+      expect(addr.getTag().toString("hex")).to.equal("facf1e3e6c74916203b7f714ca100d4d60604f0917696d0f09330f82f52bed1a");
+      expect(addr2.getTag().toString("hex")).to.equal("d6487aaea3d2d022d80abbce2605089523ba2b516b81c03545f19a5c85f15fa2");
+
+      var addr3 = Address({
+        signPrivateKey: Buffer("71c95d26c716a5e85e9af9efe26fb5f744dc98005a13d05d23ee92c77e038d9f", "hex"),
+        encPrivateKey: Buffer("9f9969c93c2d186787a7653f70e49be34c03c4a853e6ad0c867db0946bc433c6", "hex"),
+      });
+      var addr4 = addr3.clone();
+      expect(addr4.signPrivateKey.toString("hex")).to.equal("71c95d26c716a5e85e9af9efe26fb5f744dc98005a13d05d23ee92c77e038d9f");
+      expect(addr4.encPrivateKey.toString("hex")).to.equal("9f9969c93c2d186787a7653f70e49be34c03c4a853e6ad0c867db0946bc433c6");
     });
 
     // FIXME(Kagami): Don't run it in browser currently because it's
