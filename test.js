@@ -27,6 +27,7 @@ var objects = bitmessage.objects;
 var getpubkey = objects.getpubkey;
 var pubkey = objects.pubkey;
 var msg = objects.msg;
+var broadcast = objects.broadcast;
 var WIF = bitmessage.WIF;
 var POW = bitmessage.POW;
 var Address = bitmessage.Address;
@@ -504,6 +505,11 @@ describe("Object types", function() {
     signPrivateKey: signPrivateKey,
     encPrivateKey: encPrivateKey,
   });
+  var fromV3 = Address({
+    version: 3,
+    signPrivateKey: signPrivateKey,
+    encPrivateKey: encPrivateKey,
+  });
 
   it("should get type of the encoded object message", function() {
     var encoded = object.encode({
@@ -689,6 +695,74 @@ describe("Object types", function() {
       });
     });
   });
+
+  describe("broadcast", function() {
+    it("should encode and decode broadcast v4", function() {
+      return broadcast.encodeAsync({
+        ttl: 987,
+        from: fromV3,
+        message: "test",
+      }).then(function(buf) {
+        expect(message.decode(buf).command).to.equal("object");
+        return broadcast.decodeAsync(buf, {subscriptions: fromV3});
+      }).then(function(res) {
+        expect(res.ttl).to.be.at.most(987);
+        expect(res.type).to.equal(object.BROADCAST);
+        expect(res.version).to.equal(4);
+        expect(res.stream).to.equal(1);
+        expect(res.senderVersion).to.equal(3);
+        expect(res.senderStream).to.equal(1);
+        expect(res.behavior.get(PubkeyBitfield.DOES_ACK)).to.be.true;
+        expect(bufferEqual(res.signPublicKey, signPublicKey)).to.be.true;
+        expect(bufferEqual(res.encPublicKey, encPublicKey)).to.be.true;
+        expect(res.nonceTrialsPerByte).to.equal(1000);
+        expect(res.payloadLengthExtraBytes).to.equal(1000);
+        expect(res.encoding).to.equal(msg.TRIVIAL);
+        expect(res.message).to.equal("test");
+        expect(res).to.not.have.property("subject");
+        expect(Buffer.isBuffer(res.signature)).to.be.true;
+      });
+    });
+
+    it("should encode and decode broadcast v5", function() {
+      return broadcast.encodeAsync({
+        ttl: 101,
+        from: from,
+        message: "キタ━━━(゜∀゜)━━━!!!!!",
+      }).then(function(buf) {
+        expect(message.decode(buf).command).to.equal("object");
+        return broadcast.decodeAsync(buf, {subscriptions: [from]});
+      }).then(function(res) {
+        expect(res.ttl).to.be.at.most(987);
+        expect(res.type).to.equal(object.BROADCAST);
+        expect(res.version).to.equal(5);
+        expect(res.stream).to.equal(1);
+        expect(res.senderVersion).to.equal(4);
+        expect(res.senderStream).to.equal(1);
+        expect(res.behavior.get(PubkeyBitfield.DOES_ACK)).to.be.true;
+        expect(bufferEqual(res.signPublicKey, signPublicKey)).to.be.true;
+        expect(bufferEqual(res.encPublicKey, encPublicKey)).to.be.true;
+        expect(res.nonceTrialsPerByte).to.equal(1000);
+        expect(res.payloadLengthExtraBytes).to.equal(1000);
+        expect(res.encoding).to.equal(msg.TRIVIAL);
+        expect(res.message).to.equal("キタ━━━(゜∀゜)━━━!!!!!");
+        expect(res).to.not.have.property("subject");
+        expect(Buffer.isBuffer(res.signature)).to.be.true;
+      });
+    });
+
+    it("shouldn't decode broadcast without subscriptions", function(done) {
+      return broadcast.encodeAsync({
+        ttl: 101,
+        from: from,
+        message: "test",
+      }).then(function(buf) {
+        return broadcast.decodeAsync(buf, {subscriptions: [fromV3]});
+      }).catch(function() {
+        done();
+      });
+    });
+  });
 });
 
 describe("WIF", function() {
@@ -825,21 +899,38 @@ describe("High-level classes", function() {
       expect(addr.getTag().toString("hex")).to.equal("facf1e3e6c74916203b7f714ca100d4d60604f0917696d0f09330f82f52bed1a");
     });
 
-    it("should calculate a private key to encrypt pubkey object", function() {
+    it("should calculate a private key to decrypt pubkey object", function() {
       var addr = Address.decode("BM-2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z");
       expect(addr.getPubkeyPrivateKey().toString("hex")).to.equal("15e516173769dc87d4a8e8ed90200362fa58c0228bb2b70b06f26c089a9823a4");
     });
 
-    it("should calculate a private key to encrypt broadcast v4", function() {
+    it("should calculate a public key to encrypt pubkey object", function() {
+      var addr = Address.decode("BM-2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z");
+      expect(addr.getPubkeyPublicKey().toString("hex")).to.equal("04ee196be97db61886beeec9ebc2c28b7d4cafbc407c31d8aac2f867068f727874e2d305ba970bd09a951aa2cde52b66061a5a8e709cda1125635a97e1c7b85ab4");
+    });
+
+    it("should calculate a private key to decrypt broadcast v4", function() {
       var addr = Address.decode("   2D8Jxw5yiepaQqxrx43iPPNfRqbvWoJLoU   ");
       expect(addr.version).to.equal(3);
       expect(addr.getBroadcastPrivateKey().toString("hex")).to.equal("664420eaed1b6b3208fc04905c2f6ca758594c537eb5a08f2f0c2bbe6f07fb44");
     });
 
-    it("should calculate a private key to encrypt broadcast v5", function() {
+    it("should calculate a public key to encrypt broadcast v4", function() {
+      var addr = Address.decode("   2D8Jxw5yiepaQqxrx43iPPNfRqbvWoJLoU   ");
+      expect(addr.version).to.equal(3);
+      expect(addr.getBroadcastPublicKey().toString("hex")).to.equal("04da633350cf2ef8194b83ae028555971df56a64948940693e54b8b4c2597b8f9e833ac1285b37487121c271346fb29684e723a992aeb37b20962406ccade6c8d3");
+    });
+
+    it("should calculate a private key to decrypt broadcast v5", function() {
       var addr = Address.decode("BM-2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z");
       expect(addr.version).to.equal(4);
       expect(addr.getBroadcastPrivateKey().toString("hex")).to.equal("15e516173769dc87d4a8e8ed90200362fa58c0228bb2b70b06f26c089a9823a4");
+    });
+
+    it("should calculate a public key to encrypt broadcast v5", function() {
+      var addr = Address.decode("BM-2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z");
+      expect(addr.version).to.equal(4);
+      expect(addr.getBroadcastPublicKey().toString("hex")).to.equal("04ee196be97db61886beeec9ebc2c28b7d4cafbc407c31d8aac2f867068f727874e2d305ba970bd09a951aa2cde52b66061a5a8e709cda1125635a97e1c7b85ab4");
     });
 
     it("should allow to decode Address instance", function() {

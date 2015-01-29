@@ -46,11 +46,11 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
   - [x] inv
   - [x] getdata
   - [x] error
-- [ ] Object types
+- [x] Object types
   - [x] getpubkey
   - [x] pubkey
   - [x] msg
-  - [ ] broadcast
+  - [x] broadcast
 - [x] WIF
 - [x] POW
 - [x] High-level classes
