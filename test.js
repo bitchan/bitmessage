@@ -33,6 +33,8 @@ var POW = bitmessage.POW;
 var Address = bitmessage.Address;
 var UserAgent = bitmessage.UserAgent;
 
+var skipPow = {skipPow: true};
+
 describe("Crypto", function() {
   it("should implement SHA-1 hash", function() {
     expect(bmcrypto.sha1(Buffer("test")).toString("hex")).to.equal("a94a8fe5ccb19ba61c4c0873d391e987982fbbd3");
@@ -147,7 +149,7 @@ describe("Common structures", function() {
         type: 2,
         version: 1,
         objectPayload: Buffer("test"),
-      }));
+      }), skipPow);
 
       expect(bufferEqual(nonce, res.nonce)).to.be.true;
       expect(res.ttl).to.be.at.most(100);
@@ -570,7 +572,7 @@ describe("Object types", function() {
         to: "BM-2D8Jxw5yiepaQqxrx43iPPNfRqbvWoJLoU",
       }).then(function(buf) {
         expect(message.decode(buf).command).to.equal("object");
-        return getpubkey.decodeAsync(buf);
+        return getpubkey.decodeAsync(buf, skipPow);
       }).then(function(res) {
         expect(res.ttl).to.be.at.most(100);
         expect(res.type).to.equal(object.GETPUBKEY);
@@ -587,7 +589,7 @@ describe("Object types", function() {
         to: "2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z",
       }).then(function(buf) {
         expect(message.decode(buf).command).to.equal("object");
-        return getpubkey.decodeAsync(buf);
+        return getpubkey.decodeAsync(buf, skipPow);
       }).then(function(res) {
         expect(res.ttl).to.be.at.most(100);
         expect(res.type).to.equal(object.GETPUBKEY);
@@ -607,7 +609,7 @@ describe("Object types", function() {
         to: "BM-onhypnh1UMhbQpmvdiPuG6soLLytYJAfH",
       }).then(function(buf) {
         expect(message.decode(buf).command).to.equal("object");
-        return pubkey.decodeAsync(buf);
+        return pubkey.decodeAsync(buf, skipPow);
       }).then(function(res) {
         expect(res.ttl).to.be.at.most(123);
         expect(res.type).to.equal(object.PUBKEY);
@@ -627,7 +629,7 @@ describe("Object types", function() {
         to: "BM-2D8Jxw5yiepaQqxrx43iPPNfRqbvWoJLoU",
       }).then(function(buf) {
         expect(message.decode(buf).command).to.equal("object");
-        return pubkey.decodeAsync(buf);
+        return pubkey.decodeAsync(buf, skipPow);
       }).then(function(res) {
         expect(res.ttl).to.be.at.most(456);
         expect(res.type).to.equal(object.PUBKEY);
@@ -646,7 +648,7 @@ describe("Object types", function() {
       return pubkey.encodeAsync({ttl: 789, from: from, to: from})
       .then(function(buf) {
         expect(message.decode(buf).command).to.equal("object");
-        return pubkey.decodeAsync(buf, {needed: from});
+        return pubkey.decodeAsync(buf, {needed: from, skipPow: true});
       }).then(function(res) {
         expect(res.ttl).to.be.at.most(789);
         expect(res.type).to.equal(object.PUBKEY);
@@ -672,7 +674,7 @@ describe("Object types", function() {
         message: "test",
       }).then(function(buf) {
         expect(message.decode(buf).command).to.equal("object");
-        return msg.decodeAsync(buf, {identities: [from]});
+        return msg.decodeAsync(buf, {identities: [from], skipPow: true});
       }).then(function(res) {
         expect(res.ttl).to.be.at.most(111);
         expect(res.type).to.equal(object.MSG);
@@ -701,7 +703,7 @@ describe("Object types", function() {
         message: "test",
       }).then(function(buf) {
         expect(message.decode(buf).command).to.equal("object");
-        return msg.decodeAsync(buf, {identities: [fromV2]});
+        return msg.decodeAsync(buf, {identities: [fromV2], skipPow: true});
       }).then(function(res) {
         expect(res.ttl).to.be.at.most(111);
         expect(res.type).to.equal(object.MSG);
@@ -729,8 +731,9 @@ describe("Object types", function() {
         to: from,
         message: "test",
       }).then(function(buf) {
-        return msg.decodeAsync(buf, {identities: []});
-      }).catch(function() {
+        return msg.decodeAsync(buf, {identities: [], skipPow: true});
+      }).catch(function(err) {
+        expect(err.message).to.match(/with given identities/i);
         done();
       });
     });
@@ -744,7 +747,7 @@ describe("Object types", function() {
         subject: "Тема",
         message: "Сообщение",
       }).then(function(buf) {
-        return msg.decodeAsync(buf, {identities: [from]});
+        return msg.decodeAsync(buf, {identities: [from], skipPow: true});
       }).then(function(res) {
         expect(res.encoding).to.equal(msg.SIMPLE);
         expect(res.subject).to.equal("Тема");
@@ -773,7 +776,7 @@ describe("Object types", function() {
         message: "test",
       }).then(function(buf) {
         expect(message.decode(buf).command).to.equal("object");
-        return broadcast.decodeAsync(buf, {subscriptions: fromV3});
+        return broadcast.decodeAsync(buf, {subscriptions: fromV3, skipPow: true});
       }).then(function(res) {
         expect(res.ttl).to.be.at.most(987);
         expect(res.type).to.equal(object.BROADCAST);
@@ -800,7 +803,7 @@ describe("Object types", function() {
         message: "test",
       }).then(function(buf) {
         expect(message.decode(buf).command).to.equal("object");
-        return broadcast.decodeAsync(buf, {subscriptions: fromV2});
+        return broadcast.decodeAsync(buf, {subscriptions: fromV2, skipPow: true});
       }).then(function(res) {
         expect(res.ttl).to.be.at.most(999);
         expect(res.type).to.equal(object.BROADCAST);
@@ -827,7 +830,7 @@ describe("Object types", function() {
         message: "キタ━━━(゜∀゜)━━━!!!!!",
       }).then(function(buf) {
         expect(message.decode(buf).command).to.equal("object");
-        return broadcast.decodeAsync(buf, {subscriptions: [from]});
+        return broadcast.decodeAsync(buf, {subscriptions: [from], skipPow: true});
       }).then(function(res) {
         expect(res.ttl).to.be.at.most(987);
         expect(res.type).to.equal(object.BROADCAST);
@@ -853,8 +856,12 @@ describe("Object types", function() {
         from: from,
         message: "test",
       }).then(function(buf) {
-        return broadcast.decodeAsync(buf, {subscriptions: [fromV3]});
-      }).catch(function() {
+        return broadcast.decodeAsync(buf, {
+          subscriptions: [fromV3],
+          skipPow: true,
+        });
+      }).catch(function(err) {
+        expect(err.message).to.match(/not interested/i);
         done();
       });
     });
@@ -901,8 +908,8 @@ describe("WIF", function() {
 
 describe("POW", function() {
   it("should calculate target", function() {
-    expect(POW.getTarget({ttl: 2418984, payloadLength: 628, nonceTrialsPerByte: 1000, payloadLengthExtraBytes: 1000})).to.equal(297422525267);
-    expect(POW.getTarget({ttl: 86400, payloadLength: 628})).to.equal(4863575534951);
+    expect(POW.getTarget({ttl: 2418984, payloadLength: 636, nonceTrialsPerByte: 1000, payloadLengthExtraBytes: 1000})).to.equal(297422525267);
+    expect(POW.getTarget({ttl: 86400, payloadLength: 636})).to.equal(4863575534951);
   });
 
   it("should check a POW", function() {
