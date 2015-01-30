@@ -14,7 +14,7 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
 * [Protocol specification](https://bitmessage.org/wiki/Protocol_specification)
 * [Whitepaper](https://bitmessage.org/bitmessage.pdf)
 
-## Common feature matrix (both Browser and Node)
+## Feature matrix (both Browser and Node)
 
 - [x] Crypto
   - [x] SHA-1
@@ -63,10 +63,9 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
 
 ## Network feature matrix (Node.js only)
 
-- [ ] Network
-  - [ ] Bootstrap
-  - [ ] Connect to the network
-  - [ ] Accept connections
+- [ ] Bootstrap
+- [ ] Connect to the network
+- [ ] Accept connections
 
 ## Usage
 
