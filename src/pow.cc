@@ -111,13 +111,13 @@ int pow(size_t pool_size,
   pthread_mutex_t mutex;
   pthread_mutex_init(&mutex, NULL);
   PowArgs pow_args = {
-    .pool_size = pool_size,
-    .target = target,
-    .initial_hash = initial_hash,
-    .max_nonce = max_nonce ? max_nonce : INT64_MAX,
-    .result = RESULT_NOT_READY,
-    .nonce = 0,
-    .mutex = &mutex,
+    pool_size,
+    target,
+    initial_hash,
+    max_nonce ? max_nonce : INT64_MAX,
+    RESULT_NOT_READY,
+    0,
+    &mutex,
   };
   ThreadArgs threads_args[pool_size];
   pthread_t threads[pool_size];
@@ -126,7 +126,7 @@ int pow(size_t pool_size,
 
   // Spawn threads.
   for (i = 0; i < pool_size; i++) {
-    ThreadArgs args = {.num = i, .pow_args = &pow_args};
+    ThreadArgs args = {i, &pow_args};
     threads_args[i] = args;
     error = pthread_create(&threads[i], NULL, pow_thread, &threads_args[i]);
     if (error) {
