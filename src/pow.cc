@@ -19,16 +19,22 @@ enum PowResult {
   RESULT_NOT_READY = -4
 };
 
-// Global arguments.
-size_t g_pool_size;
-uint64_t g_target;
-uint8_t* g_initial_hash;
-uint64_t g_max_nonce;
+// Shared POW parameters.
+typedef struct {
+  const size_t pool_size;
+  const size_t target;
+  const uint8_t* initial_hash;
+  const uint64_t max_nonce;
+  PowResult result;
+  uint64_t nonce;
+  pthread_mutex_t* mutex;
+} PowArgs;
 
-// Shared variables for threads.
-pthread_mutex_t g_mutex;
-PowResult g_result = RESULT_NOT_READY;
-uint64_t g_nonce;
+// Thread-specific arguments.
+typedef struct {
+  size_t num;  // Thread number
+  PowArgs* pow_args;
+} ThreadArgs;
 
 inline uint64_t ntohll(uint64_t x) {
   return (
@@ -38,34 +44,44 @@ inline uint64_t ntohll(uint64_t x) {
 }
 
 // Set POW computation result in a thread-safe way.
-void set_result(PowResult res, uint64_t nonce) {
-  pthread_mutex_lock(&g_mutex);
-  if (g_result == RESULT_NOT_READY) {
-    g_result = res;
-    g_nonce = nonce;
+void set_result(PowArgs* pow_args, PowResult res, uint64_t nonce) {
+  pthread_mutex_lock(pow_args->mutex);
+  if (pow_args->result == RESULT_NOT_READY) {
+    pow_args->result = res;
+    pow_args->nonce = nonce;
   }
-  pthread_mutex_unlock(&g_mutex);
+  pthread_mutex_unlock(pow_args->mutex);
 }
 
-void* pow_thread(void* num) {
-  uint64_t i = *((size_t *)num);
+void* pow_thread(void* arg) {
+  ThreadArgs* thread_args = (ThreadArgs *)arg;
+  PowArgs* pow_args = thread_args->pow_args;
+
+  // Copy some fixed POW args so compiler can inline them.
+  const size_t pool_size = pow_args->pool_size;
+  const uint64_t target = pow_args->target;
+  const uint64_t max_nonce = pow_args->max_nonce;
+
+  uint64_t i = thread_args->num;
   uint8_t message[HASH_SIZE+sizeof(uint64_t)];
   uint8_t digest[HASH_SIZE];
   uint64_t* be_nonce;
   uint64_t* be_trial;
   SHA512_CTX sha;
 
-  memcpy(message+sizeof(uint64_t), g_initial_hash, HASH_SIZE);
+  memcpy(message+sizeof(uint64_t), pow_args->initial_hash, HASH_SIZE);
   be_nonce = (uint64_t *)message;
   be_trial = (uint64_t *)digest;
 
-  while (g_result == RESULT_NOT_READY) {
+  while (pow_args->result == RESULT_NOT_READY) {
     // This is very unlikely to be ever happen but it's better to be
     // sure anyway.
-    if (i > g_max_nonce) {
-      set_result(RESULT_OVERFLOW, 0);
+    if (i > max_nonce) {
+      set_result(pow_args, RESULT_OVERFLOW, 0);
       return NULL;
     }
+    // XXX(Kagami): This and target comparision lines imply that we run
+    // this code on LE architecture while this might not be true.
     *be_nonce = ntohll(i);
     SHA512_Init(&sha);
     SHA512_Update(&sha, message, HASH_SIZE+sizeof(uint64_t));
@@ -73,11 +89,11 @@ void* pow_thread(void* num) {
     SHA512_Init(&sha);
     SHA512_Update(&sha, digest, HASH_SIZE);
     SHA512_Final(digest, &sha);
-    if (ntohll(*be_trial) <= g_target) {
-      set_result(RESULT_OK, i);
+    if (ntohll(*be_trial) <= target) {
+      set_result(pow_args, RESULT_OK, i);
       return NULL;
     }
-    i += g_pool_size;
+    i += pool_size;
   }
   return NULL;
 }
@@ -90,22 +106,31 @@ int pow(size_t pool_size,
   if (pool_size < 1 || pool_size > MAX_POOL_SIZE) {
     return RESULT_BAD_INPUT;
   }
-  g_pool_size = pool_size;
-  g_target = target;
-  g_initial_hash = (uint8_t *)initial_hash;
-  g_max_nonce = max_nonce ? max_nonce : UINT64_MAX;
 
-  pthread_mutex_init(&g_mutex, NULL);
+  // Initialize all structures on stack.
+  pthread_mutex_t mutex;
+  pthread_mutex_init(&mutex, NULL);
+  PowArgs pow_args = {
+    .pool_size = pool_size,
+    .target = target,
+    .initial_hash = initial_hash,
+    .max_nonce = max_nonce ? max_nonce : INT64_MAX,
+    .result = RESULT_NOT_READY,
+    .nonce = 0,
+    .mutex = &mutex,
+  };
+  ThreadArgs threads_args[pool_size];
   pthread_t threads[pool_size];
-  size_t args[pool_size];
   size_t i;
   int error;
 
+  // Spawn threads.
   for (i = 0; i < pool_size; i++) {
-    args[i] = i;
-    error = pthread_create(&threads[i], NULL, pow_thread, &args[i]);
+    ThreadArgs args = {.num = i, .pow_args = &pow_args};
+    threads_args[i] = args;
+    error = pthread_create(&threads[i], NULL, pow_thread, &threads_args[i]);
     if (error) {
-      set_result(RESULT_ERROR, 0);
+      set_result(&pow_args, RESULT_ERROR, 0);
       break;
     }
   }
@@ -115,10 +140,10 @@ int pow(size_t pool_size,
     pthread_join(threads[i], NULL);
   }
 
-  if (g_result == RESULT_OK) {
-    *nonce = g_nonce;
+  // Set resulting nonce, cleanup and exit;
+  if (pow_args.result == RESULT_OK) {
+    *nonce = pow_args.nonce;
   }
-
-  pthread_mutex_destroy(&g_mutex);
-  return g_result;
+  pthread_mutex_destroy(&mutex);
+  return pow_args.result;
 }
