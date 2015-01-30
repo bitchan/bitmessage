@@ -167,6 +167,28 @@ describe("Common structures", function() {
         objectPayload: Buffer("test"),
       })).to.throw(Error);
     });
+
+    it("shouldn't encode message payload bigger than 2^18 bytes", function() {
+      expect(object.encodePayload.bind(null, {
+        nonce: Buffer(8),
+        ttl: 100,
+        type: object.MSG,
+        version: 1,
+        objectPayload: Buffer(300000),
+      })).to.throw(/too big/i);
+    });
+
+    it("shouldn't decode message payload bigger than 2^18 bytes", function() {
+      var encoded = object.encodePayload({
+        nonce: Buffer(8),
+        ttl: 100,
+        type: object.MSG,
+        version: 1,
+        objectPayload: Buffer("test"),
+      });
+      encoded = Buffer.concat([encoded, Buffer(300000)]);
+      expect(object.decodePayload.bind(null, encoded)).to.throw(/too big/i);
+    });
   });
 
   describe("var_int", function() {
@@ -729,6 +751,18 @@ describe("Object types", function() {
         expect(res.message).to.equal("Сообщение");
       });
     });
+
+    it("shouldn't encode too big msg", function(done) {
+      return msg.encodeAsync({
+        ttl: 111,
+        from: from,
+        to: from,
+        message: Buffer(300000),
+      }).catch(function(err) {
+        expect(err.message).to.match(/too big/i);
+        done();
+      });
+    });
   });
 
   describe("broadcast", function() {
@@ -821,6 +855,17 @@ describe("Object types", function() {
       }).then(function(buf) {
         return broadcast.decodeAsync(buf, {subscriptions: [fromV3]});
       }).catch(function() {
+        done();
+      });
+    });
+
+    it("shouldn't encode too big broadcast", function(done) {
+      return broadcast.encodeAsync({
+        ttl: 101,
+        from: from,
+        message: Buffer(300000),
+      }).catch(function(err) {
+        expect(err.message).to.match(/too big/i);
         done();
       });
     });
