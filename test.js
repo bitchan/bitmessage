@@ -901,12 +901,12 @@ describe("WIF", function() {
 
 describe("POW", function() {
   it("should calculate target", function() {
-    expect(POW.getTarget({ttl: 2418984, payloadLength: 628, nonceTrialsPerByte: 1000, payloadLengthExtraBytes: 1000})).to.equal(297422593171);
-    expect(POW.getTarget({ttl: 86400, payloadLength: 628})).to.equal(4864647698763);
+    expect(POW.getTarget({ttl: 2418984, payloadLength: 628, nonceTrialsPerByte: 1000, payloadLengthExtraBytes: 1000})).to.equal(297422525267);
+    expect(POW.getTarget({ttl: 86400, payloadLength: 628})).to.equal(4863575534951);
   });
 
   it("should check a POW", function() {
-    expect(POW.check({nonce: 21997550, target: 297422593171, initialHash: Buffer("8ff2d685db89a0af2e3dbfd3f700ae96ef4d9a1eac72fd778bbb368c7510cddda349e03207e1c4965bd95c6f7265e8f1a481a08afab3874eaafb9ade09a10880", "hex")})).to.be.true;
+    expect(POW.check({nonce: 21997550, target: 297422525267, initialHash: Buffer("8ff2d685db89a0af2e3dbfd3f700ae96ef4d9a1eac72fd778bbb368c7510cddda349e03207e1c4965bd95c6f7265e8f1a481a08afab3874eaafb9ade09a10880", "hex")})).to.be.true;
     expect(POW.check({nonce: 3122437, target: 4864647698763, initialHash: Buffer("8ff2d685db89a0af2e3dbfd3f700ae96ef4d9a1eac72fd778bbb368c7510cddda349e03207e1c4965bd95c6f7265e8f1a481a08afab3874eaafb9ade09a10880", "hex")})).to.be.true;
     expect(POW.check({nonce: 3122436, target: 4864647698763, initialHash: Buffer("8ff2d685db89a0af2e3dbfd3f700ae96ef4d9a1eac72fd778bbb368c7510cddda349e03207e1c4965bd95c6f7265e8f1a481a08afab3874eaafb9ade09a10880", "hex")})).to.be.false;
   });
@@ -925,7 +925,7 @@ describe("POW", function() {
   if (allTests) {
     it("should do a POW", function() {
       this.timeout(300000);
-      var target = typeof window === "undefined" ? 297422593171 : 10693764680411;
+      var target = typeof window === "undefined" ? 297422525267 : 10688385392246;
       var initialHash = Buffer("8ff2d685db89a0af2e3dbfd3f700ae96ef4d9a1eac72fd778bbb368c7510cddda349e03207e1c4965bd95c6f7265e8f1a481a08afab3874eaafb9ade09a10880", "hex");
       return POW.doAsync({target: target, initialHash: initialHash})
       .then(function(nonce) {
