@@ -191,6 +191,16 @@ describe("Common structures", function() {
       encoded = Buffer.concat([encoded, Buffer(300000)]);
       expect(object.decodePayload.bind(null, encoded)).to.throw(/too big/i);
     });
+
+    it("shouldn't decode object with insufficient nonce", function() {
+      expect(object.decode.bind(null, object.encode({
+        nonce: Buffer(8),
+        ttl: 100,
+        type: 2,
+        version: 1,
+        objectPayload: Buffer("test"),
+      }))).to.throw(/insufficient/i);
+    });
   });
 
   describe("var_int", function() {
@@ -570,6 +580,7 @@ describe("Object types", function() {
       return getpubkey.encodeAsync({
         ttl: 100,
         to: "BM-2D8Jxw5yiepaQqxrx43iPPNfRqbvWoJLoU",
+        skipPow: true,
       }).then(function(buf) {
         expect(message.decode(buf).command).to.equal("object");
         return getpubkey.decodeAsync(buf, skipPow);
@@ -587,6 +598,7 @@ describe("Object types", function() {
       return getpubkey.encodeAsync({
         ttl: 100,
         to: "2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z",
+        skipPow: true,
       }).then(function(buf) {
         expect(message.decode(buf).command).to.equal("object");
         return getpubkey.decodeAsync(buf, skipPow);
@@ -599,6 +611,33 @@ describe("Object types", function() {
         expect(res.tag.toString("hex")).to.equal("facf1e3e6c74916203b7f714ca100d4d60604f0917696d0f09330f82f52bed1a");
       });
     });
+
+    it("shouldn't decode getpubkey with insufficient nonce", function(done) {
+      return getpubkey.encodeAsync({
+        ttl: 100,
+        to: "2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z",
+        skipPow: true,
+      }).then(getpubkey.decodeAsync).catch(function(err) {
+        expect(err.message).to.match(/insufficient/i);
+        done();
+      });
+    });
+
+    if (allTests) {
+      it("should encode and decode getpubkey with nonce", function() {
+        this.timeout(300000);
+        return getpubkey.encodePayloadAsync({
+          ttl: 100,
+          to: "2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z",
+        }).then(function(payload) {
+          expect(POW.check({ttl: 100, payload: payload})).to.be.true;;
+          return getpubkey.decodePayloadAsync(payload);
+        }).then(function(res) {
+          expect(res.ttl).to.be.at.most(100);
+          expect(res.tag.toString("hex")).to.equal("facf1e3e6c74916203b7f714ca100d4d60604f0917696d0f09330f82f52bed1a");
+        });
+      });
+    }
   });
 
   describe("pubkey", function() {
@@ -607,6 +646,7 @@ describe("Object types", function() {
         ttl: 123,
         from: from,
         to: "BM-onhypnh1UMhbQpmvdiPuG6soLLytYJAfH",
+        skipPow: true,
       }).then(function(buf) {
         expect(message.decode(buf).command).to.equal("object");
         return pubkey.decodeAsync(buf, skipPow);
@@ -627,6 +667,7 @@ describe("Object types", function() {
         ttl: 456,
         from: from,
         to: "BM-2D8Jxw5yiepaQqxrx43iPPNfRqbvWoJLoU",
+        skipPow: true,
       }).then(function(buf) {
         expect(message.decode(buf).command).to.equal("object");
         return pubkey.decodeAsync(buf, skipPow);
@@ -645,7 +686,7 @@ describe("Object types", function() {
     });
 
     it("should encode and decode pubkey v4", function() {
-      return pubkey.encodeAsync({ttl: 789, from: from, to: from})
+      return pubkey.encodeAsync({ttl: 789, from: from, to: from, skipPow: true})
       .then(function(buf) {
         expect(message.decode(buf).command).to.equal("object");
         return pubkey.decodeAsync(buf, {needed: from, skipPow: true});
@@ -663,6 +704,20 @@ describe("Object types", function() {
         expect(bufferEqual(res.tag, from.getTag())).to.be.true;
       });
     });
+
+    if (allTests) {
+      it("should encode and decode pubkey with nonce", function() {
+        this.timeout(300000);
+        return pubkey.encodePayloadAsync({ttl: 789, from: from, to: from})
+        .then(function(payload) {
+          expect(POW.check({ttl: 789, payload: payload})).to.be.true;;
+          return pubkey.decodePayloadAsync(payload, {needed: from});
+        }).then(function(res) {
+          expect(res.ttl).to.be.at.most(789);
+          expect(bufferEqual(res.tag, from.getTag())).to.be.true;
+        });
+      });
+    }
   });
 
   describe("msg", function() {
@@ -672,6 +727,7 @@ describe("Object types", function() {
         from: from,
         to: from,
         message: "test",
+        skipPow: true,
       }).then(function(buf) {
         expect(message.decode(buf).command).to.equal("object");
         return msg.decodeAsync(buf, {identities: [from], skipPow: true});
@@ -701,6 +757,7 @@ describe("Object types", function() {
         from: fromV2,
         to: fromV2,
         message: "test",
+        skipPow: true,
       }).then(function(buf) {
         expect(message.decode(buf).command).to.equal("object");
         return msg.decodeAsync(buf, {identities: [fromV2], skipPow: true});
@@ -730,6 +787,7 @@ describe("Object types", function() {
         from: from,
         to: from,
         message: "test",
+        skipPow: true,
       }).then(function(buf) {
         return msg.decodeAsync(buf, {identities: [], skipPow: true});
       }).catch(function(err) {
@@ -746,6 +804,7 @@ describe("Object types", function() {
         encoding: msg.SIMPLE,
         subject: "Тема",
         message: "Сообщение",
+        skipPow: true,
       }).then(function(buf) {
         return msg.decodeAsync(buf, {identities: [from], skipPow: true});
       }).then(function(res) {
@@ -761,11 +820,30 @@ describe("Object types", function() {
         from: from,
         to: from,
         message: Buffer(300000),
+        skipPow: true,
       }).catch(function(err) {
         expect(err.message).to.match(/too big/i);
         done();
       });
     });
+
+    if (allTests) {
+      it("should encode and decode msg with nonce", function() {
+        this.timeout(300000);
+        return msg.encodePayloadAsync({
+          ttl: 111,
+          from: from,
+          to: from,
+          message: "test",
+        }).then(function(payload) {
+          expect(POW.check({ttl: 111, payload: payload})).to.be.true;;
+          return msg.decodePayloadAsync(payload, {identities: from});
+        }).then(function(res) {
+          expect(res.ttl).to.be.at.most(111);
+          expect(res.message).to.equal("test");
+        });
+      });
+    }
   });
 
   describe("broadcast", function() {
@@ -774,6 +852,7 @@ describe("Object types", function() {
         ttl: 987,
         from: fromV3,
         message: "test",
+        skipPow: true,
       }).then(function(buf) {
         expect(message.decode(buf).command).to.equal("object");
         return broadcast.decodeAsync(buf, {subscriptions: fromV3, skipPow: true});
@@ -801,6 +880,7 @@ describe("Object types", function() {
         ttl: 999,
         from: fromV2,
         message: "test",
+        skipPow: true,
       }).then(function(buf) {
         expect(message.decode(buf).command).to.equal("object");
         return broadcast.decodeAsync(buf, {subscriptions: fromV2, skipPow: true});
@@ -828,11 +908,12 @@ describe("Object types", function() {
         ttl: 101,
         from: from,
         message: "キタ━━━(゜∀゜)━━━!!!!!",
+        skipPow: true,
       }).then(function(buf) {
         expect(message.decode(buf).command).to.equal("object");
         return broadcast.decodeAsync(buf, {subscriptions: [from], skipPow: true});
       }).then(function(res) {
-        expect(res.ttl).to.be.at.most(987);
+        expect(res.ttl).to.be.at.most(101);
         expect(res.type).to.equal(object.BROADCAST);
         expect(res.version).to.equal(5);
         expect(res.stream).to.equal(1);
@@ -855,6 +936,7 @@ describe("Object types", function() {
         ttl: 101,
         from: from,
         message: "test",
+        skipPow: true,
       }).then(function(buf) {
         return broadcast.decodeAsync(buf, {
           subscriptions: [fromV3],
@@ -871,11 +953,29 @@ describe("Object types", function() {
         ttl: 101,
         from: from,
         message: Buffer(300000),
+        skipPow: true,
       }).catch(function(err) {
         expect(err.message).to.match(/too big/i);
         done();
       });
     });
+
+    if (allTests) {
+      it("should encode and decode broadcast with nonce", function() {
+        this.timeout(300000);
+        return broadcast.encodePayloadAsync({
+          ttl: 101,
+          from: from,
+          message: "test",
+        }).then(function(payload) {
+          expect(POW.check({ttl: 101, payload: payload})).to.be.true;;
+          return broadcast.decodePayloadAsync(payload, {subscriptions: from});
+        }).then(function(res) {
+          expect(res.ttl).to.be.at.most(101);
+          expect(res.message).to.equal("test");
+        });
+      });
+    }
   });
 });
 
