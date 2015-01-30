@@ -501,7 +501,8 @@ describe("Object types", function() {
   var signPublicKey = bmcrypto.getPublic(signPrivateKey);
   var encPrivateKey = Buffer("9f9969c93c2d186787a7653f70e49be34c03c4a853e6ad0c867db0946bc433c6", "hex");
   var encPublicKey = bmcrypto.getPublic(encPrivateKey);
-  var from = Address({
+  var fromV2 = Address({
+    version: 2,
     signPrivateKey: signPrivateKey,
     encPrivateKey: encPrivateKey,
   });
@@ -510,6 +511,11 @@ describe("Object types", function() {
     signPrivateKey: signPrivateKey,
     encPrivateKey: encPrivateKey,
   });
+  var fromV4 = Address({
+    signPrivateKey: signPrivateKey,
+    encPrivateKey: encPrivateKey,
+  });
+  var from = fromV4;
 
   it("should get type of the encoded object message", function() {
     var encoded = object.encode({
@@ -665,6 +671,35 @@ describe("Object types", function() {
       });
     });
 
+    it("should encode and decode msg for address v2", function() {
+      return msg.encodeAsync({
+        ttl: 111,
+        from: fromV2,
+        to: fromV2,
+        message: "test",
+      }).then(function(buf) {
+        expect(message.decode(buf).command).to.equal("object");
+        return msg.decodeAsync(buf, {identities: [fromV2]});
+      }).then(function(res) {
+        expect(res.ttl).to.be.at.most(111);
+        expect(res.type).to.equal(object.MSG);
+        expect(res.version).to.equal(1);
+        expect(res.stream).to.equal(1);
+        expect(res.senderVersion).to.equal(2);
+        expect(res.senderStream).to.equal(1);
+        expect(res.behavior.get(PubkeyBitfield.DOES_ACK)).to.be.true;
+        expect(bufferEqual(res.signPublicKey, signPublicKey)).to.be.true;
+        expect(bufferEqual(res.encPublicKey, encPublicKey)).to.be.true;
+        expect(res).to.not.have.property("nonceTrialsPerByte");
+        expect(res).to.not.have.property("payloadLengthExtraBytes");
+        expect(bufferEqual(res.ripe, fromV2.ripe)).to.be.true;
+        expect(res.encoding).to.equal(msg.TRIVIAL);
+        expect(res.message).to.equal("test");
+        expect(res).to.not.have.property("subject");
+        expect(Buffer.isBuffer(res.signature)).to.be.true;
+      });
+    });
+
     it("shouldn't decode msg without identities", function(done) {
       return msg.encodeAsync({
         ttl: 111,
@@ -717,6 +752,33 @@ describe("Object types", function() {
         expect(bufferEqual(res.encPublicKey, encPublicKey)).to.be.true;
         expect(res.nonceTrialsPerByte).to.equal(1000);
         expect(res.payloadLengthExtraBytes).to.equal(1000);
+        expect(res.encoding).to.equal(msg.TRIVIAL);
+        expect(res.message).to.equal("test");
+        expect(res).to.not.have.property("subject");
+        expect(Buffer.isBuffer(res.signature)).to.be.true;
+      });
+    });
+
+    it("should encode and decode broadcast v4 for address v2", function() {
+      return broadcast.encodeAsync({
+        ttl: 999,
+        from: fromV2,
+        message: "test",
+      }).then(function(buf) {
+        expect(message.decode(buf).command).to.equal("object");
+        return broadcast.decodeAsync(buf, {subscriptions: fromV2});
+      }).then(function(res) {
+        expect(res.ttl).to.be.at.most(999);
+        expect(res.type).to.equal(object.BROADCAST);
+        expect(res.version).to.equal(4);
+        expect(res.stream).to.equal(1);
+        expect(res.senderVersion).to.equal(2);
+        expect(res.senderStream).to.equal(1);
+        expect(res.behavior.get(PubkeyBitfield.DOES_ACK)).to.be.true;
+        expect(bufferEqual(res.signPublicKey, signPublicKey)).to.be.true;
+        expect(bufferEqual(res.encPublicKey, encPublicKey)).to.be.true;
+        expect(res).to.not.have.property("nonceTrialsPerByte");
+        expect(res).to.not.have.property("payloadLengthExtraBytes");
         expect(res.encoding).to.equal(msg.TRIVIAL);
         expect(res.message).to.equal("test");
         expect(res).to.not.have.property("subject");
