@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: user-agent.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: user-agent.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Working with Bitmessage user agents.
+ * @see {@link https://bitmessage.org/wiki/User_Agent}
+ * @module bitmessage/user-agent
+ */
+
+"use strict";
+
+var var_str = require("./structs").var_str;
+var BM_NAME = require("../package.json").name;
+var BM_VERSION = require("../package.json").version;
+
+/**
+ * User agent of the bitmessage library itself.
+ * @constant {Object[]}
+ * @static
+ */
+var SELF = exports.SELF = [{name: BM_NAME, version: BM_VERSION}];
+
+/**
+ * Decode user agent's `var_str`. Just an alias for
+ * [var_str.decode]{@link module:bitmessage/structs.var_str.decode}.
+ * @function
+ */
+exports.decode = var_str.decode;
+
+/**
+ * Parse raw user agent into software stack list. Most underlying
+ * software comes first.  
+ * NOTE: Decoding is rather loose, it won't fail on bad user agent
+ * format because it's not that important.
+ * @param {string} str - Raw user agent string
+ * @return {Object[]} Parsed user agent.
+ */
+exports.parse = function(str) {
+  var software = [];
+  if (str.length > 2 &amp;&amp; str[0] === "/" &amp;&amp; str[str.length - 1] === "/") {
+    software = str.slice(1, -1).split("/");
+    software = software.map(function(str) {
+      // That's more readable than /([^:]*)(?::([^(]*)(?:\(([^)]*))?)?/
+      var soft = {name: str};
+      var semicolon = soft.name.indexOf(":");
+      if (semicolon !== -1) {
+        soft.version = soft.name.slice(semicolon + 1);
+        soft.name = soft.name.slice(0, semicolon);
+        var obracket = soft.version.indexOf("(");
+        if (obracket !== -1) {
+          soft.comments = soft.version.slice(obracket + 1);
+          soft.version = soft.version.slice(0, obracket);
+          var cbracket = soft.comments.indexOf(")");
+          if (cbracket !== -1) {
+            soft.comments = soft.comments.slice(0, cbracket);
+          }
+        }
+      }
+      return soft;
+    });
+  }
+  return software;
+};
+
+/**
+ * Encode user agent into `var_str` Buffer. Most underlying software
+ * comes first.
+ * @param {(Object[]|string[]|string)} software - List of software to
+ * encode or just raw user agent string
+ * @return {Buffer} Encoded user agent.
+ * @function
+ * @static
+ */
+var encode = exports.encode = function(software) {
+  var ua;
+  if (Array.isArray(software)) {
+    ua = software.map(function(soft) {
+      if (typeof soft === "string") {
+        return soft;
+      }
+      var version = soft.version || "0.0.0";
+      var str = soft.name + ":" + version;
+      if (soft.comments) {
+        str += "(" + soft.comments + ")";
+      }
+      return str;
+    }).join("/");
+    ua = "/" + ua + "/";
+  } else {
+    ua = software;
+  }
+  return var_str.encode(ua);
+};
+
+/**
+ * Encode bitmessage's user agent.
+ * @return {Buffer} Encoded user agent.
+ */
+exports.encodeSelf = function() {
+  return encode(SELF);
+};
+
+/**
+ * Encode user agent with bitmessage's user agent underneath. Most
+ * underlying software comes first.
+ * @param {(Object[]|string[]|Object|string)} software - List of
+ * software to encode
+ * @return {Buffer} Encoded user agent.
+ */
+exports.encodeSelfWith = function(software) {
+  software = SELF.concat(software);
+  return encode(software);
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-bitmessage.html">bitmessage</a></li><li><a href="module-bitmessage_address.html">bitmessage/address</a></li><li><a href="module-bitmessage_crypto.html">bitmessage/crypto</a></li><li><a href="module-bitmessage_messages.html">bitmessage/messages</a></li><li><a href="module-bitmessage_objects.html">bitmessage/objects</a></li><li><a href="module-bitmessage_pow.html">bitmessage/pow</a></li><li><a href="module-bitmessage_structs.html">bitmessage/structs</a></li><li><a href="module-bitmessage_user-agent.html">bitmessage/user-agent</a></li><li><a href="module-bitmessage_wif.html">bitmessage/wif</a></li></ul><h3>Classes</h3><ul><li><a href="module-bitmessage_address.Address.html">Address</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-bitmessage_messages.addr.html">addr</a></li><li><a href="module-bitmessage_messages.error.html">error</a></li><li><a href="module-bitmessage_messages.getdata.html">getdata</a></li><li><a href="module-bitmessage_messages.inv.html">inv</a></li><li><a href="module-bitmessage_messages.version.html">version</a></li><li><a href="module-bitmessage_objects.broadcast.html">broadcast</a></li><li><a href="module-bitmessage_objects.getpubkey.html">getpubkey</a></li><li><a href="module-bitmessage_objects.msg.html">msg</a></li><li><a href="module-bitmessage_objects.pubkey.html">pubkey</a></li><li><a href="module-bitmessage_structs.encrypted.html">encrypted</a></li><li><a href="module-bitmessage_structs.inv_vect.html">inv_vect</a></li><li><a href="module-bitmessage_structs.message.html">message</a></li><li><a href="module-bitmessage_structs.net_addr.html">net_addr</a></li><li><a href="module-bitmessage_structs.object.html">object</a></li><li><a href="module-bitmessage_structs.PubkeyBitfield.html">PubkeyBitfield</a></li><li><a href="module-bitmessage_structs.ServicesBitfield.html">ServicesBitfield</a></li><li><a href="module-bitmessage_structs.var_int.html">var_int</a></li><li><a href="module-bitmessage_structs.var_int_list.html">var_int_list</a></li><li><a href="module-bitmessage_structs.var_str.html">var_str</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta1</a> on Sat Jan 31 2015 14:53:21 GMT+0300 (MSK)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
