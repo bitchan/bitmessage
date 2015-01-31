@@ -28,22 +28,26 @@
         <article>
             <pre class="prettyprint source linenums"><code>/**
  * Isomorphic Bitmessage crypto module. Reexports platform-dependent
- * implementations and and also some common routines.
+ * implementations and also some common routines.
  * @module bitmessage/crypto
  */
 
 "use strict";
 
 var eccrypto = require("eccrypto");
+var assert = require("./_util").assert;
 var platform = require("./platform");
 
+var promise = platform.promise;
+
 /**
- * Calculate SHA-512 hash.
+ * Calculate SHA-1 hash.
  * @param {Buffer} buf - Input data
  * @return {Buffer} Resulting hash.
  * @function
+ * @static
  */
-exports.sha512 = platform.sha512;
+var sha1 = exports.sha1 = platform.sha1;
 
 /**
  * Calculate SHA-256 hash.
@@ -52,6 +56,14 @@ exports.sha512 = platform.sha512;
  * @function
  */
 exports.sha256 = platform.sha256;
+
+/**
+ * Calculate SHA-512 hash.
+ * @param {Buffer} buf - Input data
+ * @return {Buffer} Resulting hash.
+ * @function
+ */
+exports.sha512 = platform.sha512;
 
 /**
  * Calculate RIPEMD-160 hash.
@@ -78,12 +90,119 @@ exports.getPrivate = function() {
 };
 
 /**
- * Generate public key for a given private key.
- * @param {Buffer} privateKey - Private key
- * @return {Buffer} Public key.
+ * Generate public key for the given private key.
+ * @param {Buffer} privateKey - A 32-byte private key
+ * @return {Buffer} A 65-byte (uncompressed) public key.
  * @function
  */
 exports.getPublic = eccrypto.getPublic;
+
+/**
+ * Sign message using ecdsa-with-sha1 scheme.
+ * @param {Buffer} privateKey - A 32-byte private key
+ * @param {Buffer} msg - The message being signed
+ * @return {Promise.&lt;Buffer>} A promise that contains signature in DER
+ * format when fulfilled.
+ */
+exports.sign = function(privateKey, msg) {
+  var hash = sha1(msg);
+  return eccrypto.sign(privateKey, hash);
+};
+
+/**
+ * Verify signature using ecdsa-with-sha1 scheme.
+ * @param {Buffer} publicKey - A 65-byte public key
+ * @param {Buffer} msg - The message being verified
+ * @param {Buffer} sig - The signature in DER format
+ * @return {Promise.&lt;undefined>} A promise that resolves on correct
+ * signature and rejects on bad key or signature.
+ */
+exports.verify = function(publicKey, msg, sig) {
+  var hash = sha1(msg);
+  return eccrypto.verify(publicKey, hash, sig);
+};
+
+var SECP256K1_TYPE = 714;
+
+// We define this structure here to avoid circular imports. However we
+// rexport and document it in `structs` module for consistency.
+var encrypted = exports.encrypted = {
+  decode: function(buf) {
+    assert(buf.length >= 118, "Buffer is too small");
+    assert(buf.readUInt16BE(16, true) === SECP256K1_TYPE, "Bad curve type");
+    assert(buf.readUInt16BE(18, true) === 32, "Bad Rx length");
+    assert(buf.readUInt16BE(52, true) === 32, "Bad Ry length");
+    var iv = new Buffer(16);
+    buf.copy(iv, 0, 0, 16);
+    var ephemPublicKey = new Buffer(65);
+    ephemPublicKey[0] = 0x04;
+    buf.copy(ephemPublicKey, 1, 20, 52);
+    buf.copy(ephemPublicKey, 33, 54, 86);
+    // NOTE(Kagami): We do copy instead of slice to protect against
+    // possible source buffer modification by user.
+    var ciphertext = new Buffer(buf.length - 118);
+    buf.copy(ciphertext, 0, 86, buf.length - 32);
+    var mac = new Buffer(32);
+    buf.copy(mac, 0, buf.length - 32);
+    return {
+      iv: iv,
+      ephemPublicKey: ephemPublicKey,
+      ciphertext: ciphertext,
+      mac: mac,
+    };
+  },
+
+  encode: function(opts) {
+    assert(opts.iv.length === 16, "Bad IV");
+    assert(opts.ephemPublicKey.length === 65, "Bad public key");
+    assert(opts.mac.length === 32, "Bad MAC");
+    // 16 + 2 + 2 + 32 + 2 + 32 + ? + 32
+    var buf = new Buffer(118 + opts.ciphertext.length);
+    opts.iv.copy(buf);
+    buf.writeUInt16BE(SECP256K1_TYPE, 16, true);  // Curve type
+    buf.writeUInt16BE(32, 18, true);  // Rx length
+    opts.ephemPublicKey.copy(buf, 20, 1, 33);  // Rx
+    buf.writeUInt16BE(32, 52, true);  // Ry length
+    opts.ephemPublicKey.copy(buf, 54, 33);  // Ry
+    opts.ciphertext.copy(buf, 86);
+    opts.mac.copy(buf, 86 + opts.ciphertext.length);
+    return buf;
+  },
+};
+
+/**
+ * Encrypt message for given recepient's public key.
+ * @param {Buffer} publicKeyTo - Recipient's public key (65 bytes)
+ * @param {Buffer} msg - The message being encrypted
+ * @param {?{?iv: Buffer, ?ephemPrivateKey: Buffer}} opts - You may also
+ * specify initialization vector (16 bytes) and ephemeral private key
+ * (32 bytes) to get deterministic results.
+ * @return {Promise.&lt;Buffer>} - A promise that resolves with the buffer
+ * in `encrypted` format successful encryption and rejects on failure.
+ */
+// TODO(Kagami): Properly document `opts`. Documenting multiple
+// function arguments with options object at the end for now gives
+// strange results (probably a bug in jsdoc).
+exports.encrypt = function(publicKeyTo, msg, opts) {
+  return eccrypto.encrypt(publicKeyTo, msg, opts).then(function(encObj) {
+    return encrypted.encode(encObj);
+  });
+};
+
+/**
+ * Decrypt message using given private key.
+ * @param {Buffer} privateKey - A 32-byte private key of recepient of
+ * the mesage
+ * @param {Buffer} buf - Encrypted data
+ * @return {Promise.&lt;Buffer>} - A promise that resolves with the
+ * plaintext on successful decryption and rejects on failure.
+ */
+exports.decrypt = function(privateKey, buf) {
+  return new promise(function(resolve) {
+    var encObj = encrypted.decode(buf);
+    resolve(eccrypto.decrypt(privateKey, encObj));
+  });
+};
 </code></pre>
         </article>
     </section>
@@ -94,13 +213,13 @@ exports.getPublic = eccrypto.getPublic;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-bitmessage.html">bitmessage</a></li><li><a href="module-bitmessage_address.html">bitmessage/address</a></li><li><a href="module-bitmessage_crypto.html">bitmessage/crypto</a></li><li><a href="module-bitmessage_messages.html">bitmessage/messages</a></li><li><a href="module-bitmessage_objects.html">bitmessage/objects</a></li><li><a href="module-bitmessage_pow.html">bitmessage/pow</a></li><li><a href="module-bitmessage_structs.html">bitmessage/structs</a></li><li><a href="module-bitmessage_wif.html">bitmessage/wif</a></li></ul><h3>Classes</h3><ul><li><a href="module-bitmessage_address.Address.html">Address</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-bitmessage_structs.var_int.html">var_int</a></li><li><a href="module-bitmessage_structs.var_int_list.html">var_int_list</a></li><li><a href="module-bitmessage_structs.var_str.html">var_str</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-bitmessage.html">bitmessage</a></li><li><a href="module-bitmessage_address.html">bitmessage/address</a></li><li><a href="module-bitmessage_crypto.html">bitmessage/crypto</a></li><li><a href="module-bitmessage_messages.html">bitmessage/messages</a></li><li><a href="module-bitmessage_objects.html">bitmessage/objects</a></li><li><a href="module-bitmessage_pow.html">bitmessage/pow</a></li><li><a href="module-bitmessage_structs.html">bitmessage/structs</a></li><li><a href="module-bitmessage_user-agent.html">bitmessage/user-agent</a></li><li><a href="module-bitmessage_wif.html">bitmessage/wif</a></li></ul><h3>Classes</h3><ul><li><a href="module-bitmessage_address.Address.html">Address</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-bitmessage_messages.addr.html">addr</a></li><li><a href="module-bitmessage_messages.error.html">error</a></li><li><a href="module-bitmessage_messages.getdata.html">getdata</a></li><li><a href="module-bitmessage_messages.inv.html">inv</a></li><li><a href="module-bitmessage_messages.version.html">version</a></li><li><a href="module-bitmessage_objects.broadcast.html">broadcast</a></li><li><a href="module-bitmessage_objects.getpubkey.html">getpubkey</a></li><li><a href="module-bitmessage_objects.msg.html">msg</a></li><li><a href="module-bitmessage_objects.pubkey.html">pubkey</a></li><li><a href="module-bitmessage_structs.encrypted.html">encrypted</a></li><li><a href="module-bitmessage_structs.inv_vect.html">inv_vect</a></li><li><a href="module-bitmessage_structs.message.html">message</a></li><li><a href="module-bitmessage_structs.net_addr.html">net_addr</a></li><li><a href="module-bitmessage_structs.object.html">object</a></li><li><a href="module-bitmessage_structs.PubkeyBitfield.html">PubkeyBitfield</a></li><li><a href="module-bitmessage_structs.ServicesBitfield.html">ServicesBitfield</a></li><li><a href="module-bitmessage_structs.var_int.html">var_int</a></li><li><a href="module-bitmessage_structs.var_int_list.html">var_int_list</a></li><li><a href="module-bitmessage_structs.var_str.html">var_str</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha13</a> on Sat Jan 03 2015 19:33:03 GMT+0300 (MSK)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta1</a> on Sat Jan 31 2015 14:53:21 GMT+0300 (MSK)
 </footer>
 
 <script> prettyPrint(); </script>

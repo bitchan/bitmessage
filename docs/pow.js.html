@@ -31,6 +31,95 @@
  * @see {@link https://bitmessage.org/wiki/Proof_of_work}
  * @module bitmessage/pow
  */
+// TODO(Kagami): Find a way how to document object params properly.
+
+"use strict";
+
+var objectAssign = Object.assign || require("object-assign");
+var bmcrypto = require("./crypto");
+var platform = require("./platform");
+var util = require("./_util");
+
+/**
+ * Calculate target.
+ * @param {Object} opts - Target options
+ * @return {number} Target.
+ * @function
+ * @static
+ */
+// Just a wrapper around platform-specific implementation.
+var getTarget = exports.getTarget = function(opts) {
+  var payloadLength = opts.payloadLength || opts.payload.length;
+  return platform.getTarget({
+    ttl: opts.ttl,
+    payloadLength: payloadLength,
+    nonceTrialsPerByte: util.getTrials(opts),
+    payloadLengthExtraBytes: util.getExtraBytes(opts),
+  });
+};
+
+/**
+ * Check a POW.
+ * @param {Object} opts - Proof of work options
+ * @return {boolean} Is the proof of work sufficient.
+ */
+exports.check = function(opts) {
+  var initialHash;
+  var nonce;
+  var target = opts.target;
+  if (target === undefined) {
+    target = getTarget(opts);
+  }
+  if (opts.payload) {
+    nonce = opts.payload.slice(0, 8);
+    initialHash = bmcrypto.sha512(opts.payload.slice(8));
+  } else {
+    if (typeof opts.nonce === "number") {
+      nonce = new Buffer(8);
+      // High 32 bits.
+      nonce.writeUInt32BE(Math.floor(opts.nonce / 4294967296), 0, true);
+      // Low 32 bits.
+      nonce.writeUInt32BE(opts.nonce % 4294967296, 4, true);
+    } else {
+      nonce = opts.nonce;
+    }
+    initialHash = opts.initialHash;
+  }
+  var targetHi = Math.floor(target / 4294967296);
+  var targetLo = target % 4294967296;
+  var dataToHash = Buffer.concat([nonce, initialHash]);
+  var resultHash = bmcrypto.sha512(bmcrypto.sha512(dataToHash));
+  var trialHi = resultHash.readUInt32BE(0, true);
+  if (trialHi > targetHi) {
+    return false;
+  } else if (trialHi &lt; targetHi) {
+    return true;
+  } else {
+    var trialLo = resultHash.readUInt32BE(4, true);
+    return trialLo &lt;= targetLo;
+  }
+};
+
+/**
+ * Do a POW.
+ * @param {Object} opts - Proof of work options
+ * @param {?Buffer} opts.data - Object message payload without nonce to
+ * get the initial hash from
+ * @param {?Buffer} opts.initialHash - Or already computed initial hash
+ * @param {number} opts.target - POW target
+ * @return {Promise.&lt;number>} A promise that contains computed nonce for
+ * the given target when fulfilled.
+ */
+exports.doAsync = function(opts) {
+  var initialHash;
+  if (opts.data) {
+    initialHash = bmcrypto.sha512(opts.data);
+  } else {
+    initialHash = opts.initialHash;
+  }
+  opts = objectAssign({}, opts, {initialHash: initialHash});
+  return platform.pow(opts);
+};
 </code></pre>
         </article>
     </section>
@@ -41,13 +130,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-bitmessage.html">bitmessage</a></li><li><a href="module-bitmessage_address.html">bitmessage/address</a></li><li><a href="module-bitmessage_crypto.html">bitmessage/crypto</a></li><li><a href="module-bitmessage_messages.html">bitmessage/messages</a></li><li><a href="module-bitmessage_objects.html">bitmessage/objects</a></li><li><a href="module-bitmessage_pow.html">bitmessage/pow</a></li><li><a href="module-bitmessage_structs.html">bitmessage/structs</a></li><li><a href="module-bitmessage_wif.html">bitmessage/wif</a></li></ul><h3>Classes</h3><ul><li><a href="module-bitmessage_address.Address.html">Address</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-bitmessage_structs.var_int.html">var_int</a></li><li><a href="module-bitmessage_structs.var_int_list.html">var_int_list</a></li><li><a href="module-bitmessage_structs.var_str.html">var_str</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-bitmessage.html">bitmessage</a></li><li><a href="module-bitmessage_address.html">bitmessage/address</a></li><li><a href="module-bitmessage_crypto.html">bitmessage/crypto</a></li><li><a href="module-bitmessage_messages.html">bitmessage/messages</a></li><li><a href="module-bitmessage_objects.html">bitmessage/objects</a></li><li><a href="module-bitmessage_pow.html">bitmessage/pow</a></li><li><a href="module-bitmessage_structs.html">bitmessage/structs</a></li><li><a href="module-bitmessage_user-agent.html">bitmessage/user-agent</a></li><li><a href="module-bitmessage_wif.html">bitmessage/wif</a></li></ul><h3>Classes</h3><ul><li><a href="module-bitmessage_address.Address.html">Address</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-bitmessage_messages.addr.html">addr</a></li><li><a href="module-bitmessage_messages.error.html">error</a></li><li><a href="module-bitmessage_messages.getdata.html">getdata</a></li><li><a href="module-bitmessage_messages.inv.html">inv</a></li><li><a href="module-bitmessage_messages.version.html">version</a></li><li><a href="module-bitmessage_objects.broadcast.html">broadcast</a></li><li><a href="module-bitmessage_objects.getpubkey.html">getpubkey</a></li><li><a href="module-bitmessage_objects.msg.html">msg</a></li><li><a href="module-bitmessage_objects.pubkey.html">pubkey</a></li><li><a href="module-bitmessage_structs.encrypted.html">encrypted</a></li><li><a href="module-bitmessage_structs.inv_vect.html">inv_vect</a></li><li><a href="module-bitmessage_structs.message.html">message</a></li><li><a href="module-bitmessage_structs.net_addr.html">net_addr</a></li><li><a href="module-bitmessage_structs.object.html">object</a></li><li><a href="module-bitmessage_structs.PubkeyBitfield.html">PubkeyBitfield</a></li><li><a href="module-bitmessage_structs.ServicesBitfield.html">ServicesBitfield</a></li><li><a href="module-bitmessage_structs.var_int.html">var_int</a></li><li><a href="module-bitmessage_structs.var_int_list.html">var_int_list</a></li><li><a href="module-bitmessage_structs.var_str.html">var_str</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha13</a> on Sat Jan 03 2015 19:33:03 GMT+0300 (MSK)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta1</a> on Sat Jan 31 2015 14:53:21 GMT+0300 (MSK)
 </footer>
 
 <script> prettyPrint(); </script>
