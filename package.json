@@ -35,7 +35,7 @@
   "homepage": "https://github.com/bitchan/bitmessage",
   "devDependencies": {
     "chai": "*",
-    "jsdoc": "^3.3.0-alpha13",
+    "jsdoc": "^3.3.0-beta1",
     "jshint": "*",
     "karma": "^0.12.31",
     "karma-browserify": "^2.0.0",
