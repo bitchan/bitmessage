@@ -56,16 +56,14 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
 - [x] High-level classes
   - [x] Address
   - [x] UserAgent
+- [ ] Network
+  - [ ] TCP (Node.js only)
+  - [ ] WebSocket
+  - [ ] WebRTC
 - [ ] Parse PyBitmessage configs
   - [ ] keys.dat
   - [ ] knownnodes.dat
   - [ ] messages.dat
-
-## Network feature matrix (Node.js only)
-
-- [ ] Bootstrap
-- [ ] Connect to the network
-- [ ] Accept connections
 
 ## Usage
 
