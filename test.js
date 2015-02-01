@@ -407,10 +407,12 @@ describe("Message types", function() {
 
   describe("version", function() {
     it("should encode and decode", function() {
+      var nonce = Buffer(8);
       var encoded = version.encode({
         remoteHost: "1.2.3.4",
         remotePort: 48444,
         port: 8444,
+        nonce: nonce,
       });
       expect(message.decode(encoded).command).to.equal("version");
       var res = version.decode(encoded);
@@ -420,7 +422,7 @@ describe("Message types", function() {
       expect(res.remoteHost).to.equal("1.2.3.4");
       expect(res.remotePort).to.equal(48444);
       expect(res.port).to.equal(8444);
-      expect(bufferEqual(res.nonce, version.NONCE)).to.be.true;
+      expect(bufferEqual(res.nonce, nonce)).to.be.true;
       expect(UserAgent.parse(res.userAgent)).to.deep.equal(UserAgent.SELF);
       expect(res.streamNumbers).to.deep.equal([1]);
       expect(res.length).to.equal(101);
@@ -432,8 +434,17 @@ describe("Message types", function() {
         remotePort: 48444,
         port: 8444,
         userAgent: "/test:0.0.1/",
+        nonce: Buffer(8),
       }));
       expect(res.userAgent).to.equal("/test:0.0.1/");
+    });
+
+    it("should fail on connection to self", function() {
+      expect(version.decode.bind(null, version.encode({
+        remoteHost: "1.2.3.4",
+        remotePort: 48444,
+        port: 8444,
+      }))).to.throw(/connection to self/i);
     });
   });
 
