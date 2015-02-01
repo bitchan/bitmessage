@@ -138,6 +138,12 @@ describe("Common structures", function() {
     it("should encode", function() {
       expect(message.encode("test", Buffer("payload")).toString("hex")).to.equal("e9beb4d97465737400000000000000000000000770b33ce97061796c6f6164");
     });
+
+    it("should encode empty payload without second argument", function() {
+      var res = message.decode(message.encode("ping"));
+      expect(res.command).to.equal("ping");
+      expect(res.payload.toString("hex")).to.equal("");
+    });
   });
 
   describe("object", function() {
