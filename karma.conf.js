@@ -1,10 +1,5 @@
 process.env.CHROME_BIN = "chromium-browser";
-var allTests = !!process.env.ALL_TESTS;
-var files = ["test.js"];
-if (allTests) {
-  // Kludgy way to pass a variable to `test.js`.
-  files.unshift("karma-all-tests.js");
-};
+var allTests = process.env.ALL_TESTS === "1";
 
 module.exports = function(config) {
   config.set({
@@ -19,14 +14,19 @@ module.exports = function(config) {
 
 
     // list of files / patterns to load in the browser
-    files: files,
+    files: ["test.js"],
 
 
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      "test.js": ["browserify"],
+      "test.js": ["browserify", "env"],
     },
+
+
+    envPreprocessor: [
+      "ALL_TESTS",
+    ],
 
 
     // list of files to exclude

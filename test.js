@@ -1,7 +1,5 @@
 var expect = require("chai").expect;
-var allTests = typeof window === "undefined" ?
-               !!process.env.ALL_TESTS :
-               window.ALL_TESTS;
+var allTests = (global.__env__ || process.env).ALL_TESTS === "1";
 
 var bufferEqual = require("buffer-equal");
 var bitmessage = require("./lib");
