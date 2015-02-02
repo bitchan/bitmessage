@@ -2,8 +2,8 @@ var expect = require("chai").expect;
 var allTests = (global.__env__ || process.env).ALL_TESTS === "1";
 
 var bufferEqual = require("buffer-equal");
-var bitmessage = require("./lib");
-var bmcrypto = require("./lib/crypto");
+var bitmessage = require("../lib");
+var bmcrypto = require("../lib/crypto");
 var structs = bitmessage.structs;
 var message = structs.message;
 var object = structs.object;
