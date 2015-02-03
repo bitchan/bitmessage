@@ -1,7 +1,7 @@
 var bitmessage = require("../lib");
 var structs = bitmessage.structs;
 var message = structs.message;
-// var WsTransport = require("../lib/net/ws").Transport;
+var WsTransport = require("../lib/net/ws").Transport;
 
 if (!process.browser) {
   var TcpTransport = require("../lib/net/tcp").Transport;
