@@ -30,7 +30,7 @@ module.exports = function() {
       } catch(e) {
         console.log(e.stack);
       }
-      if (err) console.log(err.stack);
+      if (err && err.stack) console.log(err.stack);
       if (doExit) process.exit(1);
     };
   }
