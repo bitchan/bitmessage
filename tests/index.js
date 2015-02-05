@@ -7,7 +7,7 @@ if (testMode !== "functional") {
 }
 
 if (testMode !== "unit") {
-  // For Browser tests nodes are runned from karma.conf.js because we
+  // For Browser tests nodes are being run from karma.conf.js because we
   // are _already_ in browser context here.
   if (!process.browser) require("./run-test-nodes.js")();
 
