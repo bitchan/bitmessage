@@ -383,7 +383,7 @@ describe("Common structures", function() {
       expect(net_addr.decode(encoded).host).to.equal("127.0.0.1");
     });
 
-    it("should encode bad IPv4", function() {
+    it("shouldn't encode bad IPv4", function() {
       var opts = {host: " 127.0.0.1", port: 1234};
       expect(net_addr.encode.bind(null, opts)).to.throw(/bad octet/i);
     });

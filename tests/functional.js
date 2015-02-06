@@ -27,6 +27,7 @@ if (!process.browser) {
     });
 
     it("should resolve DNS seeds on bootstrap", function() {
+      this.timeout(10000);
       var tcp2 = new TcpTransport({
         dnsSeeds: [["bootstrap8444.bitmessage.org", 8444]],
       });
@@ -37,6 +38,7 @@ if (!process.browser) {
     });
 
     it("should return hardcoded seeds on bootstrap", function() {
+      this.timeout(10000);
       var tcp3 = new TcpTransport({
         seeds: [["1.1.1.1", 8080]],
         dnsSeeds: [["bootstrap8444.bitmessage.org", 8444]],

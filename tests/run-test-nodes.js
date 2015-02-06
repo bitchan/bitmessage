@@ -6,16 +6,13 @@
 var path = require("path");
 var child = require("child_process");
 
-var TCP_NODE_PATH = path.join(__dirname, "tcp-node.js");
-var WS_NODE_PATH = path.join(__dirname, "ws-node.js");
-
-function spawn(path) {
-  var p = child.spawn("node", [path]);
+function spawn(name) {
+  var p = child.spawn("node", [path.join(__dirname, name)]);
   p.stdout.on("data", function(data) {
-    console.log("Info from", path, ":", data.toString().trim());
+    console.log("Info from " + name + ": " + data.toString().trim());
   });
   p.stderr.on("data", function(err) {
-    console.log("Error from", path, ":", err.toString());
+    console.log("Error from " + name + ": " + err.toString().trim());
   });
   return p;
 }
@@ -38,9 +35,10 @@ module.exports = function() {
     };
   }
 
-  var tcpNode = spawn(TCP_NODE_PATH);
-  var wsNode = spawn(WS_NODE_PATH);
   process.on("exit", cleanup());
   process.on("SIGINT", cleanup(true));
   process.on("uncaughtException", cleanup(true));
+
+  var tcpNode = spawn("tcp-node.js");
+  var wsNode = spawn("ws-node.js");
 };
