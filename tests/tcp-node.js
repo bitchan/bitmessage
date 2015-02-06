@@ -1,4 +1,4 @@
-var TcpTransport = require("../lib/net/tcp").Transport;
+var TcpTransport = require("../lib/net/tcp");
 
 function start() {
   var tcp = new TcpTransport();

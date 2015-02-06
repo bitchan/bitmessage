@@ -3,12 +3,12 @@ var expect = require("chai").expect;
 var bitmessage = require("../lib");
 var structs = bitmessage.structs;
 var message = structs.message;
-var WsTransport = require("../lib/net/ws").Transport;
+var WsTransport = require("../lib/net/ws");
 
 var TcpTransport, tcp;
 
 if (!process.browser) {
-  TcpTransport = require("../lib/net/tcp").Transport;
+  TcpTransport = require("../lib/net/tcp");
 
   describe("TCP transport", function() {
     before(function(done) {
