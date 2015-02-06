@@ -346,6 +346,16 @@ describe("Common structures", function() {
       expect(net_addr.encode({short: true, services: ServicesBitfield().set(ServicesBitfield.NODE_NETWORK), host: "127.0.0.1", port: 8444}).toString("hex")).to.equal("000000000000000100000000000000000000ffff7f00000120fc");
       expect(net_addr.encode({short: true, host: "::1", port: 65000}).toString("hex")).to.equal("000000000000000100000000000000000000000000000001fde8");
     });
+
+    it("should encode IPv4-mapped IPv6", function() {
+      var encoded = net_addr.encode({host: "::ffff:127.0.0.1", port: 1234});
+      expect(net_addr.decode(encoded).host).to.equal("127.0.0.1");
+    });
+
+    it("should encode bad IPv4", function() {
+      var opts = {host: " 127.0.0.1", port: 1234};
+      expect(net_addr.encode.bind(null, opts)).to.throw(/bad octet/i);
+    });
   });
 
   describe("inv_vect", function() {
