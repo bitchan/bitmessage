@@ -11,6 +11,9 @@ var WS_NODE_PATH = path.join(__dirname, "ws-node.js");
 
 function spawn(path) {
   var p = child.spawn("node", [path]);
+  p.stdout.on("data", function(data) {
+    console.log("Info from", path, ":", data.toString().trim());
+  });
   p.stderr.on("data", function(err) {
     console.log("Error from", path, ":", err.toString());
   });
