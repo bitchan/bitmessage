@@ -142,6 +142,37 @@ describe("Common structures", function() {
       expect(res.command).to.equal("ping");
       expect(res.payload.toString("hex")).to.equal("");
     });
+
+    it("should decode messages in stream mode", function() {
+      var res = message.tryDecode(Buffer(""));
+      expect(res).to.not.exist;
+
+      res = message.tryDecode(Buffer(25));
+      expect(res.error).to.match(/magic not found/i);
+      expect(res.rest.toString("hex")).to.equal("");
+      expect(res).to.not.have.property("message");
+
+      res = message.tryDecode(message.encode("test", Buffer([1,2,3])));
+      expect(res).to.not.have.property("error");
+      expect(res.message.command).to.equal("test");
+      expect(res.message.payload.toString("hex")).to.equal("010203");
+      expect(res.rest.toString("hex")).to.equal("");
+
+      var encoded = message.encode("cmd", Buffer("buf"));
+      encoded[20] ^= 1;  // Corrupt checksum
+      encoded = Buffer.concat([encoded, Buffer("rest")]);
+      res = message.tryDecode(encoded);
+      expect(res.error).to.match(/bad checksum/i);
+      expect(res.rest.toString()).to.equal("rest");
+      expect(res).to.not.have.property("message");
+
+      encoded = Buffer.concat([Buffer(10), encoded]);
+      res = message.tryDecode(encoded);
+      expect(res.error).to.match(/magic in the middle/i);
+      expect(res.rest).to.have.length(31);
+      expect(res.rest.readUInt32BE(0)).to.equal(message.MAGIC);
+      expect(res).to.not.have.property("message");
+    });
   });
 
   describe("object", function() {
