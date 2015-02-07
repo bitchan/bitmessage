@@ -173,6 +173,16 @@ describe("Common structures", function() {
       expect(res.rest.readUInt32BE(0)).to.equal(message.MAGIC);
       expect(res).to.not.have.property("message");
     });
+
+    it("should check for max payload length", function() {
+      var fn = message.encode.bind(null, "test", Buffer(2000000));
+      expect(fn).to.throw(/payload is too big/i);
+
+      var bigmsg = message.encode("test");
+      bigmsg.writeUInt32BE(2000000, 16);
+      fn = message.decode.bind(null, bigmsg);
+      expect(fn).to.throw(/payload is too big/i);
+    });
   });
 
   describe("object", function() {
