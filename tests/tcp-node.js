@@ -1,8 +1,15 @@
 var TcpTransport = require("../lib/net/tcp");
 
 function start() {
-  var tcp = new TcpTransport();
-  tcp.listen(22333, "127.0.0.1");
+  var server = new TcpTransport();
+  server.listen(22333, "127.0.0.1");
+  server.on("connection", function(client) {
+    client.on("message", function(command, payload) {
+      if (command === "echo-req") {
+        client.send("echo-res", payload);
+      }
+    });
+  });
 }
 
 start();

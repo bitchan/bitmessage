@@ -53,14 +53,31 @@ if (!process.browser) {
 
     it("should allow to interconnect two nodes", function(done) {
       tcp.connect(22333, "127.0.0.1");
-      tcp.on("open", function() {
+      tcp.once("open", function() {
         done();
       });
     });
 
+    it("should establish connection", function(done) {
+      tcp.once("established", function() {
+        done();
+      });
+    });
+
+    it("should allow to communicate", function(done) {
+      tcp.on("message", function cb(command, payload) {
+        if (command === "echo-res") {
+          expect(payload.toString()).to.equal("test");
+          tcp.removeListener("message", cb);
+          done();
+        }
+      });
+      tcp.send("echo-req", Buffer("test"));
+    });
+
     it("should allow to close connection", function(done) {
       tcp.close();
-      tcp.on("close", function() {
+      tcp.once("close", function() {
         done();
       });
     });
