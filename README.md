@@ -56,7 +56,7 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
   - [x] UserAgent
 - [ ] Network transports
   - [x] TCP (Node.js only)
-  - [ ] WebSocket
+  - [x] WebSocket
   - [ ] WebRTC
 - [ ] Parse PyBitmessage configs
   - [ ] keys.dat

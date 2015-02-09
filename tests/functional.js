@@ -14,10 +14,13 @@ if (!process.browser) {
     before(function(done) {
       tcp = new TcpTransport();
       tcp.on("error", function(err) {
-        console.log("TCP transport error:", err);
+        console.log("TCP transport error: " + err);
       });
-      // Wait some time for server.
-      setTimeout(done, 1000);
+      tcp.on("warning", function(warn) {
+        console.log("TCP transport warning: " + warn);
+      });
+      // Wait some time for the server.
+      setTimeout(done, 300);
     });
 
     it("should return nothing on bootstrap by default", function() {
@@ -58,7 +61,7 @@ if (!process.browser) {
       });
     });
 
-    it("should establish connection", function(done) {
+    it("should automatically establish connection", function(done) {
       tcp.once("established", function() {
         done();
       });
@@ -85,5 +88,57 @@ if (!process.browser) {
 }
 
 describe("WebSocket transport", function() {
-  it("should allow to communicate between two nodes");
+  var ws;
+
+  before(function(done) {
+    ws = new WsTransport();
+    ws.on("error", function(err) {
+      console.log("WebSocket transport error: " + err);
+    });
+    ws.on("warning", function(warn) {
+      console.log("WebSocket transport warning: " + warn);
+    });
+    // Wait some time for the server.
+    setTimeout(done, 300);
+  });
+
+  it("should return hardcoded seeds on bootstrap", function() {
+    var ws2 = new WsTransport({seeds: [["ws.example.com", 8080]]});
+    return ws2.bootstrap().then(function(nodes) {
+      expect(nodes).to.have.length(1);
+      expect(nodes[0][0]).to.be.equal("ws.example.com");
+      expect(nodes[0][1]).to.be.equal(8080);
+    });
+  });
+
+  it("should allow to interconnect two nodes", function(done) {
+    ws.connect("ws://127.0.0.1:22334");
+    ws.once("open", function() {
+      done();
+    });
+  });
+
+  it("should automatically establish connection", function(done) {
+    ws.once("established", function() {
+      done();
+    });
+  });
+
+  it("should allow to communicate", function(done) {
+    ws.on("message", function cb(command, payload) {
+      if (command === "echo-res") {
+        expect(payload.toString()).to.equal("test");
+        ws.removeListener("message", cb);
+        done();
+      }
+    });
+    ws.send("echo-req", Buffer("test"));
+  });
+
+  it("should allow to close connection", function(done) {
+    ws.close();
+    ws.once("close", function() {
+      done();
+    });
+  });
 });
