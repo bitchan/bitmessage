@@ -26,8 +26,6 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
   - [x] ECDSA
   - [x] ECDH
   - [x] ECIES
-  - [x] AES-256-CBC
-  - [x] HMAC-SHA-256
 - [x] Common structures
   - [x] message
   - [x] object
