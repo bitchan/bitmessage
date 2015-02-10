@@ -1327,5 +1327,14 @@ describe("High-level classes", function() {
       expect(UserAgent.parse("/test").length).to.equal(0);
       expect(UserAgent.parse("test/").length).to.equal(0);
     });
+
+    it("should accept raw Buffer on encode", function() {
+      var enc = UserAgent.encodeSelfWith("test:0.0.1");
+      enc = UserAgent.encode(enc);
+      var software = UserAgent.parse(UserAgent.decode(enc).str);
+      expect(software[0].name).to.equal("bitmessage");
+      expect(software[1]).to.deep.equal({name: "test", version: "0.0.1"});
+    });
+
   });
 });
