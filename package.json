@@ -6,8 +6,7 @@
   "browser": {
     "./lib/platform.js": "./lib/platform.browser.js",
     "./lib/net/tcp.js": "./lib/net/tcp.browser.js",
-    "./lib/net/ws.js": "./lib/net/ws.browser.js",
-    "./lib/net/webrtc.js": "./lib/net/webrtc.browser.js"
+    "./lib/net/ws.js": "./lib/net/ws.browser.js"
   },
   "scripts": {
     "install": "node-gyp rebuild || exit 0",
