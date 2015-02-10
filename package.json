@@ -57,7 +57,7 @@
     "bn.js": "^1.0.0",
     "bs58": "^2.0.0",
     "buffer-equal": "~0.0.1",
-    "eccrypto": "^0.9.5",
+    "eccrypto": "^0.9.6",
     "es6-promise": "^2.0.1",
     "hash.js": "^1.0.2",
     "inherits": "^2.0.1",
