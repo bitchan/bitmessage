@@ -22,9 +22,8 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
   - [x] SHA-512
   - [x] RIPEMD-160
   - [x] PRNG
-  - [x] ECC keys manipulation
+  - [x] ECC keys handling
   - [x] ECDSA
-  - [x] ECDH
   - [x] ECIES
 - [x] Common structures
   - [x] message
@@ -39,7 +38,6 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
   - [x] pubkey features
 - [x] Message types
   - [x] version
-  - [x] verack
   - [x] addr
   - [x] inv
   - [x] getdata
@@ -58,7 +56,7 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
   - [x] TCP (Node.js only)
   - [x] WebSocket
   - [ ] WebRTC
-- [ ] Parse PyBitmessage configs
+- [ ] PyBitmessage configs parsing
   - [ ] keys.dat
   - [ ] knownnodes.dat
   - [ ] messages.dat
