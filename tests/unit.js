@@ -576,7 +576,7 @@ describe("Message types", function() {
       var res = error.decode(encoded);
       expect(res.fatal).to.equal(0);
       expect(res.banTime).to.equal(0);
-      expect(res.vector).to.have.length(0);
+      expect(res.vector).to.not.exist;
       expect(res.errorText).to.equal("test");
       expect(res.length).to.equal(8);
 
