@@ -576,21 +576,22 @@ describe("Message types", function() {
       var res = error.decode(encoded);
       expect(res.fatal).to.equal(0);
       expect(res.banTime).to.equal(0);
-      expect(res.vector).to.equal("");
+      expect(res.vector).to.have.length(0);
       expect(res.errorText).to.equal("test");
       expect(res.length).to.equal(8);
 
+      var vector = inv_vect.encode(Buffer("test"));
       var res = error.decode(error.encode({
         fatal: error.FATAL,
         banTime: 120,
-        vector: "123",
+        vector: vector,
         errorText: "fatal error",
       }));
       expect(res.fatal).to.equal(2);
       expect(res.banTime).to.equal(120);
-      expect(res.vector).to.equal("123");
+      expect(bufferEqual(res.vector, vector)).to.be.true;
       expect(res.errorText).to.equal("fatal error");
-      expect(res.length).to.equal(18);
+      expect(res.length).to.equal(47);
     });
   });
 });
