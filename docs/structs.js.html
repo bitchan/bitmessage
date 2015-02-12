@@ -28,10 +28,28 @@
         <article>
             <pre class="prettyprint source linenums"><code>/**
  * Implements common structures.
- * @see {@link https://bitmessage.org/wiki/Protocol_specification#Common_structures}
+ * @see {@link
+ * https://bitmessage.org/wiki/Protocol_specification#Common_structures}
  * @module bitmessage/structs
+ * @example
+ * var structs = require("bitmessage").structs;
+ *
+ * var encoded = Buffer.concat([
+ *   structs.var_int.encode(4),
+ *   Buffer("test"),
+ *   structs.var_str.encode("test2"),
+ *   structs.var_int_list.encode([1, 2, 3]),
+ * ]);
+ *
+ * var decoded1 = structs.var_str.decode(encoded);
+ * console.log(decoded1.str);  // test
+ * var decoded2 = structs.var_str.decode(decoded1.rest);
+ * console.log(decoded2.str);  // test2
+ * var decoded3 = structs.var_int.decode(decoded2.rest);
+ * console.log(decoded3.value);  // 3
+ * var decoded4 = structs.var_int_list.decode(decoded2.rest);
+ * console.log(decoded4.list);  // [1, 2, 3]
  */
-// TODO(Kagami): Document object-like params.
 
 "use strict";
 
@@ -56,6 +74,48 @@ function getmsgchecksum(data) {
   return bmcrypto.sha512(data).slice(0, 4);
 }
 
+// \ :3 /
+function findMagic(buf) {
+  var i;
+  var len = buf.length;
+  var firstb = false;
+  var secondb = false;
+  var thirdb = false;
+  for (i = 0; i &lt; len; ++i) {
+    switch (buf[i]) {
+      case 0xE9:
+        firstb = true;
+        break;
+      case 0xBE:
+        if (firstb) { secondb = true; }
+        break;
+      case 0xB4:
+        if (firstb &amp;&amp; secondb) { thirdb = true; }
+        break;
+      case 0xD9:
+        if (firstb &amp;&amp; secondb &amp;&amp; thirdb) { return i - 3; }
+        break;
+      default:
+        firstb = false;
+        secondb = false;
+        thirdb = false;
+    }
+  }
+  // If we reached the end of the buffer but part of the magic matches
+  // we'll still return index of the magic's start position.
+  if (firstb) {
+    if (secondb) {
+      --i;
+    }
+    if (thirdb) {
+      --i;
+    }
+    return i - 1;  // Compensate for last i's increment
+  } else {
+    return -1;
+  }
+}
+
 /**
  * Message structure.
  * @see {@link https://bitmessage.org/wiki/Protocol_specification#Message_structure}
@@ -70,11 +130,118 @@ var message = exports.message = {
   MAGIC: 0xE9BEB4D9,
 
   /**
-   * Decode message structure.  
+   * @typedef {Object} TryDecodeResult
+   * @property {Object} message - Decoded message
+   * @property {string} message.command - Message command
+   * @property {Buffer} message.payload - Message payload
+   * @property {number} message.length - Full message length
+   * @property {Error} error - ...or decoding error
+   * @property {Buffer} rest - The rest of the input buffer after
+   * processing message
+   * @memberof module:bitmessage/structs.message
+   */
+
+  /**
+   * Decode message in "stream" mode.  
+   * NOTE: message payload and `rest` are copied (so the runtime can GC
+   * processed buffer data).
+   * @param {Buffer} buf - Data buffer
+   * @return {?TryDecodeResult}
+   * [Decoded result.]{@link module:bitmessage/structs.message.TryDecodeResult}
+   */
+  tryDecode: function(buf) {
+    if (buf.length &lt; 24) {
+      // Message is not yet fully received, just skip to next process
+      // cycle.
+      return;
+    }
+    var res = {};
+
+    // Magic.
+    var mindex = findMagic(buf);
+    if (mindex !== 0) {
+      if (mindex === -1) {
+        res.error = new Error("Magic not found, skipping buffer data");
+        res.rest = new Buffer(0);
+      } else {
+        res.error = new Error(
+          "Magic in the middle of buffer, skipping some data at start"
+        );
+        res.rest = new Buffer(buf.length - mindex);
+        buf.copy(res.rest, 0, mindex);
+      }
+      return res;
+    }
+
+    // Payload length.
+    var payloadLength = buf.readUInt32BE(16, true);
+    var msgLength = 24 + payloadLength;
+    // See: &lt;https://github.com/Bitmessage/PyBitmessage/issues/767>.
+    if (payloadLength > 1600003) {
+      res.error = new Error("Message is too large, skipping it");
+      if (buf.length > msgLength) {
+        res.rest = new Buffer(buf.length - msgLength);
+        buf.copy(res.rest, 0, msgLength);
+      } else {
+        res.rest = new Buffer(0);
+      }
+      return res;
+    }
+    if (buf.length &lt; msgLength) {
+      // Message is not yet fully received, just skip to next process
+      // cycle.
+      return;
+    }
+
+    // Now we can set `rest` value.
+    res.rest = new Buffer(buf.length - msgLength);
+    buf.copy(res.rest, 0, msgLength);
+
+    // Command.
+    var command = buf.slice(4, 16);
+    var firstNonNull = 0;
+    var i;
+    for (i = 11; i >=0; i--) {
+      if (command[i] > 127) {
+        res.error = new Error(
+          "Non-ASCII characters in command, skipping message"
+        );
+        return res;
+      }
+      if (!firstNonNull &amp;&amp; command[i] !== 0) {
+        firstNonNull = i + 1;
+      }
+    }
+    command = command.slice(0, firstNonNull).toString("ascii");
+
+    // Payload.
+    var payload = new Buffer(payloadLength);
+    buf.copy(payload, 0, 24, msgLength);
+    var checksum = buf.slice(20, 24);
+    if (!bufferEqual(checksum, getmsgchecksum(payload))) {
+      res.error = new Error("Bad checksum, skipping message");
+      return res;
+    }
+
+    res.message = {command: command, payload: payload, length: msgLength};
+    return res;
+  },
+
+  /**
+   * @typedef {Object} DecodeResult
+   * @property {string} command - Message command
+   * @property {Buffer} payload - Message payload
+   * @property {number} length - Full message length
+   * @property {Buffer} rest - The rest of the input buffer
+   * @memberof module:bitmessage/structs.message
+   */
+
+  /**
+   * Decode message.  
    * NOTE: `payload` is copied, `rest` references input buffer.
    * @param {Buffer} buf - Buffer that starts with encoded message
-   * @return {{command: string, payload: Buffer, length: number, rest: Buffer}}
-   * Decoded message structure.
+   * @return {DecodeResult}
+   * [Decoded message structure.]{@link module:bitmessage/structs.message.DecodeResult}
    */
   decode: function(buf) {
     assert(buf.length >= 24, "Buffer is too small");
@@ -93,6 +260,7 @@ var message = exports.message = {
     // than default "utf-8" encoding.
     command = command.slice(0, firstNonNull).toString("ascii");
     var payloadLength = buf.readUInt32BE(16, true);
+    assert(payloadLength &lt;= 1600003, "Message payload is too big");
     var length = 24 + payloadLength;
     assert(buf.length >= length, "Truncated payload");
     var checksum = buf.slice(20, 24);
@@ -106,7 +274,7 @@ var message = exports.message = {
   },
 
   /**
-   * Encode message structure.
+   * Encode message.
    * @param {string} command - Message command
    * @param {Bufer} payload - Message payload
    * @return {Buffer} Encoded message structure.
@@ -114,6 +282,8 @@ var message = exports.message = {
   encode: function(command, payload) {
     assert(command.length &lt;= 12, "Command is too long");
     assert(isAscii(command), "Non-ASCII characters in command");
+    payload = payload || new Buffer(0);
+    assert(payload.length &lt;= 1600003, "Message payload is too big");
     var buf = new Buffer(24 + payload.length);
     buf.fill(0);
     buf.writeUInt32BE(message.MAGIC, 0, true);
@@ -134,18 +304,48 @@ var message = exports.message = {
  * @static
  */
 var object = exports.object = {
-  // Known types.
+  /**
+   * [getpubkey]{@link module:bitmessage/objects.getpubkey} object type.
+   * @constant {number}
+   */
   GETPUBKEY: 0,
+  /**
+   * [pubkey]{@link module:bitmessage/objects.pubkey} object type.
+   * @constant {number}
+   */
   PUBKEY: 1,
+  /**
+   * [msg]{@link module:bitmessage/objects.msg} object type.
+   * @constant {number}
+   */
   MSG: 2,
+  /**
+   * [broadcast]{@link module:bitmessage/objects.broadcast} object type.
+   * @constant {number}
+   */
   BROADCAST: 3,
+
+  /**
+   * @typedef {Object} DecodeResult
+   * @property {Buffer} nonce - A 8-byte object nonce
+   * @property {number} ttl - Time to live in seconds
+   * @property {number} type - Object type
+   * @property {number} version - Object version
+   * @property {number} stream - Object stream
+   * @property {number} headerLength - Length of the object header
+   * @property {Buffer} objectPayload - Object payload
+   * @memberof module:bitmessage/structs.object
+   */
 
   /**
    * Decode `object` message.  
    * NOTE: `nonce` and `objectPayload` are copied.
    * @param {Buffer} buf - Message
-   * @param {?Object} opts - Decoding options
-   * @return {Object} Decoded `object` structure.
+   * @param {Object=} opts - Decoding options
+   * @param {boolean} opts.allowExpired - Allow expired objects
+   * @param {boolean} opts.skipPow - Do not validate object POW
+   * @return {DecodeResult}
+   * [Decoded `object` structure.]{@link module:bitmessage/structs.object.DecodeResult}
    */
   decode: function(buf, opts) {
     var decoded = message.decode(buf);
@@ -154,11 +354,8 @@ var object = exports.object = {
   },
 
   /**
-   * Decode `object` message payload.  
-   * NOTE: `nonce` and `objectPayload` are copied.
-   * @param {Buffer} buf - Message payload
-   * @param {?Object} opts - Decoding options
-   * @return {Object} Decoded `object` structure.
+   * Decode `object` message payload.
+   * The same as [decode]{@link module:bitmessage/structs.object.decode}.
    */
   decodePayload: function(buf, opts) {
     opts = opts || {};
@@ -206,6 +403,12 @@ var object = exports.object = {
   /**
    * Encode `object` message.
    * @param {Object} opts - Object options
+   * @param {Object} opts.nonce - A 8-byte object nonce
+   * @param {number} opts.ttl - Time to live in seconds
+   * @param {number} opts.type - Object type
+   * @param {number} opts.version - Object version
+   * @param {number=} opts.stream - Object stream (1 by default)
+   * @param {Buffer} opts.objectPayload - Object payload
    * @return {Buffer} Encoded message.
    */
   encode: function(opts) {
@@ -215,8 +418,7 @@ var object = exports.object = {
 
   /**
    * Encode `object` message payload.
-   * @param {Object} opts - Object options
-   * @return {Buffer} Encoded payload.
+   * The same as [encode]{@link module:bitmessage/structs.object.encode}.
    */
   encodePayload: function(opts) {
     // NOTE(Kagami): We do not try to calculate nonce here if it is not
@@ -240,6 +442,11 @@ var object = exports.object = {
    * Encode `object` message payload without leading nonce field (may be
    * useful if you are going to calculate it later).
    * @param {Object} opts - Object options
+   * @param {number} opts.ttl - Time to live in seconds
+   * @param {number} opts.type - Object type
+   * @param {number} opts.version - Object version
+   * @param {number=} opts.stream - Object stream (1 by default)
+   * @param {Buffer} opts.objectPayload - Object payload
    * @return {Buffer} Encoded payload.
    */
   encodePayloadWithoutNonce: function(opts) {
@@ -269,11 +476,19 @@ var object = exports.object = {
  */
 var var_int = exports.var_int = {
   /**
+   * @typedef {Object} DecodeResult
+   * @property {number} value - Stored value
+   * @property {number} length - `var_int` full length
+   * @property {Buffer} rest - The rest of the input buffer
+   * @memberof module:bitmessage/structs.var_int
+   */
+
+  /**
    * Decode `var_int`.  
    * NOTE: `rest` references input buffer.
    * @param {Buffer} buf - A buffer that starts with encoded `var_int`
-   * @return {{value: number, length: number, rest: Buffer}}
-   * Decoded `var_int` structure.
+   * @return {DecodeResult}
+   * [Decoded `var_int` structure.]{@link module:bitmessage/structs.var_int.DecodeResult}
    */
   decode: function(buf) {
     var value, length;
@@ -362,11 +577,19 @@ var var_int = exports.var_int = {
  */
 exports.var_str = {
   /**
+   * @typedef {Object} DecodeResult
+   * @property {number} str - The string itself
+   * @property {number} length - `var_str` full length
+   * @property {Buffer} rest - The rest of the input buffer
+   * @memberof module:bitmessage/structs.var_str
+   */
+
+  /**
    * Decode `var_str`.  
    * NOTE: `rest` references input buffer.
    * @param {Buffer} buf - A buffer that starts with encoded `var_str`
-   * @return {{str: string, length: number, rest: Buffer}}
-   * Decoded `var_str` structure.
+   * @return {DecodeResult}
+   * [Decoded `var_str` structure.]{@link module:bitmessage/structs.var_str.DecodeResult}
    */
   decode: function(buf) {
     var decoded = var_int.decode(buf);
@@ -398,12 +621,20 @@ exports.var_str = {
  */
 exports.var_int_list = {
   /**
+   * @typedef {Object} DecodeResult
+   * @property {number} list - Stored numbers
+   * @property {number} length - `var_int_list` full length
+   * @property {Buffer} rest - The rest of the input buffer
+   * @memberof module:bitmessage/structs.var_int_list
+   */
+
+  /**
    * Decode `var_int_list`.  
    * NOTE: `rest` references input buffer.
    * @param {Buffer} buf - A buffer that starts with encoded
    * `var_int_list`
-   * @return {{list: number[], length: number, rest: Buffer}}
-   * Decoded `var_int_list` structure.
+   * @return {DecodeResult}
+   * [Decoded `var_int_list` structure.]{@link module:bitmessage/structs.var_int_list.DecodeResult}
    */
   decode: function(buf) {
     var decoded = var_int.decode(buf);
@@ -426,8 +657,9 @@ exports.var_int_list = {
    * @return {Buffer} Encoded `var_int_list`.
    */
   encode: function(list) {
-    var listBuf = Buffer.concat(list.map(var_int.encode));
-    return Buffer.concat([var_int.encode(list.length), listBuf]);
+    var var_ints = list.map(var_int.encode);
+    var bufs = [var_int.encode(list.length)].concat(var_ints);
+    return Buffer.concat(bufs);
   },
 };
 
@@ -454,10 +686,17 @@ function inet_ntop(buf) {
 function inet_pton(str) {
   var buf = new Buffer(16);
   buf.fill(0);
+  // IPv4-mapped IPv6.
+  if (str.slice(0, 7) === "::ffff:") {
+    str = str.slice(7);
+  }
   // IPv4.
   if (str.indexOf(":") === -1) {
     IPv4_MAPPING.copy(buf);
-    var octets = str.split(/\./g).map(function(s) {return parseInt(s, 10);});
+    var octets = str.split(/\./g).map(function(o) {
+      assert(/^\d+$/.test(o), "Bad octet");
+      return parseInt(o, 10);
+    });
     // Support short form from inet_aton(3) man page.
     if (octets.length === 1) {
       buf.writeUInt32BE(octets[0], 12);
@@ -512,6 +751,8 @@ function inet_pton(str) {
       assert(groups.length === 8, "Bad IPv6 address");
     }
     for (i = 0; i &lt; Math.min(groups.length, 8); i++) {
+      // Check against parseInt("127.0.0.1", 16) -> 295
+      assert(/^[0-9a-f]+$/.test(groups[i]), "Bad group");
       buf.writeUInt16BE(parseInt(groups[i], 16), i * 2);
     }
   }
@@ -525,12 +766,27 @@ function inet_pton(str) {
  */
 exports.net_addr = {
   /**
+   * @typedef {Object} DecodeResult
+   * @property {Date} time - Time the node was last active, not included
+   * in short mode
+   * @property {number} stream - Stream number of the node, not included
+   * in short mode
+   * @property {Object} services -
+   * [Services]{@link module:bitmessage/structs.ServicesBitfield}
+   * provided by the node
+   * @property {string} host - IPv4/IPv6 address of the node
+   * @property {number} port - Incoming port of the node
+   * @memberof module:bitmessage/structs.net_addr
+   */
+
+  /**
    * Decode `net_addr`.
    * @param {Buffer} buf - A buffer that contains encoded `net_addr`
-   * @param {?Object} opts - Decoding options; use `short` option to
+   * @param {Object=} opts - Decoding options; use `short` option to
    * decode `net_addr` from
    * [version message]{@link module:bitmessage/messages.version}
-   * @return {Object} Decoded `net_addr` structure.
+   * @return {DecodeResult}
+   * [Decoded `net_addr` structure.]{@link module:bitmessage/structs.net_addr.DecodeResult}
    */
   decode: function(buf, opts) {
     var short = !!(opts || {}).short;
@@ -558,9 +814,19 @@ exports.net_addr = {
 
   /**
    * Encode `net_addr`.
-   * @param {Object} opts - Encode options; use `short` option to encode
-   * `net_addr` for
+   * @param {Object} opts - Encoding options
+   * @param {boolean=} opts.short - Encode `net_addr` for
    * [version message]{@link module:bitmessage/messages.version}
+   * (false by default)
+   * @param {Date=} opts.time - Time the node was last active, not
+   * included in short mode (current time by default)
+   * @param {number=} opts.stream - Stream number of the node, not
+   * included in short mode (1 by default)
+   * @param {Object=} opts.services -
+   * [Services]{@link module:bitmessage/structs.ServicesBitfield}
+   * provided by the node (`NODE_NETWORK` by default)
+   * @param {string} opts.host - IPv4/IPv6 address of the node
+   * @param {number} opts.port - Incoming port of the node
    * @return {Buffer} Encoded `net_addr`.
    */
   encode: function(opts) {
@@ -595,12 +861,14 @@ exports.net_addr = {
  * @see {@link https://bitmessage.org/wiki/Protocol_specification#Inventory_Vectors}
  * @namespace
  */
-// Only encode operation is defined because decode is impossible.
 exports.inv_vect = {
+  // NOTE(Kagami): Only encode operation is defined because decoding of
+  // the encoded vector is impossible.
+
   /**
    * Encode inventory vector.
    * @param {Buffer} buf - Payload to calculate the inventory vector for
-   * @return {Buffer} Encoded `inv_vect`.
+   * @return {Buffer} A 32-byte encoded `inv_vect`.
    */
   encode: function(buf) {
     return bmcrypto.sha512(bmcrypto.sha512(buf)).slice(0, 32);
@@ -614,17 +882,33 @@ exports.inv_vect = {
  * @static
  */
 /**
+ * @typedef {Object} DecodeResult
+ * @property {Buffer} iv - Initialization vector (16 bytes)
+ * @property {Buffer} ephemPrivateKey - Ephemeral private key (32 bytes)
+ * @property {Buffer} ciphertext - The result of encryption (variable
+ * size)
+ * @property {Buffer} mac - Message authentication code (32 bytes)
+ * @memberof module:bitmessage/structs.encrypted
+ */
+/**
  * Decode encrypted payload.  
  * NOTE: all structure members are copied.
  * @param {Buffer} buf - A buffer that contains encrypted payload
- * @return {Object} Decoded encrypted structure.
+ * @return {DecodeResult}
+ * [Decoded `encrypted` structure.]{@link module:bitmessage/structs.encrypted.DecodeResult}
  * @function decode
  * @memberof module:bitmessage/structs.encrypted
  */
 /**
  * Encode `encrypted`.
- * @param {Object} opts - Encode options
- * @return {Buffer} Encoded encrypted payload.
+ * @param {Object} opts - Encoding options
+ * @param {Buffer} opts.iv - Initialization vector (16 bytes)
+ * @param {Buffer} opts.ephemPrivateKey - Ephemeral private key (32
+ * bytes)
+ * @param {Buffer} opts.ciphertext - The result of encryption (variable
+ * size)
+ * @param {Buffer} opts.mac - Message authentication code (32 bytes)
+ * @return {Buffer} Encoded `encrypted` payload.
  * @function encode
  * @memberof module:bitmessage/structs.encrypted
  */
@@ -689,18 +973,49 @@ var Bitfield = function(size) {
 };
 
 /**
- * Services bitfield features.
+ * Service features bitfield (MSB 0).
  * @see {@link https://bitmessage.org/wiki/Protocol_specification#version}
- * @namespace
+ * @param {Buffer=} buf - A 8-byte bitfield buffer (will be created if
+ * not provided or will be copied if `opts.copy` is `true`)
+ * @param {Object=} opts - Options
+ * @constructor
  * @static
+ * @example
+ * var ServicesBitfield = require("bitmessage").structs.ServicesBitfield;
+ * var services = ServicesBitfield().set(ServicesBitfield.NODE_NETWORK);
+ * console.log(services.get(ServicesBitfield.NODE_NETWORK));  // true
+ * console.log(services.get(15));  // false
  */
-// TODO(Kagami): Document methods.
 // NOTE(Kagami): Since pubkey bitfield uses MSB 0, we use it here too.
 // See &lt;https://github.com/Bitmessage/PyBitmessage/issues/769> for
 // details.
 var ServicesBitfield = exports.ServicesBitfield = objectAssign(Bitfield(64), {
   /**
-   * This is a normal network node.
+   * Returns a boolean indicating whether the bit is set.
+   * @param {number} index - Bit index (MSB 0)
+   * @function get
+   * @instance
+   * @return {boolean}
+   * @memberof module:bitmessage/structs.ServicesBitfield
+   */
+  /**
+   * Set the given bit(s) to `1`.
+   * @param {(number|number[])} index - Bit(s) index (MSB 0)
+   * @function set
+   * @instance
+   * @return {Object} Returns self so methods can be chained.
+   * @memberof module:bitmessage/structs.ServicesBitfield
+   */
+  /**
+   * The contents of the bitfield.
+   * @type {Buffer}
+   * @var buffer
+   * @instance
+   * @memberof module:bitmessage/structs.ServicesBitfield
+   */
+
+  /**
+   * Bit index indicating normal network node.
    * @memberof module:bitmessage/structs.ServicesBitfield
    * @constant {number}
    */
@@ -708,22 +1023,58 @@ var ServicesBitfield = exports.ServicesBitfield = objectAssign(Bitfield(64), {
 });
 
 /**
- * Pubkey bitfield features.
+ * Pubkey features bitfield (MSB 0).
  * @see {@link https://bitmessage.org/wiki/Protocol_specification#Pubkey_bitfield_features}
- * @namespace
+ * @param {Buffer=} buf - A 4-byte bitfield buffer (will be created if
+ * not provided or will be copied if `opts.copy` is `true`)
+ * @param {Object=} opts - Options
+ * @constructor
+ * @example
+ * var PubkeyBitfield = require("bitmessage").structs.PubkeyBitfield;
+ * var behavior = PubkeyBitfield().set([
+ *   PubkeyBitfield.INCLUDE_DESTINATION,
+ *   PubkeyBitfield.DOES_ACK,
+ * ]).set(1);
+ * console.log(behavior.get(PubkeyBitfield.DOES_ACK));  // true
+ * console.log(behavior.get(15));  // false
  */
-// TODO(Kagami): Document methods.
 exports.PubkeyBitfield = objectAssign(Bitfield(32), {
   /**
-   * Receiving node expects that the RIPE hash encoded in their address
-   * preceedes the encrypted message data of msg messages bound for
-   * them.
+   * Returns a boolean indicating whether the bit is set.
+   * @param {number} index - Bit index (MSB 0)
+   * @function get
+   * @instance
+   * @return {boolean}
+   * @memberof module:bitmessage/structs.PubkeyBitfield
+   */
+  /**
+   * Set the given bit(s) to `1`.
+   * @param {(number|number[])} index - Bit(s) index (MSB 0)
+   * @function set
+   * @instance
+   * @return {Object} Returns self so methods can be chained.
+   * @memberof module:bitmessage/structs.PubkeyBitfield
+   */
+  /**
+   * The contents of the bitfield.
+   * @type {Buffer}
+   * @var buffer
+   * @instance
+   * @memberof module:bitmessage/structs.PubkeyBitfield
+   */
+
+  /**
+   * Bit index.
+   * If set, the receiving node expects that the RIPEMD hash encoded in
+   * their address preceedes the encrypted message data of msg messages
+   * bound for them.
    * @memberof module:bitmessage/structs.PubkeyBitfield
    * @constant {number}
    */
   INCLUDE_DESTINATION: 30,
   /**
-   * If true, the receiving node does send acknowledgements (rather than
+   * Bit index.
+   * If set, the receiving node does send acknowledgements (rather than
    * dropping them).
    * @memberof module:bitmessage/structs.PubkeyBitfield
    * @constant {number}
@@ -740,13 +1091,13 @@ exports.PubkeyBitfield = objectAssign(Bitfield(32), {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-bitmessage.html">bitmessage</a></li><li><a href="module-bitmessage_address.html">bitmessage/address</a></li><li><a href="module-bitmessage_crypto.html">bitmessage/crypto</a></li><li><a href="module-bitmessage_messages.html">bitmessage/messages</a></li><li><a href="module-bitmessage_objects.html">bitmessage/objects</a></li><li><a href="module-bitmessage_pow.html">bitmessage/pow</a></li><li><a href="module-bitmessage_structs.html">bitmessage/structs</a></li><li><a href="module-bitmessage_user-agent.html">bitmessage/user-agent</a></li><li><a href="module-bitmessage_wif.html">bitmessage/wif</a></li></ul><h3>Classes</h3><ul><li><a href="module-bitmessage_address.Address.html">Address</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-bitmessage_messages.addr.html">addr</a></li><li><a href="module-bitmessage_messages.error.html">error</a></li><li><a href="module-bitmessage_messages.getdata.html">getdata</a></li><li><a href="module-bitmessage_messages.inv.html">inv</a></li><li><a href="module-bitmessage_messages.version.html">version</a></li><li><a href="module-bitmessage_objects.broadcast.html">broadcast</a></li><li><a href="module-bitmessage_objects.getpubkey.html">getpubkey</a></li><li><a href="module-bitmessage_objects.msg.html">msg</a></li><li><a href="module-bitmessage_objects.pubkey.html">pubkey</a></li><li><a href="module-bitmessage_structs.encrypted.html">encrypted</a></li><li><a href="module-bitmessage_structs.inv_vect.html">inv_vect</a></li><li><a href="module-bitmessage_structs.message.html">message</a></li><li><a href="module-bitmessage_structs.net_addr.html">net_addr</a></li><li><a href="module-bitmessage_structs.object.html">object</a></li><li><a href="module-bitmessage_structs.PubkeyBitfield.html">PubkeyBitfield</a></li><li><a href="module-bitmessage_structs.ServicesBitfield.html">ServicesBitfield</a></li><li><a href="module-bitmessage_structs.var_int.html">var_int</a></li><li><a href="module-bitmessage_structs.var_int_list.html">var_int_list</a></li><li><a href="module-bitmessage_structs.var_str.html">var_str</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-bitmessage.html">bitmessage</a></li><li><a href="module-bitmessage_address.html">bitmessage/address</a></li><li><a href="module-bitmessage_crypto.html">bitmessage/crypto</a></li><li><a href="module-bitmessage_messages.html">bitmessage/messages</a></li><li><a href="module-bitmessage_net_base.html">bitmessage/net/base</a></li><li><a href="module-bitmessage_net_tcp.html">bitmessage/net/tcp</a></li><li><a href="module-bitmessage_net_ws.html">bitmessage/net/ws</a></li><li><a href="module-bitmessage_objects.html">bitmessage/objects</a></li><li><a href="module-bitmessage_pow.html">bitmessage/pow</a></li><li><a href="module-bitmessage_structs.html">bitmessage/structs</a></li><li><a href="module-bitmessage_user-agent.html">bitmessage/user-agent</a></li><li><a href="module-bitmessage_wif.html">bitmessage/wif</a></li></ul><h3>Classes</h3><ul><li><a href="module-bitmessage_address.Address.html">Address</a></li><li><a href="module-bitmessage_net_base.BaseTransport.html">BaseTransport</a></li><li><a href="module-bitmessage_net_tcp.TcpTransport.html">TcpTransport</a></li><li><a href="module-bitmessage_net_ws.WsTransport.html">WsTransport</a></li><li><a href="module-bitmessage_structs.PubkeyBitfield.html">PubkeyBitfield</a></li><li><a href="module-bitmessage_structs.ServicesBitfield.html">ServicesBitfield</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-bitmessage_messages.addr.html">addr</a></li><li><a href="module-bitmessage_messages.error.html">error</a></li><li><a href="module-bitmessage_messages.getdata.html">getdata</a></li><li><a href="module-bitmessage_messages.inv.html">inv</a></li><li><a href="module-bitmessage_messages.version.html">version</a></li><li><a href="module-bitmessage_objects.broadcast.html">broadcast</a></li><li><a href="module-bitmessage_objects.getpubkey.html">getpubkey</a></li><li><a href="module-bitmessage_objects.msg.html">msg</a></li><li><a href="module-bitmessage_objects.pubkey.html">pubkey</a></li><li><a href="module-bitmessage_structs.encrypted.html">encrypted</a></li><li><a href="module-bitmessage_structs.inv_vect.html">inv_vect</a></li><li><a href="module-bitmessage_structs.message.html">message</a></li><li><a href="module-bitmessage_structs.net_addr.html">net_addr</a></li><li><a href="module-bitmessage_structs.object.html">object</a></li><li><a href="module-bitmessage_structs.var_int.html">var_int</a></li><li><a href="module-bitmessage_structs.var_int_list.html">var_int_list</a></li><li><a href="module-bitmessage_structs.var_str.html">var_str</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta1</a> on Sat Jan 31 2015 14:53:21 GMT+0300 (MSK)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0-dev</a> on Thu Feb 12 2015 13:43:38 GMT+0300 (MSK)
 </footer>
 
 <script> prettyPrint(); </script>

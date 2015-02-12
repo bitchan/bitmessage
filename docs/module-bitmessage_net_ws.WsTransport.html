@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Namespace: var_str</title>
+    <title>JSDoc: Class: WsTransport</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Namespace: var_str</h1>
+    <h1 class="page-title">Class: WsTransport</h1>
 
     
 
@@ -29,9 +29,9 @@
 <header>
     
         <h2>
-            <span class="ancestors"><a href="module-bitmessage_structs.html">bitmessage/structs</a>.</span>
+            <span class="ancestors"><a href="module-bitmessage_net_ws.html">bitmessage/net/ws</a>.</span>
         
-        var_str
+        WsTransport
         </h2>
         
     
@@ -41,10 +41,242 @@
     <div class="container-overview">
     
         
-            <div class="description"><p>Variable length string.</p></div>
+
+    
+
+    <h4 class="name" id="WsTransport"><span class="type-signature"></span>new WsTransport<span class="signature">(opts<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>WebSocket transport class. Implements
+<a href="module-bitmessage_net_base.BaseTransport.html">base transport interface</a>.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
         
 
         
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Transport options</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>seeds</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Bootstrap nodes (none by default)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>services</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p><a href="module-bitmessage_structs.ServicesBitfield.html">Service features</a>
+provided by this node (<code>NODE_NETWORK</code> by default)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>userAgent</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+|
+
+<span class="param-type">string</span>
+|
+
+<span class="param-type">Buffer</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p><a href="module-bitmessage_user-agent.html">User agent</a> of this node
+(bitmessage's by default)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>streamNumbers</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;number></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Streams accepted by this node
+(1 by default)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>port</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Incoming port of this node (8444 by
+default)</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
 
 
 <dl class="details">
@@ -76,26 +308,32 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="structs.js.html">structs.js</a>, <a href="structs.js.html#line550">line 550</a>
+        <a href="net_ws.js.html">net/ws.js</a>, <a href="net_ws.js.html#line43">line 43</a>
     </li></ul></dd>
     
 
     
 
     
-    <dt class="tag-see">See:</dt>
-    <dd class="tag-see">
-        <ul>
-            <li><a href="https://bitmessage.org/wiki/Protocol_specification#Variable_length_string">https://bitmessage.org/wiki/Protocol_specification#Variable_length_string</a></li>
-        </ul>
-    </dd>
-    
 
     
 </dl>
 
 
-        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     </div>
 
@@ -119,14 +357,15 @@
 
     
 
-    <h4 class="name" id=".decode"><span class="type-signature">(static) </span>decode<span class="signature">(buf)</span><span class="type-signature"> &rarr; {DecodeResult}</span></h4>
+    <h4 class="name" id="connect"><span class="type-signature"></span>connect<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Decode <code>var_str</code>.<br>NOTE: <code>rest</code> references input buffer.</p>
+    <p>Connect to a WebSocket node. Connection arguments are the same as for
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/WebSocket">WebSocket</a>.</p>
 </div>
 
 
@@ -135,55 +374,6 @@
 
 
 
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>buf</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Buffer</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>A buffer that starts with encoded <code>var_str</code></p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
 
 
 
@@ -219,7 +409,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="structs.js.html">structs.js</a>, <a href="structs.js.html#line566">line 566</a>
+        <a href="net_ws.js.html">net/ws.js</a>, <a href="net_ws.js.html#line165">line 165</a>
     </li></ul></dd>
     
 
@@ -242,28 +432,6 @@
 
 
 
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p><a href="module-bitmessage_structs.var_str.html#.DecodeResult">Decoded <code>var_str</code> structure.</a></p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">DecodeResult</span>
-
-
-    </dd>
-</dl>
-
-    
 
 
 
@@ -272,14 +440,17 @@
 
     
 
-    <h4 class="name" id=".encode"><span class="type-signature">(static) </span>encode<span class="signature">(str)</span><span class="type-signature"> &rarr; {Buffer}</span></h4>
+    <h4 class="name" id="listen"><span class="type-signature"></span>listen<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Encode string into <code>var_str</code>.</p>
+    <p>Listen for incoming WebSocket connections. Listen arguments are the
+same as for
+<a href="https://github.com/websockets/ws#server-example">WebSocketServer</a>.
+Available only for Node platform.</p>
 </div>
 
 
@@ -288,55 +459,6 @@
 
 
 
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>str</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>A string</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
 
 
 
@@ -372,7 +494,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="structs.js.html">structs.js</a>, <a href="structs.js.html#line582">line 582</a>
+        <a href="net_ws.js.html">net/ws.js</a>, <a href="net_ws.js.html#line179">line 179</a>
     </li></ul></dd>
     
 
@@ -395,204 +517,12 @@
 
 
 
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>Encoded <code>var_str</code>.</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Buffer</span>
-
-
-    </dd>
-</dl>
-
-    
 
 
 
         
     
 
-    
-        <h3 class="subsection-title">Type Definitions</h3>
-
-        
-                
-<h4 class="name" id=".DecodeResult">DecodeResult</h4>
-
-
-
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">Object</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-    <h5 class="subsection-title">Properties:</h5>
-
-    
-
-<table class="props">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>str</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The string itself</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>length</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p><code>var_str</code> full length</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>rest</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Buffer</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The rest of the input buffer</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="structs.js.html">structs.js</a>, <a href="structs.js.html#line551">line 551</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-            
     
 
     

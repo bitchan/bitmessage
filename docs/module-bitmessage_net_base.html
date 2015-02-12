@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: wif.js</title>
+    <title>JSDoc: Module: bitmessage/net/base</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,63 +17,140 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: wif.js</h1>
+    <h1 class="page-title">Module: bitmessage/net/base</h1>
 
     
 
 
 
+
+<section>
+
+<header>
     
-    <section>
-        <article>
-            <pre class="prettyprint source linenums"><code>/**
- * Implements WIF encoding/decoding.
- * @see {@link https://en.bitcoin.it/wiki/Wallet_import_format}
- * @module bitmessage/wif
- */
+        
+            
+        
+    
+</header>
 
-"use strict";
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>Networking base module. Defines base transport interface, useful for
+implementing new transports. End-users should import some transport
+instead in order to connect/accept connections to/from other nodes.<br><strong>NOTE</strong>: <code>BaseTransport</code> is exported as a module.</p></div>
+        
 
-var bufferEqual = require("buffer-equal");
-var bs58 = require("bs58");
-var assert = require("./_util").assert;
-var bmcrypto = require("./crypto");
+        
+            
 
-// Compute the WIF checksum for the given data.
-function getwifchecksum(data) {
-  return bmcrypto.sha256(bmcrypto.sha256(data)).slice(0, 4);
-}
 
-/**
- * Decode WIF-encoded private key (corresponded to a uncompressed public
- * key).
- * @param {string} wif - Encoded key
- * @return {Buffer} Private key.
- */
-exports.decode = function(wif) {
-  var bytes = bs58.decode(wif);
-  assert(bytes[0] === 0x80, "Bad WIF");
-  var data = new Buffer(bytes.slice(0, -4));
-  var checksum = new Buffer(bytes.slice(-4));
-  assert(bufferEqual(checksum, getwifchecksum(data)), "Bad checkum");
-  return data.slice(1);
-};
 
-/**
- * Convert private key to a WIF (corresponded to a uncompressed public
- * key).
- * @param {Buffer} privateKey - A private key to encode
- * @return {string} WIF-encoded private key.
- */
-exports.encode = function(privateKey) {
-  var data = Buffer.concat([new Buffer([0x80]), privateKey]);
-  var checksum = getwifchecksum(data);
-  var bytes = Buffer.concat([data, checksum]);
-  return bs58.encode(bytes);
-};
-</code></pre>
-        </article>
-    </section>
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="net_base.js.html">net/base.js</a>, <a href="net_base.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>var BaseTransport = require("bitmessage/net/base");</code></pre>
+
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Classes</h3>
+
+        <dl>
+            <dt><a href="module-bitmessage_net_base.BaseTransport.html">BaseTransport</a></dt>
+            <dd></dd>
+        </dl>
+    
+
+     
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
 
 
 

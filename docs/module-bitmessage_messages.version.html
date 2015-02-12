@@ -76,7 +76,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line52">line 52</a>
+        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line83">line 83</a>
     </li></ul></dd>
     
 
@@ -110,82 +110,6 @@
     
 
     
-        <h3 class="subsection-title">Members</h3>
-
-        
-            
-<h4 class="name" id=".NONCE"><span class="type-signature">(static, constant) </span>NONCE<span class="type-signature"> :Buffer</span></h4>
-
-
-
-
-<div class="description">
-    <p>Random nonce used to detect connections to self.</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">Buffer</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line57">line 57</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-    
 
     
         <h3 class="subsection-title">Methods</h3>
@@ -195,15 +119,14 @@
 
     
 
-    <h4 class="name" id=".decode"><span class="type-signature">(static) </span>decode<span class="signature">(buf)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    <h4 class="name" id=".decode"><span class="type-signature">(static) </span>decode<span class="signature">(buf)</span><span class="type-signature"> &rarr; {DecodeResult}</span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Decode <code>version</code> message.
-NOTE: <code>nonce</code> is copied.</p>
+    <p>Decode <code>version</code> message.<br>NOTE: <code>nonce</code> is copied.</p>
 </div>
 
 
@@ -296,7 +219,7 @@ NOTE: <code>nonce</code> is copied.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line65">line 65</a>
+        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line112">line 112</a>
     </li></ul></dd>
     
 
@@ -323,7 +246,7 @@ NOTE: <code>nonce</code> is copied.</p>
 
         
 <div class="param-desc">
-    <p>Decoded <code>version</code> structure.</p>
+    <p><a href="module-bitmessage_messages.version.html#.DecodeResult">Decoded <code>version</code> structure.</a></p>
 </div>
 
 
@@ -334,7 +257,7 @@ NOTE: <code>nonce</code> is copied.</p>
     </dt>
     <dd>
         
-<span class="param-type">Object</span>
+<span class="param-type">DecodeResult</span>
 
 
     </dd>
@@ -349,7 +272,7 @@ NOTE: <code>nonce</code> is copied.</p>
 
     
 
-    <h4 class="name" id=".decodePayload"><span class="type-signature">(static) </span>decodePayload<span class="signature">(buf)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    <h4 class="name" id=".decodePayload"><span class="type-signature">(static) </span>decodePayload<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
@@ -357,7 +280,7 @@ NOTE: <code>nonce</code> is copied.</p>
 
 <div class="description">
     <p>Decode <code>version</code> message payload.
-NOTE: <code>nonce</code> is copied.</p>
+The same as <a href="module-bitmessage_messages.version.html#.decode">decode</a>.</p>
 </div>
 
 
@@ -366,55 +289,6 @@ NOTE: <code>nonce</code> is copied.</p>
 
 
 
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>buf</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Buffer</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Message payload</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
 
 
 
@@ -450,7 +324,7 @@ NOTE: <code>nonce</code> is copied.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line77">line 77</a>
+        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line122">line 122</a>
     </li></ul></dd>
     
 
@@ -473,28 +347,6 @@ NOTE: <code>nonce</code> is copied.</p>
 
 
 
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>Decoded <code>version</code> structure.</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Object</span>
-
-
-    </dd>
-</dl>
-
-    
 
 
 
@@ -562,7 +414,309 @@ NOTE: <code>nonce</code> is copied.</p>
 
             
 
-            <td class="description last"><p>Version options</p></td>
+            <td class="description last"><p>Version options</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>services</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p><a href="module-bitmessage_structs.ServicesBitfield.html">Service</a>
+features to be enabled for this connection (<code>NODE_NETWORK</code> by
+default)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>time</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Date</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Node time (current time by default)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>remoteHost</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>IPv4/IPv6 address of the node
+receiving this message</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>remotePort</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Port of the node receiving this
+message</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>port</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Incoming port of the node (8444 by
+default)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>nonce</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Buffer</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Random nonce used to detect connection
+to self (unique per node.js process by default)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>userAgent</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+|
+
+<span class="param-type">string</span>
+|
+
+<span class="param-type">Buffer</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p><a href="module-bitmessage_user-agent.html">User agent</a> of the node
+(bitmessage's by default)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>streamNumbers</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;number></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Streams accepted by the
+node (1 by default)</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -603,7 +757,7 @@ NOTE: <code>nonce</code> is copied.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line113">line 113</a>
+        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line177">line 177</a>
     </li></ul></dd>
     
 
@@ -656,14 +810,15 @@ NOTE: <code>nonce</code> is copied.</p>
 
     
 
-    <h4 class="name" id=".encodePayload"><span class="type-signature">(static) </span>encodePayload<span class="signature">(opts)</span><span class="type-signature"> &rarr; {Buffer}</span></h4>
+    <h4 class="name" id=".encodePayload"><span class="type-signature">(static) </span>encodePayload<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Encode <code>version</code> message payload.</p>
+    <p>Encode <code>version</code> message payload.
+The same as <a href="module-bitmessage_messages.version.html#.encode">encode</a>.</p>
 </div>
 
 
@@ -672,55 +827,6 @@ NOTE: <code>nonce</code> is copied.</p>
 
 
 
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>opts</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Version options</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
 
 
 
@@ -756,7 +862,7 @@ NOTE: <code>nonce</code> is copied.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line123">line 123</a>
+        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line186">line 186</a>
     </li></ul></dd>
     
 
@@ -779,34 +885,331 @@ NOTE: <code>nonce</code> is copied.</p>
 
 
 
-<h5>Returns:</h5>
+
+
 
         
-<div class="param-desc">
-    <p>Encoded payload.</p>
-</div>
+    
 
+    
+        <h3 class="subsection-title">Type Definitions</h3>
 
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
         
+                
+<h4 class="name" id=".DecodeResult">DecodeResult</h4>
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>services</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p><a href="module-bitmessage_structs.ServicesBitfield.html">Service</a>
+features to be enabled for this connection</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>time</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Date</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Node time</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>remoteHost</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>IPv4/IPv6 address of the node
+receiving this message</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>remotePort</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Port of the node receiving this
+message</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>port</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Incoming port of the node sending this
+message</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>nonce</code></td>
+            
+
+            <td class="type">
+            
+                
 <span class="param-type">Buffer</span>
 
 
-    </dd>
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Random nonce used to detect connection
+to self</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>userAgent</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+|
+
+<span class="param-type">string</span>
+|
+
+<span class="param-type">Buffer</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p><a href="module-bitmessage_user-agent.html">User agent</a> of the node</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>streamNumbers</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;number></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Streams accepted by the node</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>length</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Real data length</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line84">line 84</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
 </dl>
 
-    
 
 
 
-        
-    
 
+
+            
     
 
     
@@ -820,13 +1223,13 @@ NOTE: <code>nonce</code> is copied.</p>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-bitmessage.html">bitmessage</a></li><li><a href="module-bitmessage_address.html">bitmessage/address</a></li><li><a href="module-bitmessage_crypto.html">bitmessage/crypto</a></li><li><a href="module-bitmessage_messages.html">bitmessage/messages</a></li><li><a href="module-bitmessage_objects.html">bitmessage/objects</a></li><li><a href="module-bitmessage_pow.html">bitmessage/pow</a></li><li><a href="module-bitmessage_structs.html">bitmessage/structs</a></li><li><a href="module-bitmessage_user-agent.html">bitmessage/user-agent</a></li><li><a href="module-bitmessage_wif.html">bitmessage/wif</a></li></ul><h3>Classes</h3><ul><li><a href="module-bitmessage_address.Address.html">Address</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-bitmessage_messages.addr.html">addr</a></li><li><a href="module-bitmessage_messages.error.html">error</a></li><li><a href="module-bitmessage_messages.getdata.html">getdata</a></li><li><a href="module-bitmessage_messages.inv.html">inv</a></li><li><a href="module-bitmessage_messages.version.html">version</a></li><li><a href="module-bitmessage_objects.broadcast.html">broadcast</a></li><li><a href="module-bitmessage_objects.getpubkey.html">getpubkey</a></li><li><a href="module-bitmessage_objects.msg.html">msg</a></li><li><a href="module-bitmessage_objects.pubkey.html">pubkey</a></li><li><a href="module-bitmessage_structs.encrypted.html">encrypted</a></li><li><a href="module-bitmessage_structs.inv_vect.html">inv_vect</a></li><li><a href="module-bitmessage_structs.message.html">message</a></li><li><a href="module-bitmessage_structs.net_addr.html">net_addr</a></li><li><a href="module-bitmessage_structs.object.html">object</a></li><li><a href="module-bitmessage_structs.PubkeyBitfield.html">PubkeyBitfield</a></li><li><a href="module-bitmessage_structs.ServicesBitfield.html">ServicesBitfield</a></li><li><a href="module-bitmessage_structs.var_int.html">var_int</a></li><li><a href="module-bitmessage_structs.var_int_list.html">var_int_list</a></li><li><a href="module-bitmessage_structs.var_str.html">var_str</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-bitmessage.html">bitmessage</a></li><li><a href="module-bitmessage_address.html">bitmessage/address</a></li><li><a href="module-bitmessage_crypto.html">bitmessage/crypto</a></li><li><a href="module-bitmessage_messages.html">bitmessage/messages</a></li><li><a href="module-bitmessage_net_base.html">bitmessage/net/base</a></li><li><a href="module-bitmessage_net_tcp.html">bitmessage/net/tcp</a></li><li><a href="module-bitmessage_net_ws.html">bitmessage/net/ws</a></li><li><a href="module-bitmessage_objects.html">bitmessage/objects</a></li><li><a href="module-bitmessage_pow.html">bitmessage/pow</a></li><li><a href="module-bitmessage_structs.html">bitmessage/structs</a></li><li><a href="module-bitmessage_user-agent.html">bitmessage/user-agent</a></li><li><a href="module-bitmessage_wif.html">bitmessage/wif</a></li></ul><h3>Classes</h3><ul><li><a href="module-bitmessage_address.Address.html">Address</a></li><li><a href="module-bitmessage_net_base.BaseTransport.html">BaseTransport</a></li><li><a href="module-bitmessage_net_tcp.TcpTransport.html">TcpTransport</a></li><li><a href="module-bitmessage_net_ws.WsTransport.html">WsTransport</a></li><li><a href="module-bitmessage_structs.PubkeyBitfield.html">PubkeyBitfield</a></li><li><a href="module-bitmessage_structs.ServicesBitfield.html">ServicesBitfield</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-bitmessage_messages.addr.html">addr</a></li><li><a href="module-bitmessage_messages.error.html">error</a></li><li><a href="module-bitmessage_messages.getdata.html">getdata</a></li><li><a href="module-bitmessage_messages.inv.html">inv</a></li><li><a href="module-bitmessage_messages.version.html">version</a></li><li><a href="module-bitmessage_objects.broadcast.html">broadcast</a></li><li><a href="module-bitmessage_objects.getpubkey.html">getpubkey</a></li><li><a href="module-bitmessage_objects.msg.html">msg</a></li><li><a href="module-bitmessage_objects.pubkey.html">pubkey</a></li><li><a href="module-bitmessage_structs.encrypted.html">encrypted</a></li><li><a href="module-bitmessage_structs.inv_vect.html">inv_vect</a></li><li><a href="module-bitmessage_structs.message.html">message</a></li><li><a href="module-bitmessage_structs.net_addr.html">net_addr</a></li><li><a href="module-bitmessage_structs.object.html">object</a></li><li><a href="module-bitmessage_structs.var_int.html">var_int</a></li><li><a href="module-bitmessage_structs.var_int_list.html">var_int_list</a></li><li><a href="module-bitmessage_structs.var_str.html">var_str</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta1</a> on Sat Jan 31 2015 14:53:22 GMT+0300 (MSK)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0-dev</a> on Thu Feb 12 2015 13:43:38 GMT+0300 (MSK)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -44,7 +44,7 @@
 
     
 
-    <h4 class="name" id="Address"><span class="type-signature"></span>new Address<span class="signature">(opts<span class="signature-attributes">nullable</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="Address"><span class="type-signature"></span>new Address<span class="signature">(opts<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
 
     
 
@@ -104,9 +104,9 @@
             
                 <td class="attributes">
                 
-
+                    &lt;optional><br>
                 
-                    &lt;nullable><br>
+
                 
 
                 
@@ -115,7 +115,217 @@
 
             
 
-            <td class="description last"><p>Address options</p></td>
+            <td class="description last"><p>Address options</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>version</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Version number (4 by default)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>stream</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Stream number (1 by default)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>behavior</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p><a href="module-bitmessage_structs.PubkeyBitfield.html">Pubkey features</a> (<code>DOES_ACK</code> by default)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>signPrivateKey</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Buffer</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Signing private key</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>signPublicKey</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Buffer</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Signing public key</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>encPrivateKey</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Buffer</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Encryption private key</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>encPublicKey</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Buffer</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Encryption public key</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ripe</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Buffer</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Keys RIPEMD hash</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -156,7 +366,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="address.js.html">address.js</a>, <a href="address.js.html#line24">line 24</a>
+        <a href="address.js.html">address.js</a>, <a href="address.js.html#line46">line 46</a>
     </li></ul></dd>
     
 
@@ -305,7 +515,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="address.js.html">address.js</a>, <a href="address.js.html#line65">line 65</a>
+        <a href="address.js.html">address.js</a>, <a href="address.js.html#line87">line 87</a>
     </li></ul></dd>
     
 
@@ -358,14 +568,14 @@
 
     
 
-    <h4 class="name" id=".fromPassphrase"><span class="type-signature">(static) </span>fromPassphrase<span class="signature">(opts<span class="signature-attributes">nullable</span>)</span><span class="type-signature"> &rarr; {Address}</span></h4>
+    <h4 class="name" id=".fromPassphrase"><span class="type-signature">(static) </span>fromPassphrase<span class="signature">(opts)</span><span class="type-signature"> &rarr; {Address}</span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Create new Bitmessage address from passphrase.</p>
+    <p>Create a new Bitmessage address from passphrase.</p>
 </div>
 
 
@@ -378,6 +588,51 @@
 
     <h5>Parameters:</h5>
     
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Passphrase or address options</p>
+                <h6>Properties</h6>
+                
 
 <table class="params">
     <thead>
@@ -403,7 +658,138 @@
 
         <tr>
             
-                <td class="name"><code>opts</code></td>
+                <td class="name"><code>passphrase</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Passphrase to generate address from</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ripeLength</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Required length of the short
+RIPEMD hash (19 by default)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>version</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Version number (4 by default)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>stream</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Stream number (1 by default)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>behavior</code></td>
             
 
             <td class="type">
@@ -418,9 +804,9 @@
             
                 <td class="attributes">
                 
-
+                    &lt;optional><br>
                 
-                    &lt;nullable><br>
+
                 
 
                 
@@ -429,7 +815,14 @@
 
             
 
-            <td class="description last"><p>Address options</p></td>
+            <td class="description last"><p><a href="module-bitmessage_structs.PubkeyBitfield.html">Pubkey features</a> (<code>DOES_ACK</code> by default)</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -470,7 +863,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="address.js.html">address.js</a>, <a href="address.js.html#line265">line 265</a>
+        <a href="address.js.html">address.js</a>, <a href="address.js.html#line298">line 298</a>
     </li></ul></dd>
     
 
@@ -497,7 +890,7 @@
 
         
 <div class="param-desc">
-    <p>Generated address object.</p>
+    <p>New address object.</p>
 </div>
 
 
@@ -523,14 +916,14 @@
 
     
 
-    <h4 class="name" id=".fromRandom"><span class="type-signature">(static) </span>fromRandom<span class="signature">(opts<span class="signature-attributes">nullable</span>)</span><span class="type-signature"> &rarr; {Address}</span></h4>
+    <h4 class="name" id=".fromRandom"><span class="type-signature">(static) </span>fromRandom<span class="signature">(opts<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Address}</span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Create new Bitmessage address from random encryption and signing
+    <p>Create a new Bitmessage address with random encryption and signing
 private keys.</p>
 </div>
 
@@ -584,9 +977,9 @@ private keys.</p>
             
                 <td class="attributes">
                 
-
+                    &lt;optional><br>
                 
-                    &lt;nullable><br>
+
                 
 
                 
@@ -595,7 +988,126 @@ private keys.</p>
 
             
 
-            <td class="description last"><p>Address options</p></td>
+            <td class="description last"><p>Address options</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>ripeLength</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Required length of the short RIPEMD
+hash (19 by default)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>version</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Version number (4 by default)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>stream</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Stream number (1 by default)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>behavior</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p><a href="module-bitmessage_structs.PubkeyBitfield.html">Pubkey features</a> (<code>DOES_ACK</code> by default)</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -636,7 +1148,7 @@ private keys.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="address.js.html">address.js</a>, <a href="address.js.html#line233">line 233</a>
+        <a href="address.js.html">address.js</a>, <a href="address.js.html#line260">line 260</a>
     </li></ul></dd>
     
 
@@ -663,7 +1175,7 @@ private keys.</p>
 
         
 <div class="param-desc">
-    <p>Generated address object.</p>
+    <p>New address object.</p>
 </div>
 
 
@@ -696,7 +1208,7 @@ private keys.</p>
 
 
 <div class="description">
-    <p>Test if given object is an Address instance.<br>NOTE: Implementation is just simple <code>instanceof</code> but it improves
+    <p>Test if the given object is an Address instance.<br>NOTE: Implementation is just simple <code>instanceof</code> but it improves
 readability and consistent with <code>isArray</code>, <code>isBuffer</code>, etc.</p>
 </div>
 
@@ -790,7 +1302,7 @@ readability and consistent with <code>isArray</code>, <code>isBuffer</code>, etc
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="address.js.html">address.js</a>, <a href="address.js.html#line56">line 56</a>
+        <a href="address.js.html">address.js</a>, <a href="address.js.html#line78">line 78</a>
     </li></ul></dd>
     
 
@@ -890,7 +1402,7 @@ readability and consistent with <code>isArray</code>, <code>isBuffer</code>, etc
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="address.js.html">address.js</a>, <a href="address.js.html#line45">line 45</a>
+        <a href="address.js.html">address.js</a>, <a href="address.js.html#line67">line 67</a>
     </li></ul></dd>
     
 
@@ -994,7 +1506,7 @@ readability and consistent with <code>isArray</code>, <code>isBuffer</code>, etc
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="address.js.html">address.js</a>, <a href="address.js.html#line217">line 217</a>
+        <a href="address.js.html">address.js</a>, <a href="address.js.html#line239">line 239</a>
     </li></ul></dd>
     
 
@@ -1099,7 +1611,7 @@ readability and consistent with <code>isArray</code>, <code>isBuffer</code>, etc
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="address.js.html">address.js</a>, <a href="address.js.html#line142">line 142</a>
+        <a href="address.js.html">address.js</a>, <a href="address.js.html#line164">line 164</a>
     </li></ul></dd>
     
 
@@ -1205,7 +1717,7 @@ encrypt/decrypt
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="address.js.html">address.js</a>, <a href="address.js.html#line156">line 156</a>
+        <a href="address.js.html">address.js</a>, <a href="address.js.html#line178">line 178</a>
     </li></ul></dd>
     
 
@@ -1310,7 +1822,7 @@ encrypt/decrypt
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="address.js.html">address.js</a>, <a href="address.js.html#line123">line 123</a>
+        <a href="address.js.html">address.js</a>, <a href="address.js.html#line145">line 145</a>
     </li></ul></dd>
     
 
@@ -1416,7 +1928,7 @@ encrypt/decrypt
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="address.js.html">address.js</a>, <a href="address.js.html#line133">line 133</a>
+        <a href="address.js.html">address.js</a>, <a href="address.js.html#line155">line 155</a>
     </li></ul></dd>
     
 
@@ -1476,7 +1988,7 @@ encrypt/decrypt
 
 
 <div class="description">
-    <p>Get the ripe hash of the address without prefix zeroes.</p>
+    <p>Get the RIPEMD hash of the address keys without prefix nulls.</p>
 </div>
 
 
@@ -1520,7 +2032,7 @@ encrypt/decrypt
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="address.js.html">address.js</a>, <a href="address.js.html#line104">line 104</a>
+        <a href="address.js.html">address.js</a>, <a href="address.js.html#line126">line 126</a>
     </li></ul></dd>
     
 
@@ -1547,7 +2059,7 @@ encrypt/decrypt
 
         
 <div class="param-desc">
-    <p>A short ripe hash.</p>
+    <p>A short RIPEMD hash.</p>
 </div>
 
 
@@ -1624,7 +2136,7 @@ encrypt/decrypt
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="address.js.html">address.js</a>, <a href="address.js.html#line164">line 164</a>
+        <a href="address.js.html">address.js</a>, <a href="address.js.html#line186">line 186</a>
     </li></ul></dd>
     
 
@@ -1688,13 +2200,13 @@ encrypt/decrypt
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-bitmessage.html">bitmessage</a></li><li><a href="module-bitmessage_address.html">bitmessage/address</a></li><li><a href="module-bitmessage_crypto.html">bitmessage/crypto</a></li><li><a href="module-bitmessage_messages.html">bitmessage/messages</a></li><li><a href="module-bitmessage_objects.html">bitmessage/objects</a></li><li><a href="module-bitmessage_pow.html">bitmessage/pow</a></li><li><a href="module-bitmessage_structs.html">bitmessage/structs</a></li><li><a href="module-bitmessage_user-agent.html">bitmessage/user-agent</a></li><li><a href="module-bitmessage_wif.html">bitmessage/wif</a></li></ul><h3>Classes</h3><ul><li><a href="module-bitmessage_address.Address.html">Address</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-bitmessage_messages.addr.html">addr</a></li><li><a href="module-bitmessage_messages.error.html">error</a></li><li><a href="module-bitmessage_messages.getdata.html">getdata</a></li><li><a href="module-bitmessage_messages.inv.html">inv</a></li><li><a href="module-bitmessage_messages.version.html">version</a></li><li><a href="module-bitmessage_objects.broadcast.html">broadcast</a></li><li><a href="module-bitmessage_objects.getpubkey.html">getpubkey</a></li><li><a href="module-bitmessage_objects.msg.html">msg</a></li><li><a href="module-bitmessage_objects.pubkey.html">pubkey</a></li><li><a href="module-bitmessage_structs.encrypted.html">encrypted</a></li><li><a href="module-bitmessage_structs.inv_vect.html">inv_vect</a></li><li><a href="module-bitmessage_structs.message.html">message</a></li><li><a href="module-bitmessage_structs.net_addr.html">net_addr</a></li><li><a href="module-bitmessage_structs.object.html">object</a></li><li><a href="module-bitmessage_structs.PubkeyBitfield.html">PubkeyBitfield</a></li><li><a href="module-bitmessage_structs.ServicesBitfield.html">ServicesBitfield</a></li><li><a href="module-bitmessage_structs.var_int.html">var_int</a></li><li><a href="module-bitmessage_structs.var_int_list.html">var_int_list</a></li><li><a href="module-bitmessage_structs.var_str.html">var_str</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-bitmessage.html">bitmessage</a></li><li><a href="module-bitmessage_address.html">bitmessage/address</a></li><li><a href="module-bitmessage_crypto.html">bitmessage/crypto</a></li><li><a href="module-bitmessage_messages.html">bitmessage/messages</a></li><li><a href="module-bitmessage_net_base.html">bitmessage/net/base</a></li><li><a href="module-bitmessage_net_tcp.html">bitmessage/net/tcp</a></li><li><a href="module-bitmessage_net_ws.html">bitmessage/net/ws</a></li><li><a href="module-bitmessage_objects.html">bitmessage/objects</a></li><li><a href="module-bitmessage_pow.html">bitmessage/pow</a></li><li><a href="module-bitmessage_structs.html">bitmessage/structs</a></li><li><a href="module-bitmessage_user-agent.html">bitmessage/user-agent</a></li><li><a href="module-bitmessage_wif.html">bitmessage/wif</a></li></ul><h3>Classes</h3><ul><li><a href="module-bitmessage_address.Address.html">Address</a></li><li><a href="module-bitmessage_net_base.BaseTransport.html">BaseTransport</a></li><li><a href="module-bitmessage_net_tcp.TcpTransport.html">TcpTransport</a></li><li><a href="module-bitmessage_net_ws.WsTransport.html">WsTransport</a></li><li><a href="module-bitmessage_structs.PubkeyBitfield.html">PubkeyBitfield</a></li><li><a href="module-bitmessage_structs.ServicesBitfield.html">ServicesBitfield</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-bitmessage_messages.addr.html">addr</a></li><li><a href="module-bitmessage_messages.error.html">error</a></li><li><a href="module-bitmessage_messages.getdata.html">getdata</a></li><li><a href="module-bitmessage_messages.inv.html">inv</a></li><li><a href="module-bitmessage_messages.version.html">version</a></li><li><a href="module-bitmessage_objects.broadcast.html">broadcast</a></li><li><a href="module-bitmessage_objects.getpubkey.html">getpubkey</a></li><li><a href="module-bitmessage_objects.msg.html">msg</a></li><li><a href="module-bitmessage_objects.pubkey.html">pubkey</a></li><li><a href="module-bitmessage_structs.encrypted.html">encrypted</a></li><li><a href="module-bitmessage_structs.inv_vect.html">inv_vect</a></li><li><a href="module-bitmessage_structs.message.html">message</a></li><li><a href="module-bitmessage_structs.net_addr.html">net_addr</a></li><li><a href="module-bitmessage_structs.object.html">object</a></li><li><a href="module-bitmessage_structs.var_int.html">var_int</a></li><li><a href="module-bitmessage_structs.var_int_list.html">var_int_list</a></li><li><a href="module-bitmessage_structs.var_str.html">var_str</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta1</a> on Sat Jan 31 2015 14:53:21 GMT+0300 (MSK)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0-dev</a> on Thu Feb 12 2015 13:43:38 GMT+0300 (MSK)
 </footer>
 
 <script> prettyPrint(); </script>

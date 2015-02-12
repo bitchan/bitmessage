@@ -76,7 +76,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line338">line 338</a>
+        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line431">line 431</a>
     </li></ul></dd>
     
 
@@ -168,7 +168,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line349">line 349</a>
+        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line442">line 442</a>
     </li></ul></dd>
     
 
@@ -241,7 +241,7 @@ maybe ban you for some time.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line356">line 356</a>
+        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line449">line 449</a>
     </li></ul></dd>
     
 
@@ -313,7 +313,7 @@ maybe ban you for some time.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line343">line 343</a>
+        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line436">line 436</a>
     </li></ul></dd>
     
 
@@ -340,7 +340,7 @@ maybe ban you for some time.</p>
 
     
 
-    <h4 class="name" id=".decode"><span class="type-signature">(static) </span>decode<span class="signature">(buf)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    <h4 class="name" id=".decode"><span class="type-signature">(static) </span>decode<span class="signature">(buf)</span><span class="type-signature"> &rarr; {DecodeResult}</span></h4>
 
     
 
@@ -440,7 +440,7 @@ maybe ban you for some time.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line363">line 363</a>
+        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line470">line 470</a>
     </li></ul></dd>
     
 
@@ -467,7 +467,7 @@ maybe ban you for some time.</p>
 
         
 <div class="param-desc">
-    <p>Decoded <code>error</code> structure.</p>
+    <p><a href="module-bitmessage_messages.error.html#.DecodeResult">Decoded <code>error</code> structure.</a></p>
 </div>
 
 
@@ -478,7 +478,7 @@ maybe ban you for some time.</p>
     </dt>
     <dd>
         
-<span class="param-type">Object</span>
+<span class="param-type">DecodeResult</span>
 
 
     </dd>
@@ -493,14 +493,15 @@ maybe ban you for some time.</p>
 
     
 
-    <h4 class="name" id=".decodePayload"><span class="type-signature">(static) </span>decodePayload<span class="signature">(buf)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    <h4 class="name" id=".decodePayload"><span class="type-signature">(static) </span>decodePayload<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Decode <code>error</code> message payload.</p>
+    <p>Decode <code>error</code> message payload.
+The same as <a href="module-bitmessage_messages.error.html#.decode">decode</a>.</p>
 </div>
 
 
@@ -509,55 +510,6 @@ maybe ban you for some time.</p>
 
 
 
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>buf</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Buffer</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Message payload</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
 
 
 
@@ -593,7 +545,7 @@ maybe ban you for some time.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line374">line 374</a>
+        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line480">line 480</a>
     </li></ul></dd>
     
 
@@ -616,28 +568,6 @@ maybe ban you for some time.</p>
 
 
 
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>Decoded <code>error</code> structure.</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Object</span>
-
-
-    </dd>
-</dl>
-
-    
 
 
 
@@ -705,7 +635,171 @@ maybe ban you for some time.</p>
 
             
 
-            <td class="description last"><p>Error options</p></td>
+            <td class="description last"><p>Error options</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>fatal</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Type of the error
+(<a href="module-bitmessage_messages.error.html#.WARNING">warning</a> by
+default)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>banTime</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Inform the other node, that you
+will not accept further connections for this number of seconds (0
+by default)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>vector</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Buffer</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>A 32-byte
+<a href="module-bitmessage_structs.inv_vect.html">inventory vector</a>
+related to the error (empty by default)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>errorText</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>A human-readable error description</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -746,7 +840,7 @@ maybe ban you for some time.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line401">line 401</a>
+        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line530">line 530</a>
     </li></ul></dd>
     
 
@@ -799,14 +893,15 @@ maybe ban you for some time.</p>
 
     
 
-    <h4 class="name" id=".encodePayload"><span class="type-signature">(static) </span>encodePayload<span class="signature">(opts)</span><span class="type-signature"> &rarr; {Buffer}</span></h4>
+    <h4 class="name" id=".encodePayload"><span class="type-signature">(static) </span>encodePayload<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Encode <code>error</code> message payload.</p>
+    <p>Encode <code>error</code> message payload.
+The same as <a href="module-bitmessage_messages.error.html#.encode">encode</a>.</p>
 </div>
 
 
@@ -815,55 +910,6 @@ maybe ban you for some time.</p>
 
 
 
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>opts</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Error options</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
 
 
 
@@ -899,7 +945,7 @@ maybe ban you for some time.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line411">line 411</a>
+        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line539">line 539</a>
     </li></ul></dd>
     
 
@@ -922,34 +968,264 @@ maybe ban you for some time.</p>
 
 
 
-<h5>Returns:</h5>
+
+
 
         
-<div class="param-desc">
-    <p>Encoded payload.</p>
-</div>
+    
 
+    
+        <h3 class="subsection-title">Type Definitions</h3>
 
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
         
+                
+<h4 class="name" id=".DecodeResult">DecodeResult</h4>
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>fatal</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Type of the error</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>banTime</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>The other node informs that it will
+not accept further connections for this number of seconds</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>vector</code></td>
+            
+
+            <td class="type">
+            
+                
 <span class="param-type">Buffer</span>
 
 
-    </dd>
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p><a href="module-bitmessage_structs.inv_vect.html">Inventory vector</a>
+related to the error</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>errorText</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>A human-readable error description</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>length</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Real data length</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line451">line 451</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
 </dl>
 
-    
 
 
 
-        
-    
 
+
+            
     
 
     
@@ -963,13 +1239,13 @@ maybe ban you for some time.</p>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-bitmessage.html">bitmessage</a></li><li><a href="module-bitmessage_address.html">bitmessage/address</a></li><li><a href="module-bitmessage_crypto.html">bitmessage/crypto</a></li><li><a href="module-bitmessage_messages.html">bitmessage/messages</a></li><li><a href="module-bitmessage_objects.html">bitmessage/objects</a></li><li><a href="module-bitmessage_pow.html">bitmessage/pow</a></li><li><a href="module-bitmessage_structs.html">bitmessage/structs</a></li><li><a href="module-bitmessage_user-agent.html">bitmessage/user-agent</a></li><li><a href="module-bitmessage_wif.html">bitmessage/wif</a></li></ul><h3>Classes</h3><ul><li><a href="module-bitmessage_address.Address.html">Address</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-bitmessage_messages.addr.html">addr</a></li><li><a href="module-bitmessage_messages.error.html">error</a></li><li><a href="module-bitmessage_messages.getdata.html">getdata</a></li><li><a href="module-bitmessage_messages.inv.html">inv</a></li><li><a href="module-bitmessage_messages.version.html">version</a></li><li><a href="module-bitmessage_objects.broadcast.html">broadcast</a></li><li><a href="module-bitmessage_objects.getpubkey.html">getpubkey</a></li><li><a href="module-bitmessage_objects.msg.html">msg</a></li><li><a href="module-bitmessage_objects.pubkey.html">pubkey</a></li><li><a href="module-bitmessage_structs.encrypted.html">encrypted</a></li><li><a href="module-bitmessage_structs.inv_vect.html">inv_vect</a></li><li><a href="module-bitmessage_structs.message.html">message</a></li><li><a href="module-bitmessage_structs.net_addr.html">net_addr</a></li><li><a href="module-bitmessage_structs.object.html">object</a></li><li><a href="module-bitmessage_structs.PubkeyBitfield.html">PubkeyBitfield</a></li><li><a href="module-bitmessage_structs.ServicesBitfield.html">ServicesBitfield</a></li><li><a href="module-bitmessage_structs.var_int.html">var_int</a></li><li><a href="module-bitmessage_structs.var_int_list.html">var_int_list</a></li><li><a href="module-bitmessage_structs.var_str.html">var_str</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-bitmessage.html">bitmessage</a></li><li><a href="module-bitmessage_address.html">bitmessage/address</a></li><li><a href="module-bitmessage_crypto.html">bitmessage/crypto</a></li><li><a href="module-bitmessage_messages.html">bitmessage/messages</a></li><li><a href="module-bitmessage_net_base.html">bitmessage/net/base</a></li><li><a href="module-bitmessage_net_tcp.html">bitmessage/net/tcp</a></li><li><a href="module-bitmessage_net_ws.html">bitmessage/net/ws</a></li><li><a href="module-bitmessage_objects.html">bitmessage/objects</a></li><li><a href="module-bitmessage_pow.html">bitmessage/pow</a></li><li><a href="module-bitmessage_structs.html">bitmessage/structs</a></li><li><a href="module-bitmessage_user-agent.html">bitmessage/user-agent</a></li><li><a href="module-bitmessage_wif.html">bitmessage/wif</a></li></ul><h3>Classes</h3><ul><li><a href="module-bitmessage_address.Address.html">Address</a></li><li><a href="module-bitmessage_net_base.BaseTransport.html">BaseTransport</a></li><li><a href="module-bitmessage_net_tcp.TcpTransport.html">TcpTransport</a></li><li><a href="module-bitmessage_net_ws.WsTransport.html">WsTransport</a></li><li><a href="module-bitmessage_structs.PubkeyBitfield.html">PubkeyBitfield</a></li><li><a href="module-bitmessage_structs.ServicesBitfield.html">ServicesBitfield</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-bitmessage_messages.addr.html">addr</a></li><li><a href="module-bitmessage_messages.error.html">error</a></li><li><a href="module-bitmessage_messages.getdata.html">getdata</a></li><li><a href="module-bitmessage_messages.inv.html">inv</a></li><li><a href="module-bitmessage_messages.version.html">version</a></li><li><a href="module-bitmessage_objects.broadcast.html">broadcast</a></li><li><a href="module-bitmessage_objects.getpubkey.html">getpubkey</a></li><li><a href="module-bitmessage_objects.msg.html">msg</a></li><li><a href="module-bitmessage_objects.pubkey.html">pubkey</a></li><li><a href="module-bitmessage_structs.encrypted.html">encrypted</a></li><li><a href="module-bitmessage_structs.inv_vect.html">inv_vect</a></li><li><a href="module-bitmessage_structs.message.html">message</a></li><li><a href="module-bitmessage_structs.net_addr.html">net_addr</a></li><li><a href="module-bitmessage_structs.object.html">object</a></li><li><a href="module-bitmessage_structs.var_int.html">var_int</a></li><li><a href="module-bitmessage_structs.var_int_list.html">var_int_list</a></li><li><a href="module-bitmessage_structs.var_str.html">var_str</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta1</a> on Sat Jan 31 2015 14:53:22 GMT+0300 (MSK)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0-dev</a> on Thu Feb 12 2015 13:43:38 GMT+0300 (MSK)
 </footer>
 
 <script> prettyPrint(); </script>

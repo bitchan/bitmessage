@@ -28,22 +28,18 @@
         <article>
             <pre class="prettyprint source linenums"><code>/**
  * Working with objects.  
- * NOTE: Most operations with objects in this module are asynchronous
- * and return promises.
+ * NOTE: Most operations with objects are asynchronous and return
+ * promises.
  * @see {@link https://bitmessage.org/wiki/Protocol_specification#Object_types}
  * @module bitmessage/objects
  */
-// TODO(Kagami): Document object-like params.
-// FIXME(Kagami): Think through the API, we may want to get decoded
-// structure even if it contains unsupported version. Also error
-// handling may need some refactoring.
 
 "use strict";
 
 var objectAssign = Object.assign || require("object-assign");
 var bufferEqual = require("buffer-equal");
 var assert = require("./_util").assert;
-var promise = require("./platform").promise;
+var PPromise = require("./platform").Promise;
 var bmcrypto = require("./crypto");
 var Address = require("./address");
 var structs = require("./structs");
@@ -76,14 +72,7 @@ exports.getType = function(buf) {
 
 /**
  * Try to get type of the given object message payload.
- * Note that this function doesn't do any validation because it is
- * already provided by
- * [object.decodePayload]{@link module:bitmessage/structs.object.decodePayload}
- * routine. Normally you call this for each incoming object message
- * payload and then call decode function of the appropriate object
- * handler.
- * @param {Buffer} buf - Buffer that starts with object message payload
- * @return {?number} Object's type if any.
+ * The same as [getType]{@link module:bitmessage/objects.getType}.
  */
 exports.getPayloadType = function(buf) {
   // Object header: 8 + 8 + 4
@@ -95,7 +84,7 @@ exports.getPayloadType = function(buf) {
 
 // Prepend nonce to a given object without nonce.
 function prependNonce(obj, opts) {
-  return new promise(function(resolve) {
+  return new PPromise(function(resolve) {
     assert(obj.length &lt;= 262136, "object message payload is too big");
     opts = objectAssign({}, opts);
     var nonce, target, powp;
@@ -130,14 +119,32 @@ function prependNonce(obj, opts) {
  */
 var getpubkey = exports.getpubkey = {
   /**
+   * @typedef {Object} DecodeResult
+   * @property {Buffer} nonce - A 8-byte object nonce
+   * @property {number} ttl - Time to live in seconds
+   * @property {number} type - Object type
+   * @property {number} version - Object version
+   * @property {number} stream - Object stream
+   * @property {number} headerLength - Length of the object header
+   * @property {Buffer} ripe - The RIPEMD hash of the requested public
+   * keys for address version &lt;= 3
+   * @property {Buffer} tag - ...or tag derived from the address object
+   * for address version >= 4
+   * @property {number} length - Real data length
+   * @memberof module:bitmessage/objects.getpubkey
+   */
+
+  /**
    * Decode `getpubkey` object message.
    * @param {Buffer} buf - Message
-   * @param {?Object} opts - Decoding options
-   * @return {Promise.&lt;Object>} A promise that contains decoded
-   * `getpubkey` object structure when fulfilled.
+   * @param {Object=} opts - Any of [object.decode]{@link
+   * module:bitmessage/structs.object.decode} options
+   * @return {Promise.&lt;DecodeResult>} A promise that contains
+   * [decoded `getpubkey` structure]{@link
+   * module:bitmessage/objects.getpubkey.DecodeResult} when fulfilled.
    */
   decodeAsync: function(buf, opts) {
-    return new promise(function(resolve) {
+    return new PPromise(function(resolve) {
       var decoded = message.decode(buf);
       assert(decoded.command === "object", "Bad command");
       resolve(getpubkey.decodePayloadAsync(decoded.payload, opts));
@@ -146,13 +153,11 @@ var getpubkey = exports.getpubkey = {
 
   /**
    * Decode `getpubkey` object message payload.
-   * @param {Buffer} buf - Message payload
-   * @param {?Object} opts - Decoding options
-   * @return {Promise.&lt;Object>} A promise that contains decoded
-   * `getpubkey` object structure when fulfilled.
+   * The same as [decodeAsync]{@link
+   * module:bitmessage/objects.getpubkey.decodeAsync}.
    */
   decodePayloadAsync: function(buf, opts) {
-    return new promise(function(resolve) {
+    return new PPromise(function(resolve) {
       var decoded = object.decodePayload(buf, opts);
       assert(decoded.type === object.GETPUBKEY, "Wrong object type");
       assert(decoded.version >= 2, "getpubkey version is too low");
@@ -174,6 +179,10 @@ var getpubkey = exports.getpubkey = {
   /**
    * Encode `getpubkey` object message.
    * @param {Object} opts - `getpubkey` object options
+   * @param {number} opts.ttl - Time to live in seconds
+   * @param {Address} opts.to - Receiver of the message
+   * @param {boolean=} opts.skipPow - Do not compute POW (false by
+   * default)
    * @return {Promise.&lt;Buffer>} A promise that contains encoded message
    * when fulfilled.
    */
@@ -185,12 +194,11 @@ var getpubkey = exports.getpubkey = {
 
   /**
    * Encode `getpubkey` object message payload.
-   * @param {Object} opts - `getpubkey` object options
-   * @return {Promise.&lt;Buffer>} A promise that contains encoded message
-   * payload when fulfilled.
+   * The same as
+   * [encodeAsync]{@link module:bitmessage/objects.getpubkey.encodeAsync}.
    */
   encodePayloadAsync: function(opts) {
-    return new promise(function(resolve) {
+    return new PPromise(function(resolve) {
       opts = objectAssign({}, opts);
       opts.type = object.GETPUBKEY;
       // Bitmessage address of recepeint of `getpubkey` message.
@@ -271,14 +279,47 @@ function findAddrByTag(addrs, tag) {
  */
 var pubkey = exports.pubkey = {
   /**
+   * @typedef {Object} DecodeResult
+   * @property {Buffer} nonce - A 8-byte object nonce
+   * @property {number} ttl - Time to live in seconds
+   * @property {number} type - Object type
+   * @property {number} version - Object version
+   * @property {number} stream - Object stream
+   * @property {number} headerLength - Length of the object header
+   * @property {Buffer} tag - Tag derived from the address object
+   * (present only if object version is 4)
+   * @property {Object} behavior - [Pubkey features]{@link
+   * module:bitmessage/structs.PubkeyBitfield} that can be expected from
+   * the node
+   * @property {Buffer} signPublicKey - Signing public key
+   * @property {Buffer} encPublicKey - Encryption public key
+   * @property {number} nonceTrialsPerByte - Difficulty parameter of the
+   * node (present only for `pubkey` version >= 3)
+   * @property {number} payloadLengthExtraBytes - Difficulty parameter
+   * of the node (present only for `pubkey` version >= 3)
+   * @property {Buffer} signature - Signature of the message (present
+   * only for `pubkey` version >= 3)
+   * @property {number} length - Real data length
+   * @memberof module:bitmessage/objects.pubkey
+   */
+
+  /**
    * Decode `pubkey` object message.
    * @param {Buffer} buf - Message
-   * @param {?Object} opts - Decoding options
-   * @return {Promise.&lt;Object>} A promise that contains decoded `pubkey`
-   * object structure when fulfilled.
+   * @param {Object=} opts - Any of [object.decode]{@link
+   * module:bitmessage/structs.object.decode} options and:
+   * @param {(Address[]|Address|Object)} opts.needed - Address objects
+   * which represent pubkeys that we are interested in (used only for
+   * pubkeys v4). It is either addresses array or single address or
+   * Object addr-by-tag. Time to match the key is O(n), O(1), O(1)
+   * respectfully.
+   * @return {Promise.&lt;DecodeResult>} A promise that contains
+   * [decoded `pubkey` structure]{@link
+   * module:bitmessage/objects.pubkey.DecodeResult}
+   * when fulfilled.
    */
   decodeAsync: function(buf, opts) {
-    return new promise(function(resolve) {
+    return new PPromise(function(resolve) {
       var decoded = message.decode(buf);
       assert(decoded.command === "object", "Bad command");
       resolve(pubkey.decodePayloadAsync(decoded.payload, opts));
@@ -287,13 +328,11 @@ var pubkey = exports.pubkey = {
 
   /**
    * Decode `pubkey` object message payload.
-   * @param {Buffer} buf - Message payload
-   * @param {?Object} opts - Decoding options
-   * @return {Promise.&lt;Object>} A promise that contains decoded `pubkey`
-   * object structure when fulfilled.
+   * The same as [decodeAsync]{@link
+   * module:bitmessage/objects.pubkey.decodeAsync}.
    */
   decodePayloadAsync: function(buf, opts) {
-    return new promise(function(resolve) {
+    return new PPromise(function(resolve) {
       opts = opts || {};
       var decoded = object.decodePayload(buf, opts);
       assert(decoded.type === object.PUBKEY, "Wrong object type");
@@ -369,6 +408,11 @@ var pubkey = exports.pubkey = {
   /**
    * Encode `pubkey` object message.
    * @param {Object} opts - `pubkey` object options
+   * @param {number} opts.ttl - Time to live in seconds
+   * @param {Address} opts.from - Originator of the message
+   * @param {Address} opts.to - Receiver of the message
+   * @param {boolean=} opts.skipPow - Do not compute POW (false by
+   * default)
    * @return {Promise.&lt;Buffer>} A promise that contains encoded message
    * when fulfilled.
    */
@@ -380,12 +424,11 @@ var pubkey = exports.pubkey = {
 
   /**
    * Encode `pubkey` object message payload.
-   * @param {Object} opts - `pubkey` object options
-   * @return {Promise.&lt;Buffer>} A promise that contains encoded message
-   * payload when fulfilled.
+   * The same as [encodeAsync]{@link
+   * module:bitmessage/objects.pubkey.encodeAsync}.
    */
   encodePayloadAsync: function(opts) {
-    return new promise(function(resolve) {
+    return new PPromise(function(resolve) {
       opts = objectAssign({}, opts);
       opts.type = object.PUBKEY;
       // Originator of `pubkey` message.
@@ -465,8 +508,9 @@ var pubkey = exports.pubkey = {
 function tryDecryptMsg(identities, buf) {
   function inner(i) {
     if (i > last) {
-      var err = new Error("Failed to decrypt msg with given identities");
-      return promise.reject(err);
+      return PPromise.reject(
+        new Error("Failed to decrypt msg with given identities")
+      );
     }
     return bmcrypto
       .decrypt(identities[i].encPrivateKey, buf)
@@ -568,14 +612,51 @@ var msg = exports.msg = {
   SIMPLE: 2,
 
   /**
+   * @typedef {Object} DecodeResult
+   * @property {Buffer} nonce - A 8-byte object nonce
+   * @property {number} ttl - Time to live in seconds
+   * @property {number} type - Object type
+   * @property {number} version - Object version
+   * @property {number} stream - Object stream
+   * @property {number} headerLength - Length of the object header
+   * @property {number} senderVersion - Sender's address version
+   * @property {number} senderStream - Sender's stream
+   * @property {Object} behavior - Sender's [pubkey features]{@link
+   * module:bitmessage/structs.PubkeyBitfield} that can be expected from
+   * the node
+   * @property {Buffer} signPublicKey - Sender's signing public key
+   * @property {Buffer} encPublicKey - Sender's encryption public key
+   * @property {number} nonceTrialsPerByte - Difficulty parameter of the
+   * sender (present only if sender's address version >= 3)
+   * @property {number} payloadLengthExtraBytes - Difficulty parameter
+   * of the sender (present only if sender's address version >= 3)
+   * @property {Buffer} ripe - The RIPEMD hash of the receiver's keys
+   * @property {number} encoding - Message encoding
+   * @property {(string|Buffer)} message - Message string for
+   * [TRIVIAL]{@link module:bitmessage/objects.msg.TRIVIAL} and
+   * [SIMPLE]{@link module:bitmessage/objects.msg.SIMPLE} encodings or
+   * unparsed buffer data for other encodings
+   * @property {string=} subject - Subject string for [SIMPLE]{@link
+   * module:bitmessage/objects.msg.SIMPLE} encoding
+   * @property {Buffer} ack - Message acknowledgement
+   * @property {Buffer} signature - Signature of the message
+   * @property {number} length - Real data length
+   * @memberof module:bitmessage/objects.msg
+   */
+
+  /**
    * Decode `msg` object message.
    * @param {Buffer} buf - Message
-   * @param {Object} opts - Decoding options
-   * @return {Promise.&lt;Object>} A promise that contains decoded `msg`
-   * object structure when fulfilled.
+   * @param {Object} opts - Any of [object.decode]{@link
+   * module:bitmessage/structs.object.decode} options and:
+   * @param {(Address[]|Address)} opts.identities - Address objects used
+   * to decrypt the message
+   * @return {Promise.&lt;DecodeResult>} A promise that contains [decoded
+   * `msg` structure]{@link module:bitmessage/objects.msg.DecodeResult}
+   * when fulfilled.
    */
   decodeAsync: function(buf, opts) {
-    return new promise(function(resolve) {
+    return new PPromise(function(resolve) {
       var decoded = message.decode(buf);
       assert(decoded.command === "object", "Bad command");
       resolve(msg.decodePayloadAsync(decoded.payload, opts));
@@ -584,13 +665,11 @@ var msg = exports.msg = {
 
   /**
    * Decode `msg` object message payload.
-   * @param {Buffer} buf - Message payload
-   * @param {Object} opts - Decoding options
-   * @return {Promise.&lt;Object>} A promise that contains decoded `msg`
-   * object structure when fulfilled.
+   * The same as [decodeAsync]{@link
+   * module:bitmessage/objects.msg.decodeAsync}.
    */
   decodePayloadAsync: function(buf, opts) {
-    return new promise(function(resolve) {
+    return new PPromise(function(resolve) {
       var decoded = object.decodePayload(buf, opts);
       assert(decoded.type === object.MSG, "Bad object type");
       assert(decoded.version === 1, "Bad msg version");
@@ -617,7 +696,7 @@ var msg = exports.msg = {
           var rest = decrypted.slice(decoded.length);
 
           // Pow extra.
-          if (decoded.senderVersion >= 3) {
+          if (senderVersion >= 3) {
             var decodedTrials = var_int.decode(rest);
             decoded.nonceTrialsPerByte = decodedTrials.value;
             decoded.length += decodedTrials.length;
@@ -685,6 +764,18 @@ var msg = exports.msg = {
   /**
    * Encode `msg` object message.
    * @param {Object} opts - `msg` object options
+   * @param {number} opts.ttl - Time to live in seconds
+   * @param {Address} opts.from - Originator of the message
+   * @param {Address} opts.to - Receiver of the message
+   * @param {(string|Buffer)} opts.message - Message
+   * @param {(string|Buffer)=} opts.subject - Subject for [SIMPLE]{@link
+   * module:bitmessage/objects.msg.SIMPLE} encoding
+   * @param {number=} opts.encoding - Encoding of the message
+   * ([TRIVIAL]{@link module:bitmessage/objects.msg.TRIVIAL} by default)
+   * @param {boolean=} opts.friend - Whether the receiver is friend and
+   * should have minimal POW difficulty (false by default)
+   * @param {boolean=} opts.skipPow - Do not compute POW (false by
+   * default)
    * @return {Promise.&lt;Buffer>} A promise that contains encoded message
    * when fulfilled.
    */
@@ -696,12 +787,11 @@ var msg = exports.msg = {
 
   /**
    * Encode `msg` object message payload.
-   * @param {Object} opts - `msg` object options
-   * @return {Promise.&lt;Buffer>} A promise that contains encoded message
-   * payload when fulfilled.
+   * The same as [encodeAsync]{@link
+   * module:bitmessage/objects.msg.encodeAsync}.
    */
   encodePayloadAsync: function(opts) {
-    return new promise(function(resolve) {
+    return new PPromise(function(resolve) {
       // Deal with options.
       opts = objectAssign({}, opts);
       opts.type = object.MSG;
@@ -776,8 +866,9 @@ var DEFAULT_ENCODING = msg.TRIVIAL;
 function tryDecryptBroadcastV4(subscriptions, buf) {
   function inner(i) {
     if (i > last) {
-      var err = new Error("Failed to decrypt broadcast with given identities");
-      return promise.reject(err);
+      return PPromise.reject(
+        new Error("Failed to decrypt broadcast with given identities")
+      );
     }
     return bmcrypto
       .decrypt(subscriptions[i].getBroadcastPrivateKey(), buf)
@@ -811,14 +902,54 @@ function tryDecryptBroadcastV4(subscriptions, buf) {
  */
 var broadcast = exports.broadcast = {
   /**
+   * @typedef {Object} DecodeResult
+   * @property {Buffer} nonce - A 8-byte object nonce
+   * @property {number} ttl - Time to live in seconds
+   * @property {number} type - Object type
+   * @property {number} version - Object version
+   * @property {number} stream - Object stream
+   * @property {number} headerLength - Length of the object header
+   * @property {Buffer} tag - Tag derived from the address object used
+   * to send this `broadcast` (present only for object version >= 5)
+   * @property {number} senderVersion - Sender's address version
+   * @property {number} senderStream - Sender's stream
+   * @property {Object} behavior - Sender's [pubkey features]{@link
+   * module:bitmessage/structs.PubkeyBitfield} that can be expected from
+   * the node
+   * @property {Buffer} signPublicKey - Sender's signing public key
+   * @property {Buffer} encPublicKey - Sender's encryption public key
+   * @property {number} nonceTrialsPerByte - Difficulty parameter of the
+   * sender (present only if sender's address version >= 3)
+   * @property {number} payloadLengthExtraBytes - Difficulty parameter
+   * of the sender (present only if sender's address version >= 3)
+   * @property {number} encoding - Message encoding
+   * @property {(string|Buffer)} message - Message string for
+   * [TRIVIAL]{@link module:bitmessage/objects.msg.TRIVIAL} and
+   * [SIMPLE]{@link module:bitmessage/objects.msg.SIMPLE} encodings or
+   * unparsed buffer data for other encodings
+   * @property {string=} subject - Subject string for [SIMPLE]{@link
+   * module:bitmessage/objects.msg.SIMPLE} encoding
+   * @property {Buffer} signature - Signature of the message
+   * @property {number} length - Real data length
+   * @memberof module:bitmessage/objects.broadcast
+   */
+
+  /**
    * Decode `broadcast` object message.
    * @param {Buffer} buf - Message
-   * @param {Object} opts - Decoding options
-   * @return {Promise.&lt;Object>} A promise that contains decoded
-   * `broadcast` object structure when fulfilled.
+   * @param {Object} opts - Any of [object.decode]{@link
+   * module:bitmessage/structs.object.decode} options and:
+   * @param {(Address[]|Address|Object)} opts.subscriptions - Address
+   * objects which represent broadcast subscriptions. It is either
+   * addresses array or single address or Object
+   * addr-by-tag/addr-by-ripe. Time to match the key is O(n), O(1), O(1)
+   * respectfully.
+   * @return {Promise.&lt;DecodeResult>} A promise that contains
+   * [decoded `broadcast` structure]{@link
+   * module:bitmessage/objects.broadcast.DecodeResult} when fulfilled.
    */
   decodeAsync: function(buf, opts) {
-    return new promise(function(resolve) {
+    return new PPromise(function(resolve) {
       var decoded = message.decode(buf);
       assert(decoded.command === "object", "Bad command");
       resolve(broadcast.decodePayloadAsync(decoded.payload, opts));
@@ -827,13 +958,11 @@ var broadcast = exports.broadcast = {
 
   /**
    * Decode `broadcast` object message payload.
-   * @param {Buffer} buf - Message payload
-   * @param {Object} opts - Decoding options
-   * @return {Promise.&lt;Object>} A promise that contains decoded `pubkey`
-   * object structure when fulfilled.
+   * The same as [decodeAsync]{@link
+   * module:bitmessage/objects.broadcast.decodeAsync}.
    */
   decodePayloadAsync: function(buf, opts) {
-    return new promise(function(resolve) {
+    return new PPromise(function(resolve) {
       var decoded = object.decodePayload(buf, opts);
       assert(decoded.type === object.BROADCAST, "Bad object type");
       var version = decoded.version;
@@ -957,6 +1086,15 @@ var broadcast = exports.broadcast = {
   /**
    * Encode `broadcast` object message.
    * @param {Object} opts - `broadcast` object options
+   * @param {number} opts.ttl - Time to live in seconds
+   * @param {Address} opts.from - Originator of the message
+   * @param {(string|Buffer)} opts.message - Message
+   * @param {(string|Buffer)=} opts.subject - Subject for [SIMPLE]{@link
+   * module:bitmessage/objects.msg.SIMPLE} encoding
+   * @param {number=} opts.encoding - Encoding of the message
+   * ([TRIVIAL]{@link module:bitmessage/objects.msg.TRIVIAL} by default)
+   * @param {boolean=} opts.skipPow - Do not compute POW (false by
+   * default)
    * @return {Promise.&lt;Buffer>} A promise that contains encoded message
    * when fulfilled.
    */
@@ -968,12 +1106,11 @@ var broadcast = exports.broadcast = {
 
   /**
    * Encode `broadcast` object message payload.
-   * @param {Object} opts - `broadcast` object options
-   * @return {Promise.&lt;Buffer>} A promise that contains encoded message
-   * payload when fulfilled.
+   * The same as [encodeAsync]{@link
+   * module:bitmessage/objects.broadcast.encodeAsync}.
    */
   encodePayloadAsync: function(opts) {
-    return new promise(function(resolve) {
+    return new PPromise(function(resolve) {
       // Deal with options.
       opts = objectAssign({}, opts);
       opts.type = object.BROADCAST;
@@ -1033,13 +1170,13 @@ var broadcast = exports.broadcast = {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-bitmessage.html">bitmessage</a></li><li><a href="module-bitmessage_address.html">bitmessage/address</a></li><li><a href="module-bitmessage_crypto.html">bitmessage/crypto</a></li><li><a href="module-bitmessage_messages.html">bitmessage/messages</a></li><li><a href="module-bitmessage_objects.html">bitmessage/objects</a></li><li><a href="module-bitmessage_pow.html">bitmessage/pow</a></li><li><a href="module-bitmessage_structs.html">bitmessage/structs</a></li><li><a href="module-bitmessage_user-agent.html">bitmessage/user-agent</a></li><li><a href="module-bitmessage_wif.html">bitmessage/wif</a></li></ul><h3>Classes</h3><ul><li><a href="module-bitmessage_address.Address.html">Address</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-bitmessage_messages.addr.html">addr</a></li><li><a href="module-bitmessage_messages.error.html">error</a></li><li><a href="module-bitmessage_messages.getdata.html">getdata</a></li><li><a href="module-bitmessage_messages.inv.html">inv</a></li><li><a href="module-bitmessage_messages.version.html">version</a></li><li><a href="module-bitmessage_objects.broadcast.html">broadcast</a></li><li><a href="module-bitmessage_objects.getpubkey.html">getpubkey</a></li><li><a href="module-bitmessage_objects.msg.html">msg</a></li><li><a href="module-bitmessage_objects.pubkey.html">pubkey</a></li><li><a href="module-bitmessage_structs.encrypted.html">encrypted</a></li><li><a href="module-bitmessage_structs.inv_vect.html">inv_vect</a></li><li><a href="module-bitmessage_structs.message.html">message</a></li><li><a href="module-bitmessage_structs.net_addr.html">net_addr</a></li><li><a href="module-bitmessage_structs.object.html">object</a></li><li><a href="module-bitmessage_structs.PubkeyBitfield.html">PubkeyBitfield</a></li><li><a href="module-bitmessage_structs.ServicesBitfield.html">ServicesBitfield</a></li><li><a href="module-bitmessage_structs.var_int.html">var_int</a></li><li><a href="module-bitmessage_structs.var_int_list.html">var_int_list</a></li><li><a href="module-bitmessage_structs.var_str.html">var_str</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-bitmessage.html">bitmessage</a></li><li><a href="module-bitmessage_address.html">bitmessage/address</a></li><li><a href="module-bitmessage_crypto.html">bitmessage/crypto</a></li><li><a href="module-bitmessage_messages.html">bitmessage/messages</a></li><li><a href="module-bitmessage_net_base.html">bitmessage/net/base</a></li><li><a href="module-bitmessage_net_tcp.html">bitmessage/net/tcp</a></li><li><a href="module-bitmessage_net_ws.html">bitmessage/net/ws</a></li><li><a href="module-bitmessage_objects.html">bitmessage/objects</a></li><li><a href="module-bitmessage_pow.html">bitmessage/pow</a></li><li><a href="module-bitmessage_structs.html">bitmessage/structs</a></li><li><a href="module-bitmessage_user-agent.html">bitmessage/user-agent</a></li><li><a href="module-bitmessage_wif.html">bitmessage/wif</a></li></ul><h3>Classes</h3><ul><li><a href="module-bitmessage_address.Address.html">Address</a></li><li><a href="module-bitmessage_net_base.BaseTransport.html">BaseTransport</a></li><li><a href="module-bitmessage_net_tcp.TcpTransport.html">TcpTransport</a></li><li><a href="module-bitmessage_net_ws.WsTransport.html">WsTransport</a></li><li><a href="module-bitmessage_structs.PubkeyBitfield.html">PubkeyBitfield</a></li><li><a href="module-bitmessage_structs.ServicesBitfield.html">ServicesBitfield</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-bitmessage_messages.addr.html">addr</a></li><li><a href="module-bitmessage_messages.error.html">error</a></li><li><a href="module-bitmessage_messages.getdata.html">getdata</a></li><li><a href="module-bitmessage_messages.inv.html">inv</a></li><li><a href="module-bitmessage_messages.version.html">version</a></li><li><a href="module-bitmessage_objects.broadcast.html">broadcast</a></li><li><a href="module-bitmessage_objects.getpubkey.html">getpubkey</a></li><li><a href="module-bitmessage_objects.msg.html">msg</a></li><li><a href="module-bitmessage_objects.pubkey.html">pubkey</a></li><li><a href="module-bitmessage_structs.encrypted.html">encrypted</a></li><li><a href="module-bitmessage_structs.inv_vect.html">inv_vect</a></li><li><a href="module-bitmessage_structs.message.html">message</a></li><li><a href="module-bitmessage_structs.net_addr.html">net_addr</a></li><li><a href="module-bitmessage_structs.object.html">object</a></li><li><a href="module-bitmessage_structs.var_int.html">var_int</a></li><li><a href="module-bitmessage_structs.var_int_list.html">var_int_list</a></li><li><a href="module-bitmessage_structs.var_str.html">var_str</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta1</a> on Sat Jan 31 2015 14:53:21 GMT+0300 (MSK)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0-dev</a> on Thu Feb 12 2015 13:43:38 GMT+0300 (MSK)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -27,10 +27,23 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/**
- * Working with Bitmessage addresses.
+ * Working with Bitmessage addresses.  
+ * **NOTE**: `Address` is exported as a module.
+ * @example
+ * var Address = require("bitmessage").Address;
+ * // Or: var Address = require("bitmessage/address");
+ *
+ * // Generate a new random Bitmessage identity.
+ * var addr1 = Address.fromRandom();
+ * console.log("New random Bitmessage address:", addr1.encode());
+ *
+ * // Or create it from passphrase.
+ * var addr2 = Address.fromPassphrase("test");
+ * console.log("Deterministic Bitmessage address:", addr2.encode());
  * @see {@link https://bitmessage.org/wiki/Address}
  * @module bitmessage/address
  */
+// TODO(Kagami): Document getters/setters.
 
 "use strict";
 
@@ -45,7 +58,16 @@ var popkey = require("./_util").popkey;
 
 /**
  * Create a new Bitmessage address object.
- * @param {?Object} opts - Address options
+ * @param {Object=} opts - Address options
+ * @param {number} opts.version - Version number (4 by default)
+ * @param {number} opts.stream - Stream number (1 by default)
+ * @param {Object} opts.behavior - [Pubkey features]{@link
+ * module:bitmessage/structs.PubkeyBitfield} (`DOES_ACK` by default)
+ * @param {Buffer} opts.signPrivateKey - Signing private key
+ * @param {Buffer} opts.signPublicKey - Signing public key
+ * @param {Buffer} opts.encPrivateKey - Encryption private key
+ * @param {Buffer} opts.encPublicKey - Encryption public key
+ * @param {Buffer} opts.ripe - Keys RIPEMD hash
  * @constructor
  * @static
  */
@@ -75,7 +97,7 @@ Address.prototype.clone = function() {
 };
 
 /**
- * Test if given object is an Address instance.  
+ * Test if the given object is an Address instance.  
  * NOTE: Implementation is just simple `instanceof` but it improves
  * readability and consistent with `isArray`, `isBuffer`, etc.
  * @param {Object} obj - Given object
@@ -126,8 +148,8 @@ function getaddrchecksum(data) {
 }
 
 /**
- * Get the ripe hash of the address without prefix zeroes.
- * @return {Buffer} A short ripe hash.
+ * Get the RIPEMD hash of the address keys without prefix nulls.
+ * @return {Buffer} A short RIPEMD hash.
  */
 Address.prototype.getShortRipe = function() {
   var ripe = this.ripe;
@@ -253,10 +275,15 @@ Address.prototype.encode = function() {
 };
 
 /**
- * Create new Bitmessage address from random encryption and signing
+ * Create a new Bitmessage address with random encryption and signing
  * private keys.
- * @param {?Object} opts - Address options
- * @return {Address} Generated address object.
+ * @param {Object=} opts - Address options
+ * @param {number} opts.ripeLength - Required length of the short RIPEMD
+ * hash (19 by default)
+ * @param {number} opts.version - Version number (4 by default)
+ * @param {number} opts.stream - Stream number (1 by default)
+ * @param {Object} opts.behavior - [Pubkey features]{@link module:bitmessage/structs.PubkeyBitfield} (`DOES_ACK` by default)
+ * @return {Address} New address object.
  */
 Address.fromRandom = function(opts) {
   opts = objectAssign({}, opts);
@@ -286,9 +313,15 @@ Address.fromRandom = function(opts) {
 };
 
 /**
- * Create new Bitmessage address from passphrase.
- * @param {?Object} opts - Address options
- * @return {Address} Generated address object.
+ * Create a new Bitmessage address from passphrase.
+ * @param {(string|Object)} opts - Passphrase or address options
+ * @param {string} opts.passphrase - Passphrase to generate address from
+ * @param {number=} opts.ripeLength - Required length of the short
+ * RIPEMD hash (19 by default)
+ * @param {number=} opts.version - Version number (4 by default)
+ * @param {number=} opts.stream - Stream number (1 by default)
+ * @param {Object=} opts.behavior - [Pubkey features]{@link module:bitmessage/structs.PubkeyBitfield} (`DOES_ACK` by default)
+ * @return {Address} New address object.
  */
 Address.fromPassphrase = function(opts) {
   if (typeof opts === "string") {
@@ -423,13 +456,13 @@ module.exports = Address;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-bitmessage.html">bitmessage</a></li><li><a href="module-bitmessage_address.html">bitmessage/address</a></li><li><a href="module-bitmessage_crypto.html">bitmessage/crypto</a></li><li><a href="module-bitmessage_messages.html">bitmessage/messages</a></li><li><a href="module-bitmessage_objects.html">bitmessage/objects</a></li><li><a href="module-bitmessage_pow.html">bitmessage/pow</a></li><li><a href="module-bitmessage_structs.html">bitmessage/structs</a></li><li><a href="module-bitmessage_user-agent.html">bitmessage/user-agent</a></li><li><a href="module-bitmessage_wif.html">bitmessage/wif</a></li></ul><h3>Classes</h3><ul><li><a href="module-bitmessage_address.Address.html">Address</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-bitmessage_messages.addr.html">addr</a></li><li><a href="module-bitmessage_messages.error.html">error</a></li><li><a href="module-bitmessage_messages.getdata.html">getdata</a></li><li><a href="module-bitmessage_messages.inv.html">inv</a></li><li><a href="module-bitmessage_messages.version.html">version</a></li><li><a href="module-bitmessage_objects.broadcast.html">broadcast</a></li><li><a href="module-bitmessage_objects.getpubkey.html">getpubkey</a></li><li><a href="module-bitmessage_objects.msg.html">msg</a></li><li><a href="module-bitmessage_objects.pubkey.html">pubkey</a></li><li><a href="module-bitmessage_structs.encrypted.html">encrypted</a></li><li><a href="module-bitmessage_structs.inv_vect.html">inv_vect</a></li><li><a href="module-bitmessage_structs.message.html">message</a></li><li><a href="module-bitmessage_structs.net_addr.html">net_addr</a></li><li><a href="module-bitmessage_structs.object.html">object</a></li><li><a href="module-bitmessage_structs.PubkeyBitfield.html">PubkeyBitfield</a></li><li><a href="module-bitmessage_structs.ServicesBitfield.html">ServicesBitfield</a></li><li><a href="module-bitmessage_structs.var_int.html">var_int</a></li><li><a href="module-bitmessage_structs.var_int_list.html">var_int_list</a></li><li><a href="module-bitmessage_structs.var_str.html">var_str</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-bitmessage.html">bitmessage</a></li><li><a href="module-bitmessage_address.html">bitmessage/address</a></li><li><a href="module-bitmessage_crypto.html">bitmessage/crypto</a></li><li><a href="module-bitmessage_messages.html">bitmessage/messages</a></li><li><a href="module-bitmessage_net_base.html">bitmessage/net/base</a></li><li><a href="module-bitmessage_net_tcp.html">bitmessage/net/tcp</a></li><li><a href="module-bitmessage_net_ws.html">bitmessage/net/ws</a></li><li><a href="module-bitmessage_objects.html">bitmessage/objects</a></li><li><a href="module-bitmessage_pow.html">bitmessage/pow</a></li><li><a href="module-bitmessage_structs.html">bitmessage/structs</a></li><li><a href="module-bitmessage_user-agent.html">bitmessage/user-agent</a></li><li><a href="module-bitmessage_wif.html">bitmessage/wif</a></li></ul><h3>Classes</h3><ul><li><a href="module-bitmessage_address.Address.html">Address</a></li><li><a href="module-bitmessage_net_base.BaseTransport.html">BaseTransport</a></li><li><a href="module-bitmessage_net_tcp.TcpTransport.html">TcpTransport</a></li><li><a href="module-bitmessage_net_ws.WsTransport.html">WsTransport</a></li><li><a href="module-bitmessage_structs.PubkeyBitfield.html">PubkeyBitfield</a></li><li><a href="module-bitmessage_structs.ServicesBitfield.html">ServicesBitfield</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-bitmessage_messages.addr.html">addr</a></li><li><a href="module-bitmessage_messages.error.html">error</a></li><li><a href="module-bitmessage_messages.getdata.html">getdata</a></li><li><a href="module-bitmessage_messages.inv.html">inv</a></li><li><a href="module-bitmessage_messages.version.html">version</a></li><li><a href="module-bitmessage_objects.broadcast.html">broadcast</a></li><li><a href="module-bitmessage_objects.getpubkey.html">getpubkey</a></li><li><a href="module-bitmessage_objects.msg.html">msg</a></li><li><a href="module-bitmessage_objects.pubkey.html">pubkey</a></li><li><a href="module-bitmessage_structs.encrypted.html">encrypted</a></li><li><a href="module-bitmessage_structs.inv_vect.html">inv_vect</a></li><li><a href="module-bitmessage_structs.message.html">message</a></li><li><a href="module-bitmessage_structs.net_addr.html">net_addr</a></li><li><a href="module-bitmessage_structs.object.html">object</a></li><li><a href="module-bitmessage_structs.var_int.html">var_int</a></li><li><a href="module-bitmessage_structs.var_int_list.html">var_int_list</a></li><li><a href="module-bitmessage_structs.var_str.html">var_str</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta1</a> on Sat Jan 31 2015 14:53:21 GMT+0300 (MSK)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0-dev</a> on Thu Feb 12 2015 13:43:38 GMT+0300 (MSK)
 </footer>
 
 <script> prettyPrint(); </script>

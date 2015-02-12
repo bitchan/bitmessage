@@ -52,19 +52,16 @@
 <li><a href="https://bitmessage.org/wiki/Protocol_specification">Protocol specification</a></li>
 <li><a href="https://bitmessage.org/bitmessage.pdf">Whitepaper</a></li>
 </ul>
-<h2>Feature matrix (both Browser and Node)</h2><ul>
+<h2>Feature matrix</h2><ul>
 <li>[x] Crypto<ul>
 <li>[x] SHA-1</li>
 <li>[x] SHA-256</li>
 <li>[x] SHA-512</li>
 <li>[x] RIPEMD-160</li>
 <li>[x] PRNG</li>
-<li>[x] ECC keys manipulation</li>
+<li>[x] ECC keys handling</li>
 <li>[x] ECDSA</li>
-<li>[x] ECDH</li>
 <li>[x] ECIES</li>
-<li>[x] AES-256-CBC</li>
-<li>[x] HMAC-SHA-256</li>
 </ul>
 </li>
 <li>[x] Common structures<ul>
@@ -82,7 +79,6 @@
 </li>
 <li>[x] Message types<ul>
 <li>[x] version</li>
-<li>[x] verack</li>
 <li>[x] addr</li>
 <li>[x] inv</li>
 <li>[x] getdata</li>
@@ -103,17 +99,18 @@
 <li>[x] UserAgent</li>
 </ul>
 </li>
-<li>[ ] Parse PyBitmessage configs<ul>
+<li>[ ] Network transports<ul>
+<li>[x] TCP (Node.js only)</li>
+<li>[x] WebSocket</li>
+<li>[ ] WebRTC</li>
+</ul>
+</li>
+<li>[ ] PyBitmessage configs parsing<ul>
 <li>[ ] keys.dat</li>
 <li>[ ] knownnodes.dat</li>
 <li>[ ] messages.dat</li>
 </ul>
 </li>
-</ul>
-<h2>Network feature matrix (Node.js only)</h2><ul>
-<li>[ ] Bootstrap</li>
-<li>[ ] Connect to the network</li>
-<li>[ ] Accept connections</li>
 </ul>
 <h2>Usage</h2><h3>Address</h3><pre class="prettyprint source lang-js"><code>var Address = require(&quot;bitmessage&quot;).Address;
 
@@ -123,8 +120,73 @@ console.log(&quot;New random Bitmessage address:&quot;, addr1.encode());
 
 // Or create it from passphrase.
 var addr2 = Address.fromPassphrase(&quot;test&quot;);
-console.log(&quot;Deterministic Bitmessage address:&quot;, addr2.encode());</code></pre><h2>License</h2><p>bitmessage - JavaScript Bitmessage library</p>
-<p>Written in 2014 by Kagami Hiiragi <a href="&#109;&#x61;&#x69;&#108;&#116;&#x6f;&#x3a;&#107;&#x61;&#x67;&#x61;&#109;&#x69;&#64;&#x67;&#x65;&#110;&#115;&#104;&#105;&#x6b;&#x65;&#110;&#46;&#111;&#x72;&#x67;">&#107;&#x61;&#x67;&#x61;&#109;&#x69;&#64;&#x67;&#x65;&#110;&#115;&#104;&#105;&#x6b;&#x65;&#110;&#46;&#111;&#x72;&#x67;</a></p>
+console.log(&quot;Deterministic Bitmessage address:&quot;, addr2.encode());</code></pre><h3>Structures</h3><pre class="prettyprint source lang-js"><code>var structs = require(&quot;bitmessage&quot;).structs;
+
+var encoded = Buffer.concat([
+  structs.var_int.encode(4),
+  Buffer(&quot;test&quot;),
+  structs.var_str.encode(&quot;test2&quot;),
+  structs.var_int_list.encode([1, 2, 3]),
+]);
+
+var decoded1 = structs.var_str.decode(encoded);
+console.log(decoded1.str);  // test
+var decoded2 = structs.var_str.decode(decoded1.rest);
+console.log(decoded2.str);  // test2
+var decoded3 = structs.var_int.decode(decoded2.rest);
+console.log(decoded3.value);  // 3
+var decoded4 = structs.var_int_list.decode(decoded2.rest);
+console.log(decoded4.list);  // [1, 2, 3]</code></pre><h3>Messages</h3><pre class="prettyprint source lang-js"><code>var structs = require(&quot;bitmessage&quot;).structs;
+var messages = require(&quot;bitmessage&quot;).messages;
+
+// Simple encoding and decoding:
+var vermsg = messages.version.encode({
+  nonce: Buffer(8),  // Hack detection connection to self
+  remoteHost: &quot;1.1.1.1&quot;,
+  remotePort: 8444,
+});
+console.log(messages.version.decode(vermsg).remoteHost);  // 1.1.1.1
+
+// Low-level encoding and decoding:
+var addrPayload = messages.addr.encodePayload([
+  {host: &quot;2.2.2.2&quot;, port: 28444},
+]);
+var addrmsg = structs.message.encode(&quot;addr&quot;, addrPayload);
+var decoded = structs.message.decode(addrmsg);
+console.log(decoded.command);  // addr
+var payload = decoded.payload;
+var decodedPayload = messages.addr.decodePayload(payload);
+console.log(decodedPayload.addrs[0].host);  // 2.2.2.2
+
+// Encode with empty payload:
+var verackmsg = structs.message.encode(&quot;verack&quot;);
+console.log(structs.message.decode(verackmsg).command);  // verack</code></pre><h3>Network</h3><pre class="prettyprint source lang-js"><code>var messages = require(&quot;bitmessage&quot;).messages;
+var TcpTransport = require(&quot;bitmessage/net/tcp&quot;);
+
+var tcp = new TcpTransport({
+  dnsSeeds: [[&quot;bootstrap8444.bitmessage.org&quot;, 8444]],
+});
+
+tcp.bootstrap().then(function(nodes) {
+  var remoteHost = nodes[0][0];
+  var remotePort = nodes[0][1];
+  console.log(&quot;Connecting to&quot;, nodes[0]);
+  tcp.connect(remotePort, remoteHost);
+});
+
+tcp.on(&quot;established&quot;, function() {
+  console.log(&quot;Connection established&quot;);
+
+  tcp.on(&quot;message&quot;, function(command, payload) {
+    console.log(&quot;Got new&quot;, command, &quot;message&quot;);
+    var decoded;
+    if (command === &quot;addr&quot;) {
+      decoded = messages.addr.decodePayload(payload);
+      console.log(&quot;Got&quot;, decoded.addrs.length, &quot;node addresses&quot;);
+    }
+  });
+});</code></pre><h2>License</h2><p>bitmessage - JavaScript Bitmessage library</p>
+<p>Written in 2014-2015 by Kagami Hiiragi <a href="&#109;&#97;&#105;&#x6c;&#116;&#x6f;&#58;&#107;&#x61;&#x67;&#97;&#x6d;&#105;&#x40;&#103;&#x65;&#110;&#x73;&#x68;&#105;&#107;&#101;&#x6e;&#46;&#x6f;&#x72;&#x67;">&#107;&#x61;&#x67;&#97;&#x6d;&#105;&#x40;&#103;&#x65;&#110;&#x73;&#x68;&#105;&#107;&#101;&#x6e;&#46;&#x6f;&#x72;&#x67;</a></p>
 <p>To the extent possible under law, the author(s) have dedicated all copyright and related and neighboring rights to this software to the public domain worldwide. This software is distributed without any warranty.</p>
 <p>You should have received a copy of the CC0 Public Domain Dedication along with this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.</p></article>
     </section>
@@ -137,13 +199,13 @@ console.log(&quot;Deterministic Bitmessage address:&quot;, addr2.encode());</cod
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-bitmessage.html">bitmessage</a></li><li><a href="module-bitmessage_address.html">bitmessage/address</a></li><li><a href="module-bitmessage_crypto.html">bitmessage/crypto</a></li><li><a href="module-bitmessage_messages.html">bitmessage/messages</a></li><li><a href="module-bitmessage_objects.html">bitmessage/objects</a></li><li><a href="module-bitmessage_pow.html">bitmessage/pow</a></li><li><a href="module-bitmessage_structs.html">bitmessage/structs</a></li><li><a href="module-bitmessage_user-agent.html">bitmessage/user-agent</a></li><li><a href="module-bitmessage_wif.html">bitmessage/wif</a></li></ul><h3>Classes</h3><ul><li><a href="module-bitmessage_address.Address.html">Address</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-bitmessage_messages.addr.html">addr</a></li><li><a href="module-bitmessage_messages.error.html">error</a></li><li><a href="module-bitmessage_messages.getdata.html">getdata</a></li><li><a href="module-bitmessage_messages.inv.html">inv</a></li><li><a href="module-bitmessage_messages.version.html">version</a></li><li><a href="module-bitmessage_objects.broadcast.html">broadcast</a></li><li><a href="module-bitmessage_objects.getpubkey.html">getpubkey</a></li><li><a href="module-bitmessage_objects.msg.html">msg</a></li><li><a href="module-bitmessage_objects.pubkey.html">pubkey</a></li><li><a href="module-bitmessage_structs.encrypted.html">encrypted</a></li><li><a href="module-bitmessage_structs.inv_vect.html">inv_vect</a></li><li><a href="module-bitmessage_structs.message.html">message</a></li><li><a href="module-bitmessage_structs.net_addr.html">net_addr</a></li><li><a href="module-bitmessage_structs.object.html">object</a></li><li><a href="module-bitmessage_structs.PubkeyBitfield.html">PubkeyBitfield</a></li><li><a href="module-bitmessage_structs.ServicesBitfield.html">ServicesBitfield</a></li><li><a href="module-bitmessage_structs.var_int.html">var_int</a></li><li><a href="module-bitmessage_structs.var_int_list.html">var_int_list</a></li><li><a href="module-bitmessage_structs.var_str.html">var_str</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-bitmessage.html">bitmessage</a></li><li><a href="module-bitmessage_address.html">bitmessage/address</a></li><li><a href="module-bitmessage_crypto.html">bitmessage/crypto</a></li><li><a href="module-bitmessage_messages.html">bitmessage/messages</a></li><li><a href="module-bitmessage_net_base.html">bitmessage/net/base</a></li><li><a href="module-bitmessage_net_tcp.html">bitmessage/net/tcp</a></li><li><a href="module-bitmessage_net_ws.html">bitmessage/net/ws</a></li><li><a href="module-bitmessage_objects.html">bitmessage/objects</a></li><li><a href="module-bitmessage_pow.html">bitmessage/pow</a></li><li><a href="module-bitmessage_structs.html">bitmessage/structs</a></li><li><a href="module-bitmessage_user-agent.html">bitmessage/user-agent</a></li><li><a href="module-bitmessage_wif.html">bitmessage/wif</a></li></ul><h3>Classes</h3><ul><li><a href="module-bitmessage_address.Address.html">Address</a></li><li><a href="module-bitmessage_net_base.BaseTransport.html">BaseTransport</a></li><li><a href="module-bitmessage_net_tcp.TcpTransport.html">TcpTransport</a></li><li><a href="module-bitmessage_net_ws.WsTransport.html">WsTransport</a></li><li><a href="module-bitmessage_structs.PubkeyBitfield.html">PubkeyBitfield</a></li><li><a href="module-bitmessage_structs.ServicesBitfield.html">ServicesBitfield</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-bitmessage_messages.addr.html">addr</a></li><li><a href="module-bitmessage_messages.error.html">error</a></li><li><a href="module-bitmessage_messages.getdata.html">getdata</a></li><li><a href="module-bitmessage_messages.inv.html">inv</a></li><li><a href="module-bitmessage_messages.version.html">version</a></li><li><a href="module-bitmessage_objects.broadcast.html">broadcast</a></li><li><a href="module-bitmessage_objects.getpubkey.html">getpubkey</a></li><li><a href="module-bitmessage_objects.msg.html">msg</a></li><li><a href="module-bitmessage_objects.pubkey.html">pubkey</a></li><li><a href="module-bitmessage_structs.encrypted.html">encrypted</a></li><li><a href="module-bitmessage_structs.inv_vect.html">inv_vect</a></li><li><a href="module-bitmessage_structs.message.html">message</a></li><li><a href="module-bitmessage_structs.net_addr.html">net_addr</a></li><li><a href="module-bitmessage_structs.object.html">object</a></li><li><a href="module-bitmessage_structs.var_int.html">var_int</a></li><li><a href="module-bitmessage_structs.var_int_list.html">var_int_list</a></li><li><a href="module-bitmessage_structs.var_str.html">var_str</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta1</a> on Sat Jan 31 2015 14:53:21 GMT+0300 (MSK)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0-dev</a> on Thu Feb 12 2015 13:43:38 GMT+0300 (MSK)
 </footer>
 
 <script> prettyPrint(); </script>
