@@ -77,6 +77,89 @@ var addr2 = Address.fromPassphrase("test");
 console.log("Deterministic Bitmessage address:", addr2.encode());
 ```
 
+### Structures
+
+```js
+var structs = require("bitmessage").structs;
+
+var encoded = Buffer.concat([
+  structs.var_int.encode(4),
+  Buffer("test"),
+  structs.var_str.encode("test2"),
+  structs.var_int_list.encode([1, 2, 3]),
+]);
+
+var decoded1 = structs.var_str.decode(encoded);
+console.log(decoded1.str);  // test
+var decoded2 = structs.var_str.decode(decoded1.rest);
+console.log(decoded2.str);  // test2
+var decoded3 = structs.var_int.decode(decoded2.rest);
+console.log(decoded3.value);  // 3
+var decoded4 = structs.var_int_list.decode(decoded2.rest);
+console.log(decoded4.list);  // [1, 2, 3]
+```
+
+### Messages
+
+```js
+var structs = require("bitmessage").structs;
+var messages = require("bitmessage").messages;
+
+// Simple encoding and decoding:
+var vermsg = messages.version.encode({
+  nonce: Buffer(8),  // Hack detection connection to self
+  remoteHost: "1.1.1.1",
+  remotePort: 8444,
+});
+console.log(messages.version.decode(vermsg).remoteHost);  // 1.1.1.1
+
+// Low-level encoding and decoding:
+var addrPayload = messages.addr.encodePayload([
+  {host: "2.2.2.2", port: 28444},
+]);
+var addrmsg = structs.message.encode("addr", addrPayload);
+var decoded = structs.message.decode(addrmsg);
+console.log(decoded.command);  // addr
+var payload = decoded.payload;
+var decodedPayload = messages.addr.decodePayload(payload);
+console.log(decodedPayload.addrs[0].host);  // 2.2.2.2
+
+// Encode with empty payload:
+var verackmsg = structs.message.encode("verack");
+console.log(structs.message.decode(verackmsg).command);  // verack
+```
+
+### Network
+
+```js
+var messages = require("bitmessage").messages;
+var TcpTransport = require("bitmessage/net/tcp");
+
+var tcp = new TcpTransport({
+  dnsSeeds: [["bootstrap8444.bitmessage.org", 8444]],
+});
+
+tcp.bootstrap().then(function(nodes) {
+  var remoteHost = nodes[0][0];
+  var remotePort = nodes[0][1];
+  console.log("Connecting to", nodes[0]);
+  tcp.connect(remotePort, remoteHost);
+});
+
+tcp.on("established", function() {
+  console.log("Connection established");
+
+  tcp.on("message", function(command, payload) {
+    console.log("Got new", command, "message");
+    var decoded;
+    if (command === "addr") {
+      decoded = messages.addr.decodePayload(payload);
+      console.log("Got", decoded.addrs.length, "node addresses");
+    }
+  });
+});
+```
+
 ## License
 
 bitmessage - JavaScript Bitmessage library
