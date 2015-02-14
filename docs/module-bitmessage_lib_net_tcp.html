@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Module: bitmessage/wif</title>
+    <title>JSDoc: Module: bitmessage/lib/net/tcp</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Module: bitmessage/wif</h1>
+    <h1 class="page-title">Module: bitmessage/lib/net/tcp</h1>
 
     
 
@@ -38,7 +38,8 @@
     <div class="container-overview">
     
         
-            <div class="description"><p>Implements WIF encoding/decoding.</p></div>
+            <div class="description"><p>TCP transport compatible with PyBitmessage. Available only for Node
+platform.<br><strong>NOTE</strong>: <code>TcpTransport</code> is exported as a module.</p></div>
         
 
         
@@ -87,19 +88,12 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="wif.js.html">wif.js</a>, <a href="wif.js.html#line1">line 1</a>
+        <a href="net_tcp.js.html">net/tcp.js</a>, <a href="net_tcp.js.html#line1">line 1</a>
     </li></ul></dd>
     
 
     
 
-    
-    <dt class="tag-see">See:</dt>
-    <dd class="tag-see">
-        <ul>
-            <li><a href="https://en.bitcoin.it/wiki/Wallet_import_format">https://en.bitcoin.it/wiki/Wallet_import_format</a></li>
-        </ul>
-    </dd>
     
 
     
@@ -117,6 +111,36 @@
 
 
 
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>var messages = require("bitmessage").messages;
+var TcpTransport = require("bitmessage/lib/net/tcp");
+
+var tcp = new TcpTransport({
+  dnsSeeds: [["bootstrap8444.bitmessage.org", 8444]],
+});
+
+tcp.bootstrap().then(function(nodes) {
+  var remoteHost = nodes[0][0];
+  var remotePort = nodes[0][1];
+  console.log("Connecting to", nodes[0]);
+  tcp.connect(remotePort, remoteHost);
+});
+
+tcp.on("established", function() {
+  console.log("Connection established");
+
+  tcp.on("message", function(command, payload) {
+    console.log("Got new", command, "message");
+    var decoded;
+    if (command === "addr") {
+      decoded = messages.addr.decodePayload(payload);
+      console.log("Got", decoded.addrs.length, "node addresses");
+    }
+  });
+});</code></pre>
 
 
 
@@ -129,6 +153,13 @@
     
 
     
+        <h3 class="subsection-title">Classes</h3>
+
+        <dl>
+            <dt><a href="module-bitmessage_lib_net_tcp.TcpTransport.html">TcpTransport</a></dt>
+            <dd></dd>
+        </dl>
+    
 
      
 
@@ -136,318 +167,6 @@
 
     
 
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        
-            
-
-    
-
-    <h4 class="name" id=".decode"><span class="type-signature">(static) </span>decode<span class="signature">(wif)</span><span class="type-signature"> &rarr; {Buffer}</span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Decode WIF-encoded private key (corresponded to a uncompressed public
-key).</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>wif</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Encoded key</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="wif.js.html">wif.js</a>, <a href="wif.js.html#line25">line 25</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>Private key.</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Buffer</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id=".encode"><span class="type-signature">(static) </span>encode<span class="signature">(privateKey)</span><span class="type-signature"> &rarr; {string}</span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Convert private key to a WIF (corresponded to a uncompressed public
-key).</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>privateKey</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Buffer</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>A private key to encode</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="wif.js.html">wif.js</a>, <a href="wif.js.html#line40">line 40</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>WIF-encoded private key.</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">string</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
     
 
     
