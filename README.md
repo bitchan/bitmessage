@@ -129,11 +129,11 @@ var verackmsg = structs.message.encode("verack");
 console.log(structs.message.decode(verackmsg).command);  // verack
 ```
 
-### Network
+### Networking
 
 ```js
 var messages = require("bitmessage").messages;
-var TcpTransport = require("bitmessage/net/tcp");
+var TcpTransport = require("bitmessage/lib/net/tcp");
 
 var tcp = new TcpTransport({
   dnsSeeds: [["bootstrap8444.bitmessage.org", 8444]],
