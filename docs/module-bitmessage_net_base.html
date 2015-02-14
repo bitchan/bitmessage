@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Module: bitmessage/address</title>
+    <title>JSDoc: Module: bitmessage/net/base</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Module: bitmessage/address</h1>
+    <h1 class="page-title">Module: bitmessage/net/base</h1>
 
     
 
@@ -38,7 +38,9 @@
     <div class="container-overview">
     
         
-            <div class="description"><p>Working with Bitmessage addresses.<br><strong>NOTE</strong>: <code>Address</code> is exported as a module.</p></div>
+            <div class="description"><p>Networking base module. Defines base transport interface, useful for
+implementing new transports. End-users should import some transport
+instead in order to connect/accept connections to/from other nodes.<br><strong>NOTE</strong>: <code>BaseTransport</code> is exported as a module.</p></div>
         
 
         
@@ -87,19 +89,12 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="address.js.html">address.js</a>, <a href="address.js.html#line1">line 1</a>
+        <a href="net_base.js.html">net/base.js</a>, <a href="net_base.js.html#line1">line 1</a>
     </li></ul></dd>
     
 
     
 
-    
-    <dt class="tag-see">See:</dt>
-    <dd class="tag-see">
-        <ul>
-            <li><a href="https://bitmessage.org/wiki/Address">https://bitmessage.org/wiki/Address</a></li>
-        </ul>
-    </dd>
     
 
     
@@ -121,16 +116,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>var Address = require("bitmessage").Address;
-// Or: var Address = require("bitmessage/lib/address");
-
-// Generate a new random Bitmessage identity.
-var addr1 = Address.fromRandom();
-console.log("New random Bitmessage address:", addr1.encode());
-
-// Or create it from passphrase.
-var addr2 = Address.fromPassphrase("test");
-console.log("Deterministic Bitmessage address:", addr2.encode());</code></pre>
+    <pre class="prettyprint"><code>var BaseTransport = require("bitmessage/lib/net/base");</code></pre>
 
 
 
@@ -146,7 +132,7 @@ console.log("Deterministic Bitmessage address:", addr2.encode());</code></pre>
         <h3 class="subsection-title">Classes</h3>
 
         <dl>
-            <dt><a href="module-bitmessage_address.Address.html">Address</a></dt>
+            <dt><a href="module-bitmessage_net_base.BaseTransport.html">BaseTransport</a></dt>
             <dd></dd>
         </dl>
     

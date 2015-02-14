@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Module: bitmessage/address</title>
+    <title>JSDoc: Module: bitmessage/net/tcp</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Module: bitmessage/address</h1>
+    <h1 class="page-title">Module: bitmessage/net/tcp</h1>
 
     
 
@@ -38,7 +38,8 @@
     <div class="container-overview">
     
         
-            <div class="description"><p>Working with Bitmessage addresses.<br><strong>NOTE</strong>: <code>Address</code> is exported as a module.</p></div>
+            <div class="description"><p>TCP transport compatible with PyBitmessage. Available only for Node
+platform.<br><strong>NOTE</strong>: <code>TcpTransport</code> is exported as a module.</p></div>
         
 
         
@@ -87,19 +88,12 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="address.js.html">address.js</a>, <a href="address.js.html#line1">line 1</a>
+        <a href="net_tcp.js.html">net/tcp.js</a>, <a href="net_tcp.js.html#line1">line 1</a>
     </li></ul></dd>
     
 
     
 
-    
-    <dt class="tag-see">See:</dt>
-    <dd class="tag-see">
-        <ul>
-            <li><a href="https://bitmessage.org/wiki/Address">https://bitmessage.org/wiki/Address</a></li>
-        </ul>
-    </dd>
     
 
     
@@ -121,16 +115,32 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>var Address = require("bitmessage").Address;
-// Or: var Address = require("bitmessage/lib/address");
+    <pre class="prettyprint"><code>var messages = require("bitmessage").messages;
+var TcpTransport = require("bitmessage/lib/net/tcp");
 
-// Generate a new random Bitmessage identity.
-var addr1 = Address.fromRandom();
-console.log("New random Bitmessage address:", addr1.encode());
+var tcp = new TcpTransport({
+  dnsSeeds: [["bootstrap8444.bitmessage.org", 8444]],
+});
 
-// Or create it from passphrase.
-var addr2 = Address.fromPassphrase("test");
-console.log("Deterministic Bitmessage address:", addr2.encode());</code></pre>
+tcp.bootstrap().then(function(nodes) {
+  var remoteHost = nodes[0][0];
+  var remotePort = nodes[0][1];
+  console.log("Connecting to", nodes[0]);
+  tcp.connect(remotePort, remoteHost);
+});
+
+tcp.on("established", function() {
+  console.log("Connection established");
+
+  tcp.on("message", function(command, payload) {
+    console.log("Got new", command, "message");
+    var decoded;
+    if (command === "addr") {
+      decoded = messages.addr.decodePayload(payload);
+      console.log("Got", decoded.addrs.length, "node addresses");
+    }
+  });
+});</code></pre>
 
 
 
@@ -146,7 +156,7 @@ console.log("Deterministic Bitmessage address:", addr2.encode());</code></pre>
         <h3 class="subsection-title">Classes</h3>
 
         <dl>
-            <dt><a href="module-bitmessage_address.Address.html">Address</a></dt>
+            <dt><a href="module-bitmessage_net_tcp.TcpTransport.html">TcpTransport</a></dt>
             <dd></dd>
         </dl>
     
