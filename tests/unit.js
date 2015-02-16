@@ -114,7 +114,6 @@ describe("Crypto", function() {
   });
 });
 
-// TODO(Kagami): Add tests for encodePayload/decodePayload as well.
 describe("Common structures", function() {
   describe("message", function() {
     it("should decode", function() {
@@ -245,6 +244,24 @@ describe("Common structures", function() {
         version: 1,
         objectPayload: Buffer("test"),
       }))).to.throw(/insufficient/i);
+    });
+
+    it("should allow to validate object", function() {
+      var verackmsg = message.encode("verack");
+      var err = object.validate(verackmsg);
+      expect(err.message).to.match(/not an object/i);
+
+      var obj = object.encodePayload({
+        nonce: Buffer(8),
+        ttl: 111,
+        type: object.MSG,
+        version: 1,
+        objectPayload: Buffer(0),
+      });
+      err = object.validatePayload(obj);
+      expect(err.message).to.match(/insufficient pow/i);
+
+      expect(object.validatePayload(obj, {skipPow: true})).to.not.exist;
     });
   });
 
