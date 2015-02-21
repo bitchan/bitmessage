@@ -596,6 +596,7 @@ describe("Message types", function() {
       expect(res.vector).to.not.exist;
       expect(res.errorText).to.equal("test");
       expect(res.length).to.equal(8);
+      expect(error.type2str(res.fatal)).to.equal("warning");
 
       var vector = inv_vect.encode(Buffer("test"));
       var res = error.decode(error.encode({
@@ -609,6 +610,7 @@ describe("Message types", function() {
       expect(bufferEqual(res.vector, vector)).to.be.true;
       expect(res.errorText).to.equal("fatal error");
       expect(res.length).to.equal(47);
+      expect(error.type2str(res.fatal)).to.equal("fatal");
     });
   });
 });
