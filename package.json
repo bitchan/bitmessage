@@ -5,7 +5,7 @@
   "main": "./lib/index.js",
   "browser": {
     "./lib/platform.js": "./lib/platform.browser.js",
-    "./lib/net/tcp.js": "./lib/net/tcp.browser.js",
+    "./lib/net/tcp.js": false,
     "./lib/net/ws.js": "./lib/net/ws.browser.js"
   },
   "scripts": {
