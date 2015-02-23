@@ -455,6 +455,14 @@ describe("Common structures", function() {
       expect(ServicesBitfield().set([ServicesBitfield.NODE_NETWORK]).buffer.toString("hex")).to.equal("0000000000000001");
       expect(ServicesBitfield().set(ServicesBitfield.NODE_NETWORK).buffer.toString("hex")).to.equal("0000000000000001");
     });
+
+    it("should implement toString", function() {
+      var services = ServicesBitfield().set([
+        ServicesBitfield.NODE_NETWORK,
+        ServicesBitfield.NODE_GATEWAY,
+      ]);
+      expect(services.toString()).to.equal("<Bitfield:0000000000000000000000000000000000000000000000000000000000000101>");
+    });
   });
 
   describe("pubkey features", function() {
