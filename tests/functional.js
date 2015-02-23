@@ -2,6 +2,7 @@ var expect = require("chai").expect;
 
 var bitmessage = require("../lib");
 var structs = bitmessage.structs;
+var ServicesBitfield = structs.ServicesBitfield;
 var message = structs.message;
 var WsTransport = require("../lib/net/ws");
 
@@ -62,7 +63,13 @@ if (!process.browser) {
     });
 
     it("should automatically establish connection", function(done) {
-      tcp.once("established", function() {
+      tcp.once("established", function(version) {
+        expect(version.version).to.equal(3);
+        expect(version.services.get(ServicesBitfield.NODE_NETWORK)).to.be.true;
+        expect(version.remoteHost).to.equal("127.0.0.1");
+        expect(version.port).to.equal(22333);
+        expect(version.userAgent).to.be.a("string");
+        expect(version.streamNumbers).to.deep.equal([1]);
         done();
       });
     });
@@ -119,7 +126,12 @@ describe("WebSocket transport", function() {
   });
 
   it("should automatically establish connection", function(done) {
-    ws.once("established", function() {
+    ws.once("established", function(version) {
+      expect(version.services.get(ServicesBitfield.NODE_GATEWAY)).to.be.true;
+      expect(version.remoteHost).to.equal("127.0.0.1");
+      expect(version.port).to.equal(22334);
+      expect(version.userAgent).to.be.a("string");
+      expect(version.streamNumbers).to.deep.equal([1]);
       done();
     });
   });
