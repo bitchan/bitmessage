@@ -517,6 +517,22 @@ describe("Message types", function() {
       }));
       expect(res.userAgent).to.equal("/test:0.0.1/");
     });
+
+    it("shouldn't encode user agent longer than 5000 bytes", function() {
+      expect(version.encode.bind(null, {
+        remoteHost: "1.2.3.4",
+        remotePort: 8444,
+        userAgent: Buffer(6000),
+      })).to.throw(/agent is too long/i);
+    });
+
+    it("shouldn't include more than 160,000 stream numbers", function() {
+      expect(version.encode.bind(null, {
+        remoteHost: "1.2.3.4",
+        remotePort: 8444,
+        streams: Array.prototype.slice.apply(new Uint8Array(200000)),
+      })).to.throw(/many streams/i);
+    });
   });
 
   describe("addr", function() {
