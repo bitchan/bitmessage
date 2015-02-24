@@ -504,7 +504,7 @@ describe("Message types", function() {
       expect(res.port).to.equal(8444);
       expect(bufferEqual(res.nonce, nonce)).to.be.true;
       expect(UserAgent.parse(res.userAgent)).to.deep.equal(UserAgent.SELF);
-      expect(res.streamNumbers).to.deep.equal([1]);
+      expect(res.streams).to.deep.equal([1]);
       expect(res.length).to.equal(101);
     });
 

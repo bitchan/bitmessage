@@ -69,7 +69,7 @@ if (!process.browser) {
         expect(version.remoteHost).to.equal("127.0.0.1");
         expect(version.port).to.equal(22333);
         expect(version.userAgent).to.be.a("string");
-        expect(version.streamNumbers).to.deep.equal([1]);
+        expect(version.streams).to.deep.equal([1]);
         done();
       });
     });
@@ -131,7 +131,7 @@ describe("WebSocket transport", function() {
       expect(version.remoteHost).to.equal("127.0.0.1");
       expect(version.port).to.equal(22334);
       expect(version.userAgent).to.be.a("string");
-      expect(version.streamNumbers).to.deep.equal([1]);
+      expect(version.streams).to.deep.equal([1]);
       done();
     });
   });
