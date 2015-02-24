@@ -66,12 +66,13 @@ var objectAssign = Object.assign || require("object-assign");
 var inherits = require("inherits");
 var net = require("net");
 var dns = require("dns");
-var assert = require("../_util").assert;
+var util = require("../_util");
 var PPromise = require("../platform").Promise;
 var structs = require("../structs");
 var messages = require("../messages");
 var BaseTransport = require("./base");
 
+var assert = util.assert;
 var getmsg = BaseTransport._getmsg;
 var unmap = BaseTransport._unmap;
 
@@ -86,9 +87,9 @@ var unmap = BaseTransport._unmap;
  * provided by this node (`NODE_NETWORK` by default)
  * @param {(Array|string|Buffer)} opts.userAgent -
  * [User agent]{@link module:bitmessage/user-agent} of this node
- * (bitmessage's by default)
- * @param {number[]} opts.streamNumbers - Streams accepted by this node
- * (1 by default)
+ * (user agent of bitmessage library by default)
+ * @param {number[]} opts.streams - Streams accepted by this node ([1]
+ * by default)
  * @param {number} opts.port - Incoming port of this node (8444 by
  * default)
  * @constructor
@@ -99,27 +100,24 @@ function TcpTransport(opts) {
   objectAssign(this, opts);
   this.seeds = this.seeds || [];
   this.dnsSeeds = this.dnsSeeds || [];
+  this.streams = this.streams || [1];
   this._clients = {};
 }
 
 inherits(TcpTransport, BaseTransport);
 
-function getfrom(client) {
-  return unmap(client.remoteAddress) + ":" + client.remotePort;
-}
-
 TcpTransport.prototype._sendVersion = function() {
   return this.send(messages.version.encode({
     services: this.services,
     userAgent: this.userAgent,
-    streamNumbers: this.streamNumbers,
+    streams: this.streams,
     port: this.port,
     remoteHost: this._client.remoteAddress,
     remotePort: this._client.remotePort,
   }));
 };
 
-TcpTransport.prototype._setupClient = function(client, accepted) {
+TcpTransport.prototype._setupClient = function(client, incoming) {
   var self = this;
   self._client = client;
   var cache = Buffer(0);
@@ -135,8 +133,8 @@ TcpTransport.prototype._setupClient = function(client, accepted) {
 
   client.on("connect", function() {
     // NOTE(Kagami): This handler shouldn't be called at all for
-    // accepted sockets but let's be sure.
-    if (!accepted) {
+    // incoming connections but let's be sure.
+    if (!incoming) {
       self.emit("open");
       self._sendVersion();
     }
@@ -155,43 +153,43 @@ TcpTransport.prototype._setupClient = function(client, accepted) {
       }
       cache = decoded.rest;
       if (decoded.message) {
-        self.emit(
-          "message",
-          decoded.message.command,
-          decoded.message.payload,
-          decoded.message);
+        self.emit("message", decoded.message.command, decoded.message.payload);
       } else if (decoded.error) {
         // TODO(Kagami): Wrap it in custom error class?
         // TODO(Kagami): Send `error` message and ban node for some time
         // if there were too many errors?
         self.emit("warning", new Error(
-          "Message decoding error from " + getfrom(client) + ": " +
-          decoded.error
+          "Message decoding error: " + decoded.error.message
         ));
       }
     }
   });
 
   // High-level message processing.
-  self.on("message", function(command) {
+  self.on("message", function(command, payload) {
+    var version;
     if (!established) {
-      // TODO: Process version data.
-      // TODO: Disconnect if proto version &lt; 3.
       if (command === "version") {
         if (verackSent) {
           return;
         }
+        try {
+          version = self._decodeVersion(payload, {network: true});
+        } catch(err) {
+          self.emit("error", err);
+          return client.end();
+        }
         self.send("verack");
         verackSent = true;
-        if (accepted) {
+        if (incoming) {
           self._sendVersion();
         } else if (verackReceived) {
-          self.emit("established");
+          self.emit("established", version);
         }
       } else if (command === "verack") {
         verackReceived = true;
         if (verackSent) {
-          self.emit("established");
+          self.emit("established", version);
         }
       }
     }
@@ -248,16 +246,25 @@ function resolveDnsSeed(seed) {
 }
 
 TcpTransport.prototype.bootstrap = function() {
-  var promises = this.dnsSeeds.map(resolveDnsSeed);
   var hardcodedNodes = this.seeds;
   // FIXME(Kagami): Filter incorrect/private IP range nodes?
   // See also: &lt;https://github.com/Bitmessage/PyBitmessage/issues/768>.
-  return PPromise.all(promises).then(function(dnsNodes) {
-    // Flatten array of arrays.
-    dnsNodes = Array.prototype.concat.apply([], dnsNodes);
+  return this.bootstrapDns().then(function(dnsNodes) {
     // Add hardcoded nodes to the end of list because DNS nodes should
     // be more up-to-date.
     return dnsNodes.concat(hardcodedNodes);
+  });
+};
+
+/**
+ * Do only DNS-specific bootstrap.
+ * @return {Promise.&lt;Array>} Discovered seed nodes.
+ */
+TcpTransport.prototype.bootstrapDns = function() {
+  var promises = this.dnsSeeds.map(resolveDnsSeed);
+  return PPromise.all(promises).then(function(dnsNodes) {
+    // Flatten array of arrays.
+    return Array.prototype.concat.apply([], dnsNodes);
   });
 };
 
@@ -284,31 +291,22 @@ TcpTransport.prototype.listen = function() {
   var server = self._server = net.createServer();
   server.listen.apply(server, arguments);
 
-  // TODO(Kagami): We may want to specify some limits for number of
-  // connected users.
+  var clientIdCounter = 0;
+
   server.on("connection", function(client) {
+    var id = client.id = clientIdCounter++;
+    self._clients[id] = client;
+    client.on("close", function() {
+      delete self._clients[id];
+    });
+    var opts = objectAssign({}, self);
+    delete opts._server;
+    var transport = new self.constructor(opts);
+    var incoming = true;
+    transport._setupClient(client, incoming);
     var addr = client.remoteAddress;
     var port = client.remotePort;
-    if (self._clients[addr]) {
-      // NOTE(Kagami): Doesn't allow more than one connection per IP.
-      // This may obstruct people behind NAT but we copy PyBitmessage's
-      // behavior here.
-      client.end();
-      return self.emit("warning", new Error(
-        unmap(addr) + " was tried to create second connection"
-      ));
-    }
-    self._clients[addr] = client;
-    client.on("close", function() {
-      delete self._clients[addr];
-    });
-    var transport = new self.constructor(self);
-    var accepted = true;
-    transport._setupClient(client, accepted);
     self.emit("connection", transport, unmap(addr), port);
-    // Emit "open" manually because "connect" for this socket won't be
-    // fired.
-    transport.emit("open");
   });
 
   server.on("error", function(err) {
@@ -332,8 +330,8 @@ TcpTransport.prototype.send = function() {
 TcpTransport.prototype.broadcast = function() {
   var data = getmsg(arguments);
   if (this._server) {
-    Object.keys(this._clients).forEach(function(ip) {
-      this._clients[ip].write(data);
+    Object.keys(this._clients).forEach(function(id) {
+      this._clients[id].write(data);
     }, this);
   } else {
     throw new Error("Not listening");
@@ -344,8 +342,8 @@ TcpTransport.prototype.close = function() {
   if (this._client) {
     this._client.end();
   } else if (this._server) {
-    Object.keys(this._clients).forEach(function(ip) {
-      this._clients[ip].end();
+    Object.keys(this._clients).forEach(function(id) {
+      this._clients[id].end();
     }, this);
     this._server.close();
   }
@@ -368,7 +366,7 @@ module.exports = TcpTransport;
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0-dev</a> on Sat Feb 14 2015 14:05:38 GMT+0300 (MSK)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0-dev</a> on Tue Feb 24 2015 20:23:33 GMT+0300 (MSK)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -38,7 +38,6 @@
  *
  * // Simple encoding and decoding:
  * var vermsg = messages.version.encode({
- *   nonce: Buffer(8),  // Hack detection connection to self
  *   remoteHost: "1.1.1.1",
  *   remotePort: 8444,
  * });
@@ -63,7 +62,6 @@
 "use strict";
 
 var objectAssign = Object.assign || require("object-assign");
-var bufferEqual = require("buffer-equal");
 var assert = require("./_util").assert;
 var structs = require("./structs");
 var bmcrypto = require("./crypto");
@@ -97,9 +95,6 @@ exports.getCommand = function(buf) {
   return command.slice(0, firstNonNull).toString("ascii");
 };
 
-// Random nonce used to detect connections to self.
-var randomNonce = bmcrypto.randomBytes(8);
-
 /**
  * `version` message.
  * @see {@link https://bitmessage.org/wiki/Protocol_specification#version}
@@ -111,10 +106,10 @@ var randomNonce = bmcrypto.randomBytes(8);
 var version = exports.version = {
   /**
    * @typedef {Object} DecodeResult
-   * @property {number} version - Identifies protocol version being used
-   * by the node. Should equal 3. Nodes should disconnect if the remote
-   * node's version is lower but continue with the connection if it is
-   * higher.
+   * @property {number} protoVersion - Identifies protocol version being
+   * used by the node. Should equal 3. Nodes should disconnect if the
+   * remote node's version is lower but continue with the connection if
+   * it is higher.
    * @property {Object} services -
    * [Service]{@link module:bitmessage/structs.ServicesBitfield}
    * features to be enabled for this connection
@@ -125,14 +120,20 @@ var version = exports.version = {
    * message
    * @property {number} port - Incoming port of the node sending this
    * message
-   * @property {Buffer} nonce - Random nonce used to detect connection
-   * to self
-   * @property {(Array|string|Buffer)} userAgent -
-   * [User agent]{@link module:bitmessage/user-agent} of the node
-   * @property {number[]} streamNumbers - Streams accepted by the node
+   * @property {Buffer} nonce - An 8-byte random nonce used to detect
+   * connection to self
+   * @property {string} userAgent - [User agent]{@link
+   * module:bitmessage/user-agent} of the node
+   * @property {number[]} streams - Streams accepted by the node
    * @property {number} length - Real data length
    * @memberof module:bitmessage/messages.version
    */
+
+  /**
+   * Random nonce used to detect connections to self.
+   * @constant {Buffer}
+   */
+  randomNonce: bmcrypto.randomBytes(8),
 
   /**
    * Decode `version` message.  
@@ -162,11 +163,12 @@ var version = exports.version = {
     var addrFrom = structs.net_addr.decode(buf.slice(46, 72), short);
     var nonce = new Buffer(8);
     buf.copy(nonce, 0, 72, 80);
-    assert(!bufferEqual(nonce, randomNonce), "Connection to self");
     var decodedUa = UserAgent.decode(buf.slice(80));
-    var decodedStreamNumbers = structs.var_int_list.decode(decodedUa.rest);
+    assert(decodedUa.length &lt;= 5000, "User agent is too long");
+    var decodedStreams = structs.var_int_list.decode(decodedUa.rest);
+    assert(decodedStreams.list.length &lt;= 160000, "Too many streams");
     return {
-      version: protoVersion,
+      protoVersion: protoVersion,
       services: services,
       time: time,
       remoteHost: addrRecv.host,
@@ -174,12 +176,12 @@ var version = exports.version = {
       port: addrFrom.port,
       nonce: nonce,
       userAgent: decodedUa.str,
-      streamNumbers: decodedStreamNumbers.list,
+      streams: decodedStreams.list,
       // NOTE(Kagami): Real data length. It may be some gap between end
       // of stream numbers list and end of payload:
       //     [payload..............[stream numbers]xxxx]
       // We are currently ignoring that.
-      length: 80 + decodedUa.length + decodedStreamNumbers.length,
+      length: 80 + decodedUa.length + decodedStreams.length,
     };
   },
 
@@ -197,13 +199,13 @@ var version = exports.version = {
    * message
    * @param {number=} opts.port - Incoming port of the node (8444 by
    * default)
-   * @param {Buffer=} opts.nonce - Random nonce used to detect connection
-   * to self (unique per node.js process by default)
+   * @param {Buffer=} opts.nonce - An 8-byte random nonce used to detect
+   * connection to self (unique per node.js process by default)
    * @param {(Array|string|Buffer)=} opts.userAgent -
    * [User agent]{@link module:bitmessage/user-agent} of the node
-   * (bitmessage's by default)
-   * @param {Array&lt;number>=} opts.streamNumbers - Streams accepted by the
-   * node (1 by default)
+   * (user agent of bitmessage library by default)
+   * @param {Array&lt;number>=} opts.streams - Streams accepted by the node
+   * ([1] by default)
    * @return {Buffer} Encoded message.
    */
   encode: function(opts) {
@@ -220,11 +222,13 @@ var version = exports.version = {
     var services = opts.services ||
                    ServicesBitfield().set(ServicesBitfield.NODE_NETWORK);
     var time = opts.time || new Date();
-    var nonce = opts.nonce || randomNonce;
+    var nonce = opts.nonce || version.randomNonce;
     assert(nonce.length === 8, "Bad nonce");
     var port = opts.port || 8444;
-    var userAgent = opts.userAgent || UserAgent.SELF;
-    var streamNumbers = opts.streamNumbers || [1];
+    var userAgent = UserAgent.encode(opts.userAgent || UserAgent.SELF);
+    assert(userAgent.length &lt;= 5000, "User agent is too long");
+    var streams = opts.streams || [1];
+    assert(streams.length &lt;= 160000, "Too many streams");
     // Start encoding.
     var protoVersion = new Buffer(4);
     protoVersion.writeUInt32BE(util.PROTOCOL_VERSION, 0);
@@ -247,8 +251,8 @@ var version = exports.version = {
       addrRecv,
       addrFrom,
       nonce,
-      UserAgent.encode(userAgent),
-      structs.var_int_list.encode(streamNumbers),
+      userAgent,
+      structs.var_int_list.encode(streams),
     ]);
   },
 };
@@ -481,8 +485,22 @@ var error = exports.error = {
   FATAL: 2,
 
   /**
+   * Convert error type to a human-readable string.
+   * @param {number} type - Type of the error
+   * @return {string}
+   */
+  type2str: function(type) {
+    switch (type) {
+      case error.WARNING: return "warning";
+      case error.ERROR: return "error";
+      case error.FATAL: return "fatal";
+      default: return "unknown";
+    }
+  },
+
+  /**
    * @typedef {Object} DecodeResult
-   * @property {number} fatal - Type of the error
+   * @property {number} type - Type of the error
    * @property {number} banTime - The other node informs that it will
    * not accept further connections for this number of seconds
    * @property {?Buffer} vector -
@@ -511,8 +529,8 @@ var error = exports.error = {
    */
   decodePayload: function(buf) {
     assert(buf.length >= 4, "Buffer is too small");
-    var decodedFatal = structs.var_int.decode(buf);
-    var decodedBanTime = structs.var_int.decode(decodedFatal.rest);
+    var decodedType = structs.var_int.decode(buf);
+    var decodedBanTime = structs.var_int.decode(decodedType.rest);
 
     var decodedVectorLength = structs.var_int.decode(decodedBanTime.rest);
     // NOTE(Kagami): Inventory vector should be only 32-byte in size but
@@ -529,13 +547,13 @@ var error = exports.error = {
 
     var decodedErrorText = structs.var_str.decode(rest);
     var length = (
-      decodedFatal.length +
+      decodedType.length +
       decodedBanTime.length +
       decodedVectorLength.length + vectorLength +
       decodedErrorText.length
     );
     return {
-      fatal: decodedFatal.value,
+      type: decodedType.value,
       banTime: decodedBanTime.value,
       vector: vector,
       errorText: decodedErrorText.str,
@@ -547,7 +565,7 @@ var error = exports.error = {
   /**
    * Encode `error` message.
    * @param {Object} opts - Error options
-   * @param {number=} opts.fatal - Type of the error
+   * @param {number=} opts.type - Type of the error
    * ([warning]{@link module:bitmessage/messages.error.WARNING} by
    * default)
    * @param {number=} opts.banTime - Inform the other node, that you
@@ -569,12 +587,12 @@ var error = exports.error = {
    * The same as [encode]{@link module:bitmessage/messages.error.encode}.
    */
   encodePayload: function(opts) {
-    var fatal = opts.fatal || error.WARNING;
+    var type = opts.type || error.WARNING;
     var banTime = opts.banTime || 0;
     // TODO(Kagami): Validate vector length.
     var vector = opts.vector || new Buffer(0);
     return Buffer.concat([
-      structs.var_int.encode(fatal),
+      structs.var_int.encode(type),
       structs.var_int.encode(banTime),
       structs.var_int.encode(vector.length),
       vector,
@@ -598,7 +616,7 @@ var error = exports.error = {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0-dev</a> on Sat Feb 14 2015 14:05:38 GMT+0300 (MSK)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0-dev</a> on Tue Feb 24 2015 20:23:33 GMT+0300 (MSK)
 </footer>
 
 <script> prettyPrint(); </script>

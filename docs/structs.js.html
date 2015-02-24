@@ -344,12 +344,13 @@ var object = exports.object = {
    * @param {Object=} opts - Decoding options
    * @param {boolean} opts.allowExpired - Allow expired objects
    * @param {boolean} opts.skipPow - Do not validate object POW
-   * @return {DecodeResult}
-   * [Decoded `object` structure.]{@link module:bitmessage/structs.object.DecodeResult}
+   * @return {DecodeResult} [Decoded `object` structure.]{@link
+   * module:bitmessage/structs.object.DecodeResult}
+   * @throws {Error} Invalid object
    */
   decode: function(buf, opts) {
     var decoded = message.decode(buf);
-    assert(decoded.command === "object", "Bad command");
+    assert(decoded.command === "object", "Given message is not an object");
     return object.decodePayload(decoded.payload, opts);
   },
 
@@ -359,11 +360,15 @@ var object = exports.object = {
    */
   decodePayload: function(buf, opts) {
     opts = opts || {};
+
     // 8 + 8 + 4 + (1+) + (1+)
     assert(buf.length >= 22, "object message payload is too small");
     assert(buf.length &lt;= 262144, "object message payload is too big");
-    var nonce = new Buffer(8);
-    buf.copy(nonce, 0, 0, 8);
+    var nonce;
+    if (!opts._validate) {
+      nonce = new Buffer(8);
+      buf.copy(nonce, 0, 0, 8);
+    }
 
     // TTL.
     var expiresTime = util.readTimestamp64BE(buf.slice(8, 16));
@@ -386,6 +391,9 @@ var object = exports.object = {
     var decodedVersion = var_int.decode(buf.slice(20));
     var decodedStream = var_int.decode(decodedVersion.rest);
     var headerLength = 20 + decodedVersion.length + decodedStream.length;
+
+    if (opts._validate) { return; }
+
     var objectPayload = new Buffer(decodedStream.rest.length);
     decodedStream.rest.copy(objectPayload);
 
@@ -398,6 +406,41 @@ var object = exports.object = {
       headerLength: headerLength,
       objectPayload: objectPayload,
     };
+  },
+
+  /**
+   * Check whether given `object` message is valid.
+   * @param {Buffer} buf - Message
+   * @param {Object=} opts - Any of [object.decode]{@link
+   * module:bitmessage/structs.object.decode} options
+   * @return {?Error} Return an error with description if object is
+   * invalid.
+   */
+  validate: function(buf, opts) {
+    var decoded;
+    try {
+      decoded = message.decode(buf);
+    } catch(e) {
+      return e;
+    }
+    if (decoded.command !== "object") {
+      return new Error("Given message is not an object");
+    }
+    return object.validatePayload(decoded.payload, opts);
+  },
+
+  /**
+   * Check whether `object` message payload is valid.
+   * The same as [validate]{@link
+   * module:bitmessage/structs.object.validate}.
+   */
+  validatePayload: function(buf, opts) {
+    opts = objectAssign({}, opts, {_validate: true});
+    try {
+      object.decodePayload(buf, opts);
+    } catch(e) {
+      return e;
+    }
   },
 
   /**
@@ -969,6 +1012,16 @@ var Bitfield = function(size) {
     return this;
   };
 
+  BitfieldInner.prototype.toString = function() {
+    var i;
+    var str = "";
+    for (i = 0; i &lt; this.buffer.length; i++) {
+      // Should be faster than pushing to array and joining on v8.
+      str += ("0000000" + this.buffer[i].toString(2)).slice(-8);
+    }
+    return "&lt;Bitfield:" + str + ">";
+  };
+
   return BitfieldInner;
 };
 
@@ -1020,6 +1073,22 @@ var ServicesBitfield = exports.ServicesBitfield = objectAssign(Bitfield(64), {
    * @constant {number}
    */
   NODE_NETWORK: 63,
+  /**
+   * Bit index indicating web/mobile client with limited network
+   * capabilities (proposal feature).
+   * @memberof module:bitmessage/structs.ServicesBitfield
+   * @see {@link https://bitmessage.org/wiki/Mobile_Protocol_specification}
+   * @constant {number}
+   */
+  NODE_MOBILE: 62,
+  /**
+   * Bit index indicating node which can work as a WebSocket gateway for
+   * web/mobile clients (proposal feature).
+   * @memberof module:bitmessage/structs.ServicesBitfield
+   * @see {@link https://bitmessage.org/wiki/Mobile_Protocol_specification}
+   * @constant {number}
+   */
+  NODE_GATEWAY: 61,
 });
 
 /**
@@ -1065,6 +1134,14 @@ exports.PubkeyBitfield = objectAssign(Bitfield(32), {
 
   /**
    * Bit index.
+   * If set, the receiving node does send acknowledgements (rather than
+   * dropping them).
+   * @memberof module:bitmessage/structs.PubkeyBitfield
+   * @constant {number}
+   */
+  DOES_ACK: 31,
+  /**
+   * Bit index.
    * If set, the receiving node expects that the RIPEMD hash encoded in
    * their address preceedes the encrypted message data of msg messages
    * bound for them.
@@ -1072,14 +1149,6 @@ exports.PubkeyBitfield = objectAssign(Bitfield(32), {
    * @constant {number}
    */
   INCLUDE_DESTINATION: 30,
-  /**
-   * Bit index.
-   * If set, the receiving node does send acknowledgements (rather than
-   * dropping them).
-   * @memberof module:bitmessage/structs.PubkeyBitfield
-   * @constant {number}
-   */
-  DOES_ACK: 31,
 });
 </code></pre>
         </article>
@@ -1097,7 +1166,7 @@ exports.PubkeyBitfield = objectAssign(Bitfield(32), {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0-dev</a> on Sat Feb 14 2015 14:05:38 GMT+0300 (MSK)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0-dev</a> on Tue Feb 24 2015 20:23:33 GMT+0300 (MSK)
 </footer>
 
 <script> prettyPrint(); </script>

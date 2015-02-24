@@ -76,7 +76,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line83">line 83</a>
+        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line78">line 78</a>
     </li></ul></dd>
     
 
@@ -109,6 +109,82 @@
 
     
 
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id=".randomNonce"><span class="type-signature">(static, constant) </span>randomNonce<span class="type-signature"> :Buffer</span></h4>
+
+
+
+
+<div class="description">
+    <p>Random nonce used to detect connections to self.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Buffer</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line108">line 108</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
     
 
     
@@ -219,7 +295,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line116">line 116</a>
+        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line117">line 117</a>
     </li></ul></dd>
     
 
@@ -324,7 +400,7 @@ The same as <a href="module-bitmessage_messages.version.html#.decode">decode</a>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line126">line 126</a>
+        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line127">line 127</a>
     </li></ul></dd>
     
 
@@ -634,8 +710,8 @@ default)</p></td>
 
             
 
-            <td class="description last"><p>Random nonce used to detect connection
-to self (unique per node.js process by default)</p></td>
+            <td class="description last"><p>An 8-byte random nonce used to detect
+connection to self (unique per node.js process by default)</p></td>
         </tr>
 
     
@@ -675,14 +751,14 @@ to self (unique per node.js process by default)</p></td>
             
 
             <td class="description last"><p><a href="module-bitmessage_user-agent.html">User agent</a> of the node
-(bitmessage's by default)</p></td>
+(user agent of bitmessage library by default)</p></td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>streamNumbers</code></td>
+                <td class="name"><code>streams</code></td>
             
 
             <td class="type">
@@ -708,8 +784,8 @@ to self (unique per node.js process by default)</p></td>
 
             
 
-            <td class="description last"><p>Streams accepted by the
-node (1 by default)</p></td>
+            <td class="description last"><p>Streams accepted by the node
+([1] by default)</p></td>
         </tr>
 
     
@@ -757,7 +833,7 @@ node (1 by default)</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line181">line 181</a>
+        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line183">line 183</a>
     </li></ul></dd>
     
 
@@ -862,7 +938,7 @@ The same as <a href="module-bitmessage_messages.version.html#.encode">encode</a>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line190">line 190</a>
+        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line192">line 192</a>
     </li></ul></dd>
     
 
@@ -943,7 +1019,7 @@ The same as <a href="module-bitmessage_messages.version.html#.encode">encode</a>
 
         <tr>
             
-                <td class="name"><code>version</code></td>
+                <td class="name"><code>protoVersion</code></td>
             
 
             <td class="type">
@@ -959,10 +1035,10 @@ The same as <a href="module-bitmessage_messages.version.html#.encode">encode</a>
 
             
 
-            <td class="description last"><p>Identifies protocol version being used
-by the node. Should equal 3. Nodes should disconnect if the remote
-node's version is lower but continue with the connection if it is
-higher.</p></td>
+            <td class="description last"><p>Identifies protocol version being
+used by the node. Should equal 3. Nodes should disconnect if the
+remote node's version is lower but continue with the connection if
+it is higher.</p></td>
         </tr>
 
     
@@ -1104,8 +1180,8 @@ message</p></td>
 
             
 
-            <td class="description last"><p>Random nonce used to detect connection
-to self</p></td>
+            <td class="description last"><p>An 8-byte random nonce used to detect
+connection to self</p></td>
         </tr>
 
     
@@ -1118,13 +1194,7 @@ to self</p></td>
             <td class="type">
             
                 
-<span class="param-type">Array</span>
-|
-
 <span class="param-type">string</span>
-|
-
-<span class="param-type">Buffer</span>
 
 
             
@@ -1141,7 +1211,7 @@ to self</p></td>
 
         <tr>
             
-                <td class="name"><code>streamNumbers</code></td>
+                <td class="name"><code>streams</code></td>
             
 
             <td class="type">
@@ -1219,7 +1289,7 @@ to self</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line84">line 84</a>
+        <a href="messages.js.html">messages.js</a>, <a href="messages.js.html#line79">line 79</a>
     </li></ul></dd>
     
 
@@ -1255,7 +1325,7 @@ to self</p></td>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0-dev</a> on Sat Feb 14 2015 14:05:38 GMT+0300 (MSK)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0-dev</a> on Tue Feb 24 2015 20:23:34 GMT+0300 (MSK)
 </footer>
 
 <script> prettyPrint(); </script>
