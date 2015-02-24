@@ -599,26 +599,26 @@ describe("Message types", function() {
       var encoded = error.encode({errorText: "test"});
       expect(message.decode(encoded).command).to.equal("error");
       var res = error.decode(encoded);
-      expect(res.fatal).to.equal(0);
+      expect(res.type).to.equal(0);
       expect(res.banTime).to.equal(0);
       expect(res.vector).to.not.exist;
       expect(res.errorText).to.equal("test");
       expect(res.length).to.equal(8);
-      expect(error.type2str(res.fatal)).to.equal("warning");
+      expect(error.type2str(res.type)).to.equal("warning");
 
       var vector = inv_vect.encode(Buffer("test"));
       var res = error.decode(error.encode({
-        fatal: error.FATAL,
+        type: error.FATAL,
         banTime: 120,
         vector: vector,
         errorText: "fatal error",
       }));
-      expect(res.fatal).to.equal(2);
+      expect(res.type).to.equal(2);
       expect(res.banTime).to.equal(120);
       expect(bufferEqual(res.vector, vector)).to.be.true;
       expect(res.errorText).to.equal("fatal error");
       expect(res.length).to.equal(47);
-      expect(error.type2str(res.fatal)).to.equal("fatal");
+      expect(error.type2str(res.type)).to.equal("fatal");
     });
   });
 });
