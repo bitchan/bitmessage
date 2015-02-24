@@ -496,7 +496,7 @@ describe("Message types", function() {
       });
       expect(message.decode(encoded).command).to.equal("version");
       var res = version.decode(encoded);
-      expect(res.version).to.equal(3);
+      expect(res.protoVersion).to.equal(3);
       expect(res.services.get(ServicesBitfield.NODE_NETWORK)).to.be.true;
       expect(res.time).to.be.instanceof(Date);
       expect(res.remoteHost).to.equal("1.2.3.4");

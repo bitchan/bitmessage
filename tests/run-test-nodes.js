@@ -37,7 +37,6 @@ module.exports = function() {
 
   process.on("exit", cleanup());
   process.on("SIGINT", cleanup(true));
-  process.on("uncaughtException", cleanup(true));
 
   var tcpNode = spawn("tcp-node.js");
   var wsNode = spawn("ws-node.js");
