@@ -107,7 +107,6 @@ var messages = require("bitmessage").messages;
 
 // Simple encoding and decoding:
 var vermsg = messages.version.encode({
-  nonce: Buffer(8),  // Hack detection connection to self
   remoteHost: "1.1.1.1",
   remotePort: 8444,
 });

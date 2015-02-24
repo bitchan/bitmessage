@@ -514,17 +514,8 @@ describe("Message types", function() {
         remotePort: 48444,
         port: 8444,
         userAgent: "/test:0.0.1/",
-        nonce: Buffer(8),
       }));
       expect(res.userAgent).to.equal("/test:0.0.1/");
-    });
-
-    it("should fail on connection to self", function() {
-      expect(version.decode.bind(null, version.encode({
-        remoteHost: "1.2.3.4",
-        remotePort: 48444,
-        port: 8444,
-      }))).to.throw(/connection to self/i);
     });
   });
 
