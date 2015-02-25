@@ -52,10 +52,6 @@ API documentation is available [here](https://bitchan.github.io/bitmessage/docs/
 - [x] High-level classes
   - [x] Address
   - [x] UserAgent
-- [ ] Network transports
-  - [x] TCP (Node.js only)
-  - [x] WebSocket
-  - [ ] WebRTC
 - [ ] PyBitmessage configs parsing
   - [ ] keys.dat
   - [ ] knownnodes.dat
@@ -129,9 +125,11 @@ console.log(structs.message.decode(verackmsg).command);  // verack
 
 ### Networking
 
+You will need to install [bitmessage-transports](https://github.com/bitchan/bitmessage-transports) library.
+
 ```js
 var messages = require("bitmessage").messages;
-var TcpTransport = require("bitmessage/lib/net/tcp");
+var TcpTransport = require("bitmessage-transports").TcpTransport;
 
 var tcp = new TcpTransport({
   dnsSeeds: [["bootstrap8444.bitmessage.org", 8444]],

@@ -4,19 +4,13 @@
   "description": "JavaScript Bitmessage library",
   "main": "./lib/index.js",
   "browser": {
-    "./lib/platform.js": "./lib/platform.browser.js",
-    "./lib/net/tcp.js": false,
-    "./lib/net/ws.js": "./lib/net/ws.browser.js"
+    "./lib/platform.js": "./lib/platform.browser.js"
   },
   "scripts": {
     "install": "node-gyp rebuild || exit 0",
-    "test": "ALL_TESTS=1 mocha tests/index.js && ALL_TESTS=1 xvfb-run -a karma start --browsers Chromium && ALL_TESTS=1 xvfb-run -a karma start --browsers Firefox && jshint .",
-    "m": "mocha tests/index.js",
-    "mu": "TEST_MODE=unit mocha tests/index.js",
-    "mf": "TEST_MODE=functional mocha tests/index.js",
+    "test": "ALL_TESTS=1 mocha && ALL_TESTS=1 xvfb-run -a karma start --browsers Chromium && ALL_TESTS=1 xvfb-run -a karma start --browsers Firefox && jshint .",
+    "m": "mocha",
     "kc": "xvfb-run -a karma start --browsers Chromium",
-    "kcu": "TEST_MODE=unit xvfb-run -a karma start --browsers Chromium",
-    "kcf": "TEST_MODE=functional xvfb-run -a karma start --browsers Chromium",
     "kf": "xvfb-run -a karma start --browsers Firefox",
     "j": "jshint .",
     "d": "jsdoc -c jsdoc.json",
@@ -59,12 +53,10 @@
     "eccrypto": "^0.9.7",
     "es6-promise": "^2.0.1",
     "hash.js": "^1.0.2",
-    "inherits": "^2.0.1",
     "nan": "^1.4.1",
     "object-assign": "^2.0.0",
     "sha.js": "^2.3.1",
-    "webworkify": "^1.0.1",
-    "ws": "^0.7.1"
+    "webworkify": "^1.0.1"
   },
   "optionalDependencies": {
     "bignum": "^0.9.0"

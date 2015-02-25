@@ -1,6 +1,5 @@
 process.env.CHROME_BIN = "chromium-browser";
 var allTests = process.env.ALL_TESTS === "1";
-if (process.env.TEST_MODE !== "unit") require("./tests/run-test-nodes.js")();
 
 module.exports = function(config) {
   config.set({
@@ -15,20 +14,17 @@ module.exports = function(config) {
 
 
     // list of files / patterns to load in the browser
-    files: ["tests/index.js"],
+    files: ["test.js"],
 
 
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      "tests/index.js": ["browserify", "env"],
+      "test.js": ["browserify", "env"],
     },
 
 
-    envPreprocessor: [
-      "ALL_TESTS",
-      "TEST_MODE",
-    ],
+    envPreprocessor: ["ALL_TESTS"],
 
 
     // list of files to exclude
