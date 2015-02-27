@@ -556,8 +556,32 @@ describe("Message types", function() {
     });
 
     it("shouldn't encode/decode more than 1000 entires", function() {
-      expect(addr.encode.bind(null, Array(2000))).to.throw(/too many/i);
+      var addrs = new Array(1001);
+      var ip = {host: "1.2.3.4"};
+      for (var i = 0; i < 1001; i++) {
+        addrs[i] = ip;
+      }
+      expect(addr.encode.bind(null, addrs)).to.throw(/too many/i);
       expect(addr.decodePayload.bind(null, var_int.encode(2000))).to.throw(/too many/i);
+    });
+
+    it("should filter out private IP ranges", function() {
+      expect(addr.encodePayload([
+        {host: "127.0.0.1", port: 1},
+        {host: "127.5.3.1", port: 2},
+        {host: "1.2.3.4", port: 3, time: new Date(1425034238202)},
+        {host: "192.168.15.20", port: 4},
+        {host: "10.10.10.10", port: 5},
+        {host: "172.17.42.1", port: 6},
+        {host: "::1", port: 7},
+        {host: "fe80::1:2:3", port: 8},
+        {host: "fc00::3:2:1", port: 9},
+      ]).toString("hex")).to.equal("010000000054f04bfe00000001000000000000000100000000000000000000ffff010203040003");
+
+      var res = addr.decodePayload(Buffer("090000000054f04b9b00000001000000000000000100000000000000000000ffff7f00000100010000000054f04b9b00000001000000000000000100000000000000000000ffff7f05030100020000000054f04b9b00000001000000000000000100000000000000000000ffff0102030400030000000054f04b9b00000001000000000000000100000000000000000000ffffc0a80f1400040000000054f04b9b00000001000000000000000100000000000000000000ffff0a0a0a0a00050000000054f04b9b00000001000000000000000100000000000000000000ffffac112a0100060000000054f04b9b0000000100000000000000010000000000000000000000000000000100070000000054f04b9b000000010000000000000001fe80000000000000000000010002000300080000000054f04b9b000000010000000000000001fc0000000000000000000003000200010009", "hex"));
+      expect(res.addrs).to.have.length(1);
+      expect(res.addrs[0].host).to.equal("1.2.3.4");
+      expect(res.addrs[0].port).to.equal(3);
     });
   });
 
