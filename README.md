@@ -1,6 +1,6 @@
 # bitmessage [![Build Status](https://travis-ci.org/bitchan/bitmessage.svg?branch=master)](https://travis-ci.org/bitchan/bitmessage)
 
-[![NPM](https://nodei.co/npm/bitmessage.png)](https://www.npmjs.com/package/bitmessage)
+[![NPM](https://nodei.co/npm/bitmessage.png?downloads=true)](https://www.npmjs.com/package/bitmessage)
 
 JavaScript Bitmessage library for both browserify and node. The goal of this project is to implement Bitmessage protocol v3 for both platforms at the maximum possible level (we still can't create TCP connections or listen for incoming connections in the Browser but the Proof of work and crypto is fully doable).
 
