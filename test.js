@@ -414,6 +414,16 @@ describe("Common structures", function() {
       var opts = {host: " 127.0.0.1", port: 1234};
       expect(net_addr.encode.bind(null, opts)).to.throw(/bad octet/i);
     });
+
+    it("should allow to pass services as Buffer", function() {
+      var services = Buffer(8);
+      var res = net_addr.decode(net_addr.encode({
+        host: "1.2.3.4",
+        port: 1234,
+        services: services,
+      }));
+      expect(bufferEqual(res.services.buffer, services)).to.be.true;
+    });
   });
 
   describe("inv_vect", function() {
