@@ -50,9 +50,8 @@
  * var addrmsg = structs.message.encode("addr", addrPayload);
  * var decoded = structs.message.decode(addrmsg);
  * console.log(decoded.command);  // addr
- * var payload = decoded.payload;
- * var decodedPayload = messages.addr.decodePayload(payload);
- * console.log(decodedPayload.addrs[0].host);  // 2.2.2.2
+ * var addr = messages.addr.decodePayload(decoded.payload);
+ * console.log(addr.addrs[0].host);  // 2.2.2.2
  *
  * // Encode with empty payload:
  * var verackmsg = structs.message.encode("verack");
@@ -62,6 +61,7 @@
 "use strict";
 
 var objectAssign = Object.assign || require("object-assign");
+var bufferEqual = require("buffer-equal");
 var assert = require("./_util").assert;
 var structs = require("./structs");
 var bmcrypto = require("./crypto");
@@ -70,6 +70,8 @@ var util = require("./_util");
 
 var message = structs.message;
 var ServicesBitfield = structs.ServicesBitfield;
+var IPv4_MAPPING = util.IPv4_MAPPING;
+var inet_pton = util.inet_pton;
 
 /**
  * Try to get command of the given encoded message.
@@ -101,8 +103,6 @@ exports.getCommand = function(buf) {
  * @namespace
  * @static
  */
-// TODO(Kagami): User agent and stream numbers size limits per
-// &lt;https://github.com/Bitmessage/PyBitmessage/issues/767>.
 var version = exports.version = {
   /**
    * @typedef {Object} DecodeResult
@@ -257,6 +257,54 @@ var version = exports.version = {
   },
 };
 
+var IPv6_LOOPBACK = new Buffer(
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+);
+
+// Check whether given encoded IPv6 or IPv4-mapped IPv6 is in private
+// network range. See
+// &lt;https://en.wikipedia.org/wiki/Reserved_IP_addresses> for details.
+// TODO(Kagami): Do we also need to filter multicasts and other reserved
+// ranges?
+function isPrivateIp(buf) {
+  // IPv4.
+  if (bufferEqual(buf.slice(0, 12), IPv4_MAPPING)) {
+    buf = buf.slice(12);
+    if (buf[0] === 127) {
+      return true;
+    } else if (buf[0] === 10) {
+      return true;
+    } else if (buf[0] === 192 &amp;&amp; buf[1] === 168) {
+      return true;
+    // XXX(Kagami): ignore:start and ignore:end doesn't ignore this for
+    // some reason. Probably related:
+    // &lt;https://github.com/jshint/jshint/issues/1465>.
+    } else if (buf[0] === 172 &amp;&amp; (buf[1] &amp; 0xf0) === 0x10) {//jshint ignore:line
+      return true;
+    } else if (buf[0] === 169 &amp;&amp; buf[1] === 254) {
+      return true;
+    } else {
+      return false;
+    }
+  // IPv6.
+  } else {
+    if (bufferEqual(buf, IPv6_LOOPBACK)) {
+      return true;
+    } else if (buf[0] === 0xfe &amp;&amp; (buf[1] &amp; 0xc0) === 0x80) {//jshint ignore:line
+      return true;
+    } else if ((buf[0] &amp; 0xfe) === 0xfc) {  // jshint ignore:line
+      return true;
+    } else {
+      return false;
+    }
+  }
+}
+
+// Helper to make it easier to filter out private IPs.
+function checkAddrOpts(opts) {
+  return !isPrivateIp(inet_pton(opts.host));
+}
+
 /**
  * `addr` message. Provide information on known nodes of the network.
  * @see {@link https://bitmessage.org/wiki/Protocol_specification#addr}
@@ -291,13 +339,19 @@ var addr = exports.addr = {
   decodePayload: function(buf) {
     var decoded = structs.var_int.decode(buf);
     var listLength = decoded.value;
+    // NOTE(Kagami): Check length before filtering private IPs because
+    // we shouldn't even receive them.
     assert(listLength &lt;= 1000, "Too many address entires");
     var length = decoded.length + listLength * 38;
     assert(buf.length >= length, "Buffer is too small");
     var rest = decoded.rest;
-    var addrs = new Array(listLength);
+    var addrs = [];
+    var addrBuf;
     for (var i = 0; i &lt; listLength; i++) {
-      addrs[i] = structs.net_addr.decode(rest.slice(i*38, (i+1)*38));
+      addrBuf = rest.slice(i*38, (i+1)*38);
+      if (!isPrivateIp(addrBuf.slice(20, 36))) {
+        addrs.push(structs.net_addr.decode(addrBuf));
+      }
     }
     return {
       addrs: addrs,
@@ -322,6 +376,7 @@ var addr = exports.addr = {
    * The same as [encode]{@link module:bitmessage/messages.addr.encode}.
    */
   encodePayload: function(addrs) {
+    addrs = addrs.filter(checkAddrOpts);
     assert(addrs.length &lt;= 1000, "Too many address entires");
     var addrBufs = addrs.map(structs.net_addr.encode);
     var bufs = [structs.var_int.encode(addrs.length)].concat(addrBufs);
@@ -610,13 +665,13 @@ var error = exports.error = {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-bitmessage.html">bitmessage</a></li><li><a href="module-bitmessage_address.html">bitmessage/address</a></li><li><a href="module-bitmessage_crypto.html">bitmessage/crypto</a></li><li><a href="module-bitmessage_messages.html">bitmessage/messages</a></li><li><a href="module-bitmessage_net_base.html">bitmessage/net/base</a></li><li><a href="module-bitmessage_net_tcp.html">bitmessage/net/tcp</a></li><li><a href="module-bitmessage_net_ws.html">bitmessage/net/ws</a></li><li><a href="module-bitmessage_objects.html">bitmessage/objects</a></li><li><a href="module-bitmessage_pow.html">bitmessage/pow</a></li><li><a href="module-bitmessage_structs.html">bitmessage/structs</a></li><li><a href="module-bitmessage_user-agent.html">bitmessage/user-agent</a></li><li><a href="module-bitmessage_wif.html">bitmessage/wif</a></li></ul><h3>Classes</h3><ul><li><a href="module-bitmessage_address.Address.html">Address</a></li><li><a href="module-bitmessage_net_base.BaseTransport.html">BaseTransport</a></li><li><a href="module-bitmessage_net_tcp.TcpTransport.html">TcpTransport</a></li><li><a href="module-bitmessage_net_ws.WsTransport.html">WsTransport</a></li><li><a href="module-bitmessage_structs.PubkeyBitfield.html">PubkeyBitfield</a></li><li><a href="module-bitmessage_structs.ServicesBitfield.html">ServicesBitfield</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-bitmessage_messages.addr.html">addr</a></li><li><a href="module-bitmessage_messages.error.html">error</a></li><li><a href="module-bitmessage_messages.getdata.html">getdata</a></li><li><a href="module-bitmessage_messages.inv.html">inv</a></li><li><a href="module-bitmessage_messages.version.html">version</a></li><li><a href="module-bitmessage_objects.broadcast.html">broadcast</a></li><li><a href="module-bitmessage_objects.getpubkey.html">getpubkey</a></li><li><a href="module-bitmessage_objects.msg.html">msg</a></li><li><a href="module-bitmessage_objects.pubkey.html">pubkey</a></li><li><a href="module-bitmessage_structs.encrypted.html">encrypted</a></li><li><a href="module-bitmessage_structs.inv_vect.html">inv_vect</a></li><li><a href="module-bitmessage_structs.message.html">message</a></li><li><a href="module-bitmessage_structs.net_addr.html">net_addr</a></li><li><a href="module-bitmessage_structs.object.html">object</a></li><li><a href="module-bitmessage_structs.var_int.html">var_int</a></li><li><a href="module-bitmessage_structs.var_int_list.html">var_int_list</a></li><li><a href="module-bitmessage_structs.var_str.html">var_str</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-bitmessage.html">bitmessage</a></li><li><a href="module-bitmessage_address.html">bitmessage/address</a></li><li><a href="module-bitmessage_crypto.html">bitmessage/crypto</a></li><li><a href="module-bitmessage_messages.html">bitmessage/messages</a></li><li><a href="module-bitmessage_objects.html">bitmessage/objects</a></li><li><a href="module-bitmessage_pow.html">bitmessage/pow</a></li><li><a href="module-bitmessage_structs.html">bitmessage/structs</a></li><li><a href="module-bitmessage_user-agent.html">bitmessage/user-agent</a></li><li><a href="module-bitmessage_wif.html">bitmessage/wif</a></li></ul><h3>Classes</h3><ul><li><a href="module-bitmessage_address.Address.html">Address</a></li><li><a href="module-bitmessage_structs.PubkeyBitfield.html">PubkeyBitfield</a></li><li><a href="module-bitmessage_structs.ServicesBitfield.html">ServicesBitfield</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-bitmessage_messages.addr.html">addr</a></li><li><a href="module-bitmessage_messages.error.html">error</a></li><li><a href="module-bitmessage_messages.getdata.html">getdata</a></li><li><a href="module-bitmessage_messages.inv.html">inv</a></li><li><a href="module-bitmessage_messages.version.html">version</a></li><li><a href="module-bitmessage_objects.broadcast.html">broadcast</a></li><li><a href="module-bitmessage_objects.getpubkey.html">getpubkey</a></li><li><a href="module-bitmessage_objects.msg.html">msg</a></li><li><a href="module-bitmessage_objects.pubkey.html">pubkey</a></li><li><a href="module-bitmessage_structs.encrypted.html">encrypted</a></li><li><a href="module-bitmessage_structs.inv_vect.html">inv_vect</a></li><li><a href="module-bitmessage_structs.message.html">message</a></li><li><a href="module-bitmessage_structs.net_addr.html">net_addr</a></li><li><a href="module-bitmessage_structs.object.html">object</a></li><li><a href="module-bitmessage_structs.var_int.html">var_int</a></li><li><a href="module-bitmessage_structs.var_int_list.html">var_int_list</a></li><li><a href="module-bitmessage_structs.var_str.html">var_str</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0-dev</a> on Tue Feb 24 2015 20:23:33 GMT+0300 (MSK)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0-dev</a> on Sat Feb 28 2015 22:57:02 GMT+0300 (MSK)
 </footer>
 
 <script> prettyPrint(); </script>
