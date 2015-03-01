@@ -1205,6 +1205,11 @@ describe("High-level classes", function() {
       expect(addr.ripe.toString("hex")).to.equal("003ab6655de4bd8c603eba9b00dd5970725fdd56");
     });
 
+    it("should decode address for bitmessage scheme", function() {
+      var addr = Address.decode("bitmessage:2cTux3PGRqHTEH6wyUP2sWeT4LrsGgy63z");
+      expect(addr.ripe.toString("hex")).to.equal("003ab6655de4bd8c603eba9b00dd5970725fdd56");
+    });
+
     it("should allow to create random Bitmessage address", function() {
       this.timeout(60000);
       var addr = Address.fromRandom();
