@@ -599,13 +599,13 @@ describe("Message types", function() {
     it("should encode and decode", function() {
       var vect1 = inv_vect.encode(Buffer("test"));
       var vect2 = inv_vect.encode(Buffer("test2"));
-      var inventory = [vect1, vect2];
-      var encoded = inv.encode(inventory);
+      var vectors = [vect1, vect2];
+      var encoded = inv.encode(vectors);
       expect(message.decode(encoded).command).to.equal("inv");
       var res = inv.decode(encoded);
-      expect(res.inventory.length).to.equal(2);
-      expect(bufferEqual(res.inventory[0], vect1)).to.be.true;
-      expect(bufferEqual(res.inventory[1], vect2)).to.be.true;
+      expect(res.vectors.length).to.equal(2);
+      expect(bufferEqual(res.vectors[0], vect1)).to.be.true;
+      expect(bufferEqual(res.vectors[1], vect2)).to.be.true;
       expect(res.length).to.equal(65);
     });
 
@@ -619,13 +619,13 @@ describe("Message types", function() {
     it("should encode and decode", function() {
       var vect1 = inv_vect.encode(Buffer("test"));
       var vect2 = inv_vect.encode(Buffer("test2"));
-      var inventory = [vect1, vect2];
-      var encoded = getdata.encode(inventory);
+      var vectors = [vect1, vect2];
+      var encoded = getdata.encode(vectors);
       expect(message.decode(encoded).command).to.equal("getdata");
       var res = getdata.decode(encoded);
-      expect(res.inventory.length).to.equal(2);
-      expect(bufferEqual(res.inventory[0], vect1)).to.be.true;
-      expect(bufferEqual(res.inventory[1], vect2)).to.be.true;
+      expect(res.vectors.length).to.equal(2);
+      expect(bufferEqual(res.vectors[0], vect1)).to.be.true;
+      expect(bufferEqual(res.vectors[1], vect2)).to.be.true;
       expect(res.length).to.equal(65);
     });
 
