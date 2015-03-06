@@ -261,7 +261,19 @@ describe("Common structures", function() {
       err = object.validatePayload(obj);
       expect(err.message).to.match(/insufficient pow/i);
 
-      expect(object.validatePayload(obj, {skipPow: true})).to.not.exist;
+      expect(object.validatePayload(obj, skipPow)).to.not.exist;
+    });
+
+    it("should allow to validate stream", function() {
+      var obj = object.encodePayload({
+        nonce: Buffer(8),
+        ttl: 111,
+        type: object.MSG,
+        version: 1,
+        objectPayload: Buffer(0),
+      });
+      var err = object.validatePayload(obj, {skipPow: true, stream: 3});
+      expect(err.message).to.match(/stream.*is not the one/i);
     });
   });
 
