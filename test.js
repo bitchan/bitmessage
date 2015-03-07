@@ -187,6 +187,7 @@ describe("Common structures", function() {
   describe("object", function() {
     it("should encode and decode", function() {
       var nonce = Buffer(8);
+      var now = new Date().getTime();
       var res = object.decode(object.encode({
         nonce: nonce,
         ttl: 100,
@@ -197,6 +198,8 @@ describe("Common structures", function() {
 
       expect(bufferEqual(nonce, res.nonce)).to.be.true;
       expect(res.ttl).to.be.at.most(100);
+      expect(res.expires.getTime()).to.be.at.least(now);
+      expect(res.expires.getTime()).to.be.at.most(now + 100*1000);
       expect(res.type).to.equal(2);
       expect(res.version).to.equal(1);
       expect(res.stream).to.equal(1);
@@ -789,6 +792,7 @@ describe("Object types", function() {
 
   describe("pubkey", function() {
     it("should encode and decode pubkey v2", function() {
+      var now = new Date().getTime();
       return pubkey.encodeAsync({
         ttl: 123,
         from: from,
@@ -799,6 +803,8 @@ describe("Object types", function() {
         return pubkey.decodeAsync(buf, skipPow);
       }).then(function(res) {
         expect(res.ttl).to.be.at.most(123);
+        expect(res.expires.getTime()).to.be.at.least(now);
+        expect(res.expires.getTime()).to.be.at.most(now + 123*1000);
         expect(res.type).to.equal(object.PUBKEY);
         expect(res.version).to.equal(2);
         expect(res.stream).to.equal(1);
