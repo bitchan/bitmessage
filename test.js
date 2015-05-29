@@ -792,7 +792,7 @@ describe("Object types", function() {
 
   describe("pubkey", function() {
     it("should encode and decode pubkey v2", function() {
-      var now = new Date().getTime();
+      var tstart = new Date().getTime();
       return pubkey.encodeAsync({
         ttl: 123,
         from: from,
@@ -802,9 +802,10 @@ describe("Object types", function() {
         expect(message.decode(buf).command).to.equal("object");
         return pubkey.decodeAsync(buf, skipPow);
       }).then(function(res) {
+        var tend = new Date().getTime();
         expect(res.ttl).to.be.at.most(123);
-        expect(res.expires.getTime()).to.be.at.least(now);
-        expect(res.expires.getTime()).to.be.at.most(now + 123*1000);
+        expect(res.expires.getTime()).to.be.at.least(tstart);
+        expect(res.expires.getTime()).to.be.at.most(tend + 123*1000);
         expect(res.type).to.equal(object.PUBKEY);
         expect(res.version).to.equal(2);
         expect(res.stream).to.equal(1);
