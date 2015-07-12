@@ -34,7 +34,7 @@
   "homepage": "https://github.com/bitchan/bitmessage",
   "devDependencies": {
     "chai": "*",
-    "jsdoc": "jsdoc3/jsdoc",
+    "jsdoc": "^3.3.2",
     "jshint": "*",
     "karma": "^0.12.31",
     "karma-browserify": "^2.0.0",
@@ -47,10 +47,10 @@
     "mocha": "*"
   },
   "dependencies": {
-    "bn.js": "^2.0.0",
+    "bn.js": "^3.0.1",
     "bs58": "^2.0.0",
     "buffer-equal": "~0.0.1",
-    "eccrypto": "^0.9.7",
+    "eccrypto": "^1.0.1",
     "es6-promise": "^2.0.1",
     "hash.js": "^1.0.2",
     "nan": "^1.4.1",
