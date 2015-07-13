@@ -2,7 +2,6 @@
 #include <nan.h>
 #include "./pow.h"
 
-using node::Buffer;
 using v8::Handle;
 using v8::Local;
 using v8::FunctionTemplate;
@@ -70,15 +69,15 @@ NAN_METHOD(PowAsync) {
   if (args.Length() != 4 ||
       !args[0]->IsNumber() ||  // pool_size
       !args[1]->IsNumber() ||  // target
-      !args[2]->IsObject() ||  // initial_hash
+      !node::Buffer::HasInstance(args[2]) ||  // initial_hash
       !args[3]->IsFunction()) {  // cb
     return NanThrowError("Bad input");
   }
 
   size_t pool_size = args[0]->Uint32Value();
   uint64_t target = args[1]->IntegerValue();
-  char* buf = Buffer::Data(args[2]->ToObject());
-  size_t length = Buffer::Length(args[2]->ToObject());
+  char* buf = node::Buffer::Data(args[2]);
+  size_t length = node::Buffer::Length(args[2]);
   if (pool_size < 1 ||
       pool_size > MAX_POOL_SIZE ||
       buf == NULL ||
