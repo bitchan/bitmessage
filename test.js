@@ -1194,9 +1194,10 @@ describe("POW", function() {
         // computed nonces may vary in a big range (since target is
         // simple, there are a lot of valid nonces). Probably because
         // some spawned web workers get blocked for some reason.
-        if (typeof window === "undefined") {
-          expect(nonce).to.equal(21997550);
-        }
+        // FIXME(Kagami): Local runs started to fail here too.
+        // if (typeof window === "undefined") {
+        //   expect(nonce).to.equal(21997550);
+        // }
         expect(POW.check({
           nonce: nonce,
           target: target,
