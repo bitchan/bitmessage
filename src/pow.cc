@@ -36,12 +36,14 @@ typedef struct {
   PowArgs* pow_args;
 } ThreadArgs;
 
+#ifndef ntohll
 inline uint64_t ntohll(uint64_t x) {
   return (
       ((uint64_t)(ntohl( (unsigned int)((x << 32) >> 32) )) << 32) |
       ntohl( ((unsigned int)(x >> 32)) )
   );
 }
+#endif
 
 // Set POW computation result in a thread-safe way.
 void set_result(PowArgs* pow_args, PowResult res, uint64_t nonce) {
