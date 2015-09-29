@@ -3,6 +3,7 @@ node_js:
   - "0.10"
   - "0.12"
   - "iojs"
+  - "4"
 sudo: false
 addons:
   firefox: "34.0"
