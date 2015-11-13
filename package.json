@@ -50,10 +50,10 @@
     "bn.js": "^3.0.1",
     "bs58": "^2.0.0",
     "buffer-equal": "~0.0.1",
-    "eccrypto": "^1.0.1",
-    "es6-promise": "^2.0.1",
+    "eccrypto": "^1.0.3",
+    "es6-promise": "^3.0.2",
     "hash.js": "^1.0.2",
-    "nan": "^1.4.1",
+    "nan": "^2.1.0",
     "object-assign": "^2.0.0",
     "sha.js": "^2.3.1",
     "webworkify": "^1.0.1"
